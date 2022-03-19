@@ -1,17 +1,30 @@
 <template>
   <div class="effect-cards">
-    <div v-for="(card, idx) in cards" class="effect-cards__item" :key="idx" :class="cardClass(card.id || idx)">
+    <div v-for="(card, idx) in cards" class="effect-cards__item" :key="card.id" :class="cardClass(card.id || idx)">
       <div @click="cardClicked(card.id || idx)" class="effect-cards__item__inner">
         <template v-if="getImage(card)">
-          <img v-if="getImage(card).endsWith('.jpg')" class="card-img card-img-top card-img-fixed" :src="getImage(card)"
-               :alt="card.name">
-          <video v-else-if="contentType === 'video'" autoplay loop class="embed-responsive-item">
+          <img
+            v-if="getImage(card).endsWith('.jpg')"
+            class="card-img card-img-top card-img-fixed"
+            :src="getImage(card)"
+            :alt="card.name"
+          >
+          <video
+            v-else-if="contentType === 'video'"
+            autoplay
+            loop
+            class="embed-responsive-item"
+          >
             <source :src="getImage(card)" type="video/mp4">
           </video>
         </template>
         <template v-else>
-          <img v-if="contentType === 'image'" class="card-img card-img-top card-img-fixed" :src="placeholder()"
-               :alt="card.name">
+          <img
+            v-if="contentType === 'image'"
+            class="card-img card-img-top card-img-fixed"
+            :src="placeholder()"
+            :alt="card.name"
+          >
         </template>
         <div class="effect-cards__item__footer">
           <p :class="{'card-title': cardSize === 'standard', 'card-text': cardSize === 'smaller'}">
@@ -23,7 +36,7 @@
 </template>
 
 <script>
-import {shorten, placeholder} from "../../utilities"
+import {shorten, placeholder} from "@/utilities"
 
 export default {
   name: "EffectCards",
@@ -49,7 +62,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .standard-card-size {
     height: 242px;
     width: 168px;
@@ -86,7 +99,7 @@ export default {
 }
 
 .chosen-card {
-    box-shadow: -1px 2px 1px 7px rgba(192, 127, 255, 0.7);
+    box-shadow: 0px 0px 7px 6px rgba(192, 127, 255, 0.7);
     transform: scale(0.92);
 }
 
@@ -103,5 +116,9 @@ export default {
 
 .effect-cards__item__footer {
   text-align: center;
+  
+  p {
+    margin: 5px 0;
+  }
 }
 </style>

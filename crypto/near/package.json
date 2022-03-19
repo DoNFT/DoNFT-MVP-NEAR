@@ -6,6 +6,7 @@
     "license": "ISC",
     "scripts": {
         "build": "bash build.sh",
+        "dev-deploy": "bash dev-deploy.sh",
         "deploy": "bash deploy.sh"
     }
 }

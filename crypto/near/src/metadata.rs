@@ -1,6 +1,18 @@
 use crate::*;
 
 pub type TokenId = String;
+
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone)]
+#[serde(crate = "near_sdk::serde")]
+pub struct Bundle {
+    //owner of the token
+    pub contract: AccountId,
+    //list of approved account IDs that have access to transfer the token. This maps an account ID to an approval ID
+    pub token_id: TokenId,
+    //the next approval ID to give out. 
+    pub approval_id: u64,
+}
+
 //defines the payout type we'll be returning as a part of the royalty standards.
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
@@ -48,9 +60,7 @@ pub struct Token {
     //keep track of the royalty percentages for the token in a hash map
     pub royalty: HashMap<AccountId, u32>,
     //set of tokens bundeled in this token
-    pub bundles: Vec<TokenId>, 
-    //flag which showed is token transfered to smart contract or not
-    pub is_owned: bool, 
+    pub bundles: Vec<Bundle>, 
 }
 
 //The Json token is what will be returned from view calls. 
@@ -68,9 +78,7 @@ pub struct JsonToken {
     //keep track of the royalty percentages for the token in a hash map
     pub royalty: HashMap<AccountId, u32>,
     //set of tokens bundeled in this token
-    pub bundles: Vec<Token>, 
-    //flag which showed is token transfered to smart contract or not
-    pub is_owned: bool, 
+    pub bundles: Vec<Bundle>, 
 }
 
 pub trait NonFungibleTokenMetadata {

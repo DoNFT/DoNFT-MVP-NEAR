@@ -1,48 +1,49 @@
 <template>
   <div class="page">
+    <nav-bar :navigation="getNav"/>
     <div v-if="getNftsAreLoading || getStatus === 1" class="loading-container">
       <spinner :size="92" color="#000" />
       <h1 class="h1--no-logo">{{ statusText }}</h1>
     </div>
     <main v-else>
-      <transition name="fade">
-        <div v-if="nftObj.token_id && nftObj.token_id.length">
-          <h1 class="h1--no-logo">Send NFTs</h1>
+      <div>
+        <h1 class="h1--no-logo">Send NFTs</h1>
+        <div
+          class="form-nft-send form-nft__detail-page"
+        >
           <div
-            class="form-nft"
+            class="nft-cards"
+            v-if="NFTComputedData && NFTComputedData.metadata"
           >
-            <input
-              type="text"
-              placeholder="Receiver ID"
-              class="input form-nft__input"
-              v-model="nftObj.receiver_id"
-            >
+            <token-card
+              :metadata="NFTComputedData"
+              :edit-available="false"
+            />
+          </div>
+          <div class="form-nft-send__inputs">
+            <div>
+              <span class="form-nft-send__inputs-title">Contract ID</span>
+              <input
+                type="text"
+                placeholder="Contract ID"
+                class="input form-nft__input"
+                v-model="nftObj.receiver_id"
+              >
+            </div>
             <div class="form-nft__bottom">
               <button
-                class="btn-main"
+                class="main-btn"
                 @click="approveNFTHandler"
-                :disabled="!isNFTApproved"
+                :disabled="!isNFTApproved(NFTComputedData) || !nftObj.receiver_id"
               >Approve</button>
               <button
-                class="btn-main"
+                class="main-btn"
                 type="submit"
-                :disabled="isNFTApproved"
+                :disabled="isNFTApproved(NFTComputedData)"
                 @click="sendNFTHandler"
               >Send</button>
             </div>
           </div>
-        </div>
-      </transition>
-      <h1 class="h1--no-logo">Choose NFTs</h1>
-      <div class="nft-cards">
-        <div
-          v-for="(item, key) in getAllNFTs"
-          :key="key"
-          class="nft-cards__item"
-          :class="{ 'chosen-card': cardClass(item.token_id)}"
-          @click="chooseNFT(item.token_id)"
-        >
-          <img :src="item.metadata.media" class="nft-cards__media">
         </div>
       </div>
     </main>
@@ -50,23 +51,29 @@
 </template>
 
 <script>
-import Spinner from "../components/Spinner"
+import Spinner from "@/components/Spinner"
 import { mapGetters, mapActions } from "vuex"
-import { StatusType } from "../utilities"
+import { StatusType } from "@/utilities"
+import NavBar from '@/components/NavBar/NavBar'
+import TokenCard from '@/components/TokenCard/TokenCard'
 
 export default {
   name: "SendNFT",
 
   components: {
-    Spinner
+    Spinner,
+    NavBar,
+    TokenCard,
   },
 
   data() {
     return {
       nftObj: {
-        receiver_id: 'near_testing2.testnet',
+        receiver_id: '',
         token_id: [],
-      }
+        media: '',
+      },
+      NFTData: {},
     }
   },
 
@@ -76,15 +83,36 @@ export default {
       'getNftsAreLoading',
       'getStatus',
     ]),
+    getNav() {
+      return [
+        {
+          text: 'Back to Gallery',
+          name: 'ChooseNFT',
+          params: null,
+        },
+      ]
+    },
+    NFTComputedData() {
+      return this.getAllNFTs.find((item) => item.token_id === this.$route.params.id)
+    },
     cardClass() {
       return (idx) => this.nftObj.token_id.indexOf(idx) !== -1
     },
     isNFTApproved() {
-      return this.nftObj.token_id.some((token) => {
-        const tokenData = this.getAllNFTs.find((item) => item.token_id === token)
-        const getKeyLength = Object.keys(tokenData.approved_account_ids).length
-        return getKeyLength === 0
-      })
+      return (NFTComputedData) => {
+        let status = true
+
+        // if input ID equal to approved_account_ids key, its approved and able to send
+        if (NFTComputedData && NFTComputedData.approved_account_ids) {
+          Object.keys(this.NFTComputedData.approved_account_ids).forEach((item) => {
+            if (item === this.nftObj.receiver_id) {
+              status = false
+            }
+          })
+        }
+
+        return status
+      }
     },
     statusText() {
       switch (this.getStatus) {
@@ -118,10 +146,28 @@ export default {
         })
       },
     },
+    getAllNFTs: {
+      handler(value) {
+        const data = value.find((item) => item.token_id === this.$route.params.id)
+        if (this.getAllNFTs && data) {
+          this.NFTData = data
+          this.nftObj.media = data.metadata.media
+        } else {
+
+          // todo? router do not work in before each of router.js properly, in case, nft was approved and then sended,
+          // cause near contract init earlier then app
+          this.$router.push({ name: 'ChooseNFT' })
+        }
+      },
+    },
   },
 
   methods: {
-    ...mapActions(['setNFTApproveId', 'sendNFTByToken']),
+    ...mapActions([
+      'setNFTApproveId',
+      'sendNFTByToken',
+      'getNFTByToken',
+    ]),
     chooseNFT(tokenId) {
       const index = this.nftObj.token_id.findIndex((_) => _ === tokenId)
 
@@ -143,45 +189,14 @@ export default {
       // }
     },
     approveNFTHandler() {
-      this.setNFTApproveId(this.nftObj.token_id[0])
+      this.setNFTApproveId({ token_id: this.NFTComputedData.token_id, approve_id: this.nftObj.receiver_id})
     },
     sendNFTHandler() {
-      this.sendNFTByToken({ receiver: this.nftObj.receiver_id , token_id: this.nftObj.token_id[0]})
+      this.sendNFTByToken({
+        receiver: this.nftObj.receiver_id,
+        token_id: this.NFTComputedData.token_id
+      })
     }
   },
 }
 </script>
-
-<style>
-.home-text {
-  display: flex;
-  justify-content: space-evenly;
-  align-items: center;
-}
-
-.home-text__inner {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 50%;
-}
-
-.home-text img {
-  width: 30%;
-  margin-left: 20px;
-}
-
-.form-nft__bottom {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.form-nft__bottom button:first-child {
-  margin: 10px 0;
-}
-
-.form-nft__bottom button {
-  min-width: 150px;
-}
-</style>

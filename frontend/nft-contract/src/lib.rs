@@ -14,7 +14,6 @@ pub use crate::nft_core::*;
 pub use crate::approval::*;
 pub use crate::royalty::*;
 pub use crate::events::*;
-pub use crate::greeting::*;
 
 mod internal;
 mod approval; 
@@ -24,7 +23,6 @@ mod mint;
 mod nft_core; 
 mod royalty; 
 mod events;
-mod greeting;
 
 // pub mod event;
 // pub use event::NearEvent;
@@ -79,7 +77,7 @@ impl Contract {
         Self::new(
             owner_id,
             NFTContractMetadata {
-                spec: "nft-1.0.0".to_string(),
+                spec: "nft-1.0.1".to_string(),
                 name: "NFT Tutorial Contract".to_string(),
                 symbol: "GOTEAM".to_string(),
                 icon: None,

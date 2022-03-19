@@ -1,6 +1,13 @@
 use near_sdk::collections::Vector;
-use serde_derive::{Serialize, Deserialize};
+use near_sdk::{ext_contract, Gas, PromiseResult};
+//use serde_derive::{Serialize, Deserialize};
 use crate::*;
+
+const GAS_FOR_RESOLVE_TRANSFER: Gas = Gas(10_000_000_000_000);
+const GAS_FOR_NFT_TRANSFER_CALL: Gas = Gas(25_000_000_000_000 + GAS_FOR_RESOLVE_TRANSFER.0);
+const MIN_GAS_FOR_NFT_TRANSFER_CALL: Gas = Gas(100_000_000_000_000);
+const NO_DEPOSIT: Balance = 0;
+const DEPOSIT: Balance = 1;
 
 #[near_bindgen]
 impl Contract {
@@ -9,79 +16,42 @@ impl Contract {
         &mut self,
         token_id: TokenId,
     ) {
-        //measure the initial storage being used on the contract
-        let initial_storage_usage = env::storage_usage();
-
-        // create a royalty map to store in the token
-        let mut royalty = HashMap::new();
-
-        // if perpetual royalties were passed into the function: 
-        if let Some(perpetual_royalties) = perpetual_royalties {
-            //make sure that the length of the perpetual royalties is below 7 since we won't have enough GAS to pay out that many people
-            assert!(perpetual_royalties.len() < 7, "Cannot add more than 6 perpetual royalty amounts");
-
-            //iterate through the perpetual royalties and insert the account and amount in the royalty map
-            for (account, amount) in perpetual_royalties {
-                royalty.insert(account, amount);
+        assert_one_yocto();
+        //get the sender to transfer the token from the sender to the receiver
+        let caller_id = env::predecessor_account_id();
+        //get the token object if there is some token object
+        let mut token = if let Some(token) = self.tokens_by_id.get(&token_id) {
+            if token.owner_id != caller_id {
+                //we refund the owner for releasing the storage used up by the approved account IDs
+                //refund_approved_account_ids(owner_id, &approved_account_ids);
+                // The token is not owner by the receiver anymore. Can't return it.
             }
-        }
+            
+            let mut range_iterator = token.bundles.iter();
+            while let Some(bundle) = range_iterator.next() {
+                ext_nft::nft_transfer(
+                    caller_id.clone(),
+                    bundle.token_id.clone(),
+                    bundle.approval_id.clone(),
+                    None,
+                    bundle.contract.clone(), // contract account id
+                    DEPOSIT, // yocto NEAR to attach
+                    GAS_FOR_NFT_TRANSFER_CALL // gas to attach
+                );
+            }
 
-        //specify the token struct that contains the owner ID 
-        let token = Token {
-            //set the owner ID equal to the receiver ID passed into the function
-            owner_id: receiver_id,
-            //we set the approved account IDs to the default value (an empty map)
-            approved_account_ids: Default::default(),
-            //the next approval ID is set to 0
-            next_approval_id: 0,
-            //the map of perpetual royalties for the token (The owner will get 100% - total perpetual royalties)
-            royalty,
-            bundles,
+            //we remove the token from the receiver
+            self.internal_remove_token_from_owner(&caller_id.clone(), &token_id);
+            //we refund the receiver any approved account IDs that they may have set on the token
+           // refund_approved_account_ids(caller_id.clone(), &token.approved_account_ids);
+            //reset the approved account IDs to what they were before the transfer
+           // token.approved_account_ids = approved_account_ids;
+
+        //if there isn't a token object, it was burned and so we return true
+        } else {
+            //we refund the owner for releasing the storage used up by the approved account IDs
+           // refund_approved_account_ids(self.owner_id, &approved_account_ids);
         };
 
-        for (int i = 0; i < bundles.len(); i++) {
-            //check ownerships
-            if transfer_ownership {
-                bundles[i].
-            }
-        }
-
-        //insert the token ID and token struct and make sure that the token doesn't exist
-        assert!(
-            self.tokens_by_id.insert(&token_id, &token).is_none(),
-            "Token already exists"
-        );
-
-        //insert the token ID and metadata
-        self.token_metadata_by_id.insert(&token_id, &metadata);
-
-        //call the internal method for adding the token to the owner
-        self.internal_add_token_to_owner(&token.owner_id, &token_id);
-
-        // Construct the mint log as per the events standard.
-        let nft_mint_log: EventLog = EventLog {
-            // Standard name ("nep171").
-            standard: NFT_STANDARD_NAME.to_string(),
-            // Version of the standard ("nft-1.0.0").
-            version: NFT_METADATA_SPEC.to_string(),
-            // The data related with the event stored in a vector.
-            event: EventLogVariant::NftMint(vec![NftMintLog {
-                // Owner of the token.
-                owner_id: token.owner_id.to_string(),
-                // Vector of token IDs that were minted.
-                token_ids: vec![token_id.to_string()],
-                // An optional memo to include.
-                memo: None,
-            }]),
-        };
-
-        // Log the serialized json.
-        env::log_str(&nft_mint_log.to_string());
-
-        //calculate the required storage which was the used - initial
-        let required_storage_in_bytes = env::storage_usage() - initial_storage_usage;
-
-        //refund any excess storage if the user attached too much. Panic if they didn't attach enough to cover the required.
-        refund_deposit(required_storage_in_bytes);
     }
 }

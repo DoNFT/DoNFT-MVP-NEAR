@@ -20,3 +20,5 @@ export const StatusType = Object.freeze({
   Minted: 5,
   Approved: 6,
 })
+
+export const getIPFS = () => import(/* webpackChunkName: "ipfs" */ 'ipfs-core')

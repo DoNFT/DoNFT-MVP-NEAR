@@ -26,7 +26,7 @@ Case: testing on nft-example.near_testing.testnet
 
 Case: new Smart-contract project
 
-1. near login           V--->subname of your account                    V--->your account
+1. near login
 2. near create-account nft-example.your-account.testnet --masterAccount your-account.testnet --initialBalance 10
 3. Create vars:
 - NFT_CONTRACT_ID=nft-example.your-account.testnet

@@ -1,148 +1,120 @@
 <template>
   <div class="navbar">
     <nav class="navbar__nav">
-      <router-link :to="{ name: 'ChooseNFT'}">Create NFT</router-link>
-      <router-link :to="{ name: 'SendNFT'}">Send NFT</router-link>
+      <div
+        class="navbar__nav-wrap"
+        v-for="(item, key) in navigation"
+        :key="key"
+      >
+        <router-link
+          :class="['navbar__nav-wrap__item', {
+            'navbar__nav-wrap__item--disabled': item.params && !item.params.id ? true : false
+          }]"
+          :to="{
+            name: item.name,
+            params: item.params ? item.params : {}
+          }"
+        >
+          <span>{{ item.text }}</span>
+        </router-link>
+      </div>
     </nav>
-    <div class="navbar__acc">
-      <div class="navbar__acc-info">Balance: <b>{{ accBalance }}</b> Near</div>
-      <button class="error" style="float: right" @click="logout">Sign out</button>
-    </div>
   </div>
 </template>
 
 <script>
-import { logout } from "../../nearConfig"
+import { logout } from "@/nearConfig"
 
 export default {
   name: "NavBar",
+  props: {
+    navigation: {
+      type: Array,
+      default: () => [],
+    },
+  },
   methods: {
     logout: logout,
-  },
-
-  computed: {
-    accBalance() {
-      return Number(window.balance).toFixed(2)
-    },
   },
 }
 </script>
 
-<style>
-.navbar__acc {
-  display: flex;
-  align-items: center;
-}
-
-.navbar__acc-info {
-  color: #fff;
-  margin-right: 15px;
-}
-
+<style lang="scss">
 .navbar {
+	width: 20%;
+  margin-right: 30px;
+}
+.navbar__nav {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 80px;
-  padding: 0 15px;
-  background: #000;
+  flex-direction: column;
 }
 
-nav {
-  width: 60%;
-  margin-right: auto;
+.navbar__nav-wrap {
+  margin-bottom: 15px;
 }
 
-nav a {
+.navbar__nav-wrap__item {
   position: relative;
-  width: 33.333%;
-  display: table-cell;
+  font-family: 'Roboto mono';
+  display: block;
+  padding: 5px 10px;
+  max-width: 250px;
+  font-size: 24px;
+  font-weight: 500;
   text-align: center;
-  color: #ffffff;
-  text-decoration: none;
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
-  font-weight: bold;
-  padding: 10px 20px;
-  transition: 0.2s ease color;
+  background-color: #5ce9bc;
+  border: #000 2px solid;
+  color: #000;
+  line-height: 1;
+  overflow: hidden;
+  transition: background-color 0.15s ease;
+
+  span {
+    position: relative;
+    z-index: 10;
+  }
+
+  &:before {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: block;
+    content: '';
+    width: 100%;
+    height: 100%;
+    background: #2d0949;
+    transform: translateX(-235px);
+    z-index: 1;
+    transition: transform 0.25s ease;
+  }
 }
 
-nav a:before,
-nav a:after {
-  content: "";
-  position: absolute;
-  border-radius: 50%;
-  transform: scale(0);
-  transition: 0.2s ease transform;
+.navbar__nav-wrap__item--disabled {
+		box-shadow: none;
+		background-color: rgba(58, 31, 79, .4);
+		color: #00000047;
+		cursor: not-allowed;
+
+		&:hover {
+			background-color: rgba(58, 31, 79, .4);
+			color: #00000047;
+	
+			span {
+				color: #00000047;
+			}
+      &.navbar__nav-wrap__item:before {
+        transform: translateX(-235px);
+      }
+		}
+
 }
 
-nav a:before {
-  top: 0;
-  left: 10px;
-  width: 6px;
-  height: 6px;
-}
-
-nav a:after {
-  top: 5px;
-  left: 18px;
-  width: 4px;
-  height: 4px;
-}
-
-nav a:nth-child(1):before {
-  background-color: yellow;
-}
-
-nav a:nth-child(1):after {
-  background-color: red;
-}
-
-nav a:nth-child(2):before {
-  background-color: #00e2ff;
-}
-
-nav a:nth-child(2):after {
-  background-color: #89ff00;
-}
-
-nav a:nth-child(3):before {
-  background-color: purple;
-}
-
-nav a:nth-child(3):after {
-  background-color: palevioletred;
-}
-
-#indicator {
-  position: absolute;
-  left: 5%;
-  bottom: 0;
-  width: 30px;
-  height: 3px;
-  background-color: #fff;
-  border-radius: 5px;
-  transition: 0.2s ease left;
-}
-
-nav a:hover {
+.navbar__nav-wrap__item:hover,
+.navbar__nav-wrap__item:focus {
   color: #fff;
+  &:before {
+    transform: translateX(0);
+  }
 }
 
-nav a:hover:before,
-nav a:hover:after {
-  transform: scale(1);
-}
-
-nav a.router-link-exact-active {
-  text-decoration: underline;
-}
-
-nav a.router-link-exact-active:before,
-nav a.router-link-exact-active:after {
-  transform: scale(1);
-}
 </style>

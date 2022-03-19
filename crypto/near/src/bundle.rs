@@ -1,4 +1,23 @@
 use crate::*;
+use near_sdk::{ext_contract, Gas};
+
+const GAS_FOR_RESOLVE_TRANSFER: Gas = Gas(10_000_000_000_000);
+const GAS_FOR_NFT_TRANSFER_CALL: Gas = Gas(25_000_000_000_000 + GAS_FOR_RESOLVE_TRANSFER.0);
+const MIN_GAS_FOR_NFT_TRANSFER_CALL: Gas = Gas(100_000_000_000_000);
+const NO_DEPOSIT: Balance = 0;
+const DEPOSIT: Balance = 1;
+
+#[ext_contract(ext_nft)]
+trait NFT {
+    fn nft_transfer(
+        &mut self,
+        receiver_id: AccountId,
+        token_id: TokenId,
+        //we introduce an approval ID so that people with that approval ID can transfer the token
+        approval_id: u64,
+        memo: Option<String>,
+    );
+}
 
 #[near_bindgen]
 impl Contract {
@@ -7,12 +26,11 @@ impl Contract {
         &mut self,
         token_id: TokenId,
         metadata: TokenMetadata,
-        receiver_id: AccountId,
+        bundles: Vec<Bundle>,
         //we add an optional parameter for perpetual royalties
         perpetual_royalties: Option<HashMap<AccountId, u32>>,
-        bundles: Vec<Token>,
-        transfer_ownership: bool,
     ) {
+        let caller_id = env::predecessor_account_id();
         //measure the initial storage being used on the contract
         let initial_storage_usage = env::storage_usage();
 
@@ -33,23 +51,28 @@ impl Contract {
         //specify the token struct that contains the owner ID 
         let token = Token {
             //set the owner ID equal to the receiver ID passed into the function
-            owner_id: receiver_id,
+            owner_id: caller_id.clone(),
             //we set the approved account IDs to the default value (an empty map)
             approved_account_ids: Default::default(),
             //the next approval ID is set to 0
             next_approval_id: 0,
             //the map of perpetual royalties for the token (The owner will get 100% - total perpetual royalties)
             royalty,
-            bundles,
-            is_owned: true,
+            bundles: bundles.clone(),
         };
 
-         for bundle in bundles {
-             //check ownerships
-             //как то надо проиницировать контракт на котором токен
-             let contract = Contract::new_default_meta();
-             contract.nft_transfer(receiver_id, bundle.token_id.clone(), None, None);
-         }
+        let mut range_iterator = bundles.iter();
+        while let Some(bundle) = range_iterator.next() {
+            ext_nft::nft_transfer(
+                env::current_account_id(),
+                bundle.token_id.clone(),
+                bundle.approval_id.clone(),
+                None,
+                bundle.contract.clone(), // contract account id
+                DEPOSIT, // yocto NEAR to attach
+                GAS_FOR_NFT_TRANSFER_CALL // gas to attach
+            );
+        }
 
         //insert the token ID and token struct and make sure that the token doesn't exist
         assert!(
@@ -67,7 +90,7 @@ impl Contract {
         let nft_mint_log: EventLog = EventLog {
             // Standard name ("nep171").
             standard: NFT_STANDARD_NAME.to_string(),
-            // Version of the standard ("nft-1.0.0").
+            // Version of the standard.
             version: NFT_METADATA_SPEC.to_string(),
             // The data related with the event stored in a vector.
             event: EventLogVariant::NftMint(vec![NftMintLog {

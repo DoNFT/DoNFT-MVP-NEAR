@@ -15,6 +15,7 @@ pub use crate::nft_core::*;
 pub use crate::approval::*;
 pub use crate::royalty::*;
 pub use crate::events::*;
+pub use crate::unbundle::*;
 
 mod internal;
 mod approval; 
@@ -25,6 +26,7 @@ mod mint;
 mod nft_core; 
 mod royalty; 
 mod events;
+mod unbundle;
 
 /// This spec can be treated like a version of the standard.
 pub const NFT_METADATA_SPEC: &str = "1.0.0";
@@ -76,7 +78,7 @@ impl Contract {
         Self::new(
             owner_id,
             NFTContractMetadata {
-                spec: "nft-1.0.0".to_string(),
+                spec: "nft-1.0.1".to_string(),
                 name: "DoNFT Contract".to_string(),
                 symbol: "DONFT".to_string(),
                 icon: None,

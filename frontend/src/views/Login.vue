@@ -5,30 +5,37 @@
       <p class="home-text__inner__subtext">Use power of neural network algorithms to create new unique combinations of digital art</p>
       <p class="home-text__inner__subtext">Go ahead and click the button below to try it out:</p>
       <p style="text-align:center; margin-top:2.5em">
-        <button v-on:click="login">Sign in</button>
+        <button class="main-btn" @click="login">Sign in</button>
       </p>
     </div>
-    <img src="../assets/home_img.jpg" style="height: 30%;  border-radius:20%;" >
+    <img src="@/assets/home_img.jpg" style="height: 30%;  border-radius:20%;" >
   </div>
 </template>
 
 <script>
-import { login } from "../nearConfig"
+import { mapGetters } from "vuex"
+import { login } from "@/nearConfig"
 
 export default {
   name: "Login",
 
-  methods: {
-    login() {
-      login()
-    },
+  computed: {
+    ...mapGetters([
+      'getCurrentWallet',
+    ]),
   },
 
   mounted() {
-    if (window.walletConnection.isSignedIn()) {
+    if (this.getCurrentWallet) {
       this.$router.push({name: 'ChooseNFT'})
     }
-  }
+  },
+
+  methods: {
+    login() {
+      login(this.getCurrentWallet)
+    },
+  },
 }
 </script>
 

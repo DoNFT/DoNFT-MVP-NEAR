@@ -195,7 +195,6 @@ impl Contract {
             //we copy over the royalties from the previous token
             royalty: token.royalty.clone(),
             bundles: Vec::new(),
-            is_owned: false
         };
         //insert that new token into the tokens_by_id, replacing the old entry 
         self.tokens_by_id.insert(token_id, &new_token);
@@ -216,7 +215,7 @@ impl Contract {
         let nft_transfer_log: EventLog = EventLog {
             // Standard name ("nep171").
             standard: NFT_STANDARD_NAME.to_string(),
-            // Version of the standard ("nft-1.0.0").
+            // Version of the standard ("").
             version: NFT_METADATA_SPEC.to_string(),
             // The data related with the event stored in a vector.
             event: EventLogVariant::NftTransfer(vec![NftTransferLog {
