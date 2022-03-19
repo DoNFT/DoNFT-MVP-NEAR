@@ -1,28 +1,26 @@
 # DoNFT MVP for NEAR Frontend
 
-###
-Frontend starting guide:
-###
+## Frontend starting guide:
 
-Node:
+### Node:
 Version while dev 15.14.0
 
+### Start frontend
 1. Change or copy .env.development.local to .env
 2. yarn install
 3. yarn serve
 4. finally check localhost:8080
 
-###
-Deploying NFT smart-contract to near guide:
-###
 
-Case: testing on nft-example.near_testing.testnet
+##Deploying NFT smart-contract to near guide:
+
+###Case: testing on nft-example.near_testing.testnet
 
 1. near login (if unavailable -> npm install -g near-cli)
 2. Check your .env -> VUE_APP_CONTRACT_NAME=nft-example.near_testing.testnet
 3. yarn dev:deploy:contract
 
-Case: new Smart-contract project
+###Case: new Smart-contract project
 
 1. near login
 2. near create-account nft-example.your-account.testnet --masterAccount your-account.testnet --initialBalance 10
