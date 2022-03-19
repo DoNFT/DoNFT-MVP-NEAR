@@ -1,6 +1,4 @@
-# near-mvp
-
-MVP проекта на Near
+# DoNFT MVP for NEAR Frontend
 
 ###
 Frontend starting guide:
@@ -15,7 +13,7 @@ Version while dev 15.14.0
 4. finally check localhost:8080
 
 ###
-Deploying Smart-contract to near guide:
+Deploying NFT smart-contract to near guide:
 ###
 
 Case: testing on nft-example.near_testing.testnet
