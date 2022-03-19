@@ -1,5 +1,14 @@
 # DoNFT MVP for NEAR Frontend
 
+Functions:
+- connect Near wallet
+- showing NFTs of this wallet
+- Minting new NFT
+- Sending NFT
+- Bundling NFTs
+- Bundling NFT with Effect
+- Unbundling NFTs
+
 ## Frontend starting guide:
 
 ### Node:
@@ -12,15 +21,15 @@ Version while dev 15.14.0
 4. finally check localhost:8080
 
 
-##Deploying NFT smart-contract to near guide:
+## Deploying NFT smart-contract to near guide:
 
-###Case: testing on nft-example.near_testing.testnet
+### Case: testing on nft-example.near_testing.testnet
 
 1. near login (if unavailable -> npm install -g near-cli)
 2. Check your .env -> VUE_APP_CONTRACT_NAME=nft-example.near_testing.testnet
 3. yarn dev:deploy:contract
 
-###Case: new Smart-contract project
+### Case: new Smart-contract project
 
 1. near login
 2. near create-account nft-example.your-account.testnet --masterAccount your-account.testnet --initialBalance 10
