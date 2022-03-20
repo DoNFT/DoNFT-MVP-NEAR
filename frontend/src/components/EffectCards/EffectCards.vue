@@ -2,30 +2,9 @@
   <div class="effect-cards">
     <div v-for="(card, idx) in cards" class="effect-cards__item" :key="card.id" :class="cardClass(card.id || idx)">
       <div @click="cardClicked(card.id || idx)" class="effect-cards__item__inner">
-        <template v-if="getImage(card)">
-          <img
-            v-if="getImage(card).endsWith('.jpg')"
-            class="card-img card-img-top card-img-fixed"
-            :src="getImage(card)"
-            :alt="card.name"
-          >
-          <video
-            v-else-if="contentType === 'video'"
-            autoplay
-            loop
-            class="embed-responsive-item"
-          >
-            <source :src="getImage(card)" type="video/mp4">
-          </video>
-        </template>
-        <template v-else>
-          <img
-            v-if="contentType === 'image'"
-            class="card-img card-img-top card-img-fixed"
-            :src="placeholder()"
-            :alt="card.name"
-          >
-        </template>
+        <token-card
+          :metadata="card"
+        />
         <div class="effect-cards__item__footer">
           <p :class="{'card-title': cardSize === 'standard', 'card-text': cardSize === 'smaller'}">
             <span v-if="showId && card.id">{{ shorten(card.id, 5) }}: </span>{{ shorten(card.name, 30) }}</p>
@@ -37,13 +16,17 @@
 
 <script>
 import {shorten, placeholder} from "@/utilities"
+import TokenCard from '@/components/TokenCard/TokenCard'
 
 export default {
   name: "EffectCards",
   props: ['cards', 'justification', 'cardSize', 'choice', 'showId', 'contentType'],
+  components: {
+    TokenCard,
+  },
   methods: {
     cardClicked(id) {
-      this.$emit('cardClicked', id)
+      this.$emit('card-clicked', id)
     },
     getImage(card) {
       return card.localImage || card.image
@@ -112,6 +95,7 @@ export default {
 .effect-cards__item__inner {
   display: flex;
   flex-direction: column;
+  height: 100%;
 }
 
 .effect-cards__item__footer {

@@ -212,9 +212,10 @@ const store = new Vuex.Store({
       dispatch('setStatus', StatusType.Minting)
       createRandomNft(token_id, metadata, getters.getAccountId, getters.getContract)
     },
-    createNewUsualNFT ({getters, dispatch},  { token_id, metadata }) {
+    createNewUsualNFT ({getters, dispatch},  { token_id, metadata, contract_id }) {
       dispatch('setStatus', StatusType.Minting)
-      createUsualNFT(token_id, metadata, getters.getAccountId, getters.getContract)
+      console.log(contract_id, 'contract')
+      createUsualNFT(token_id, metadata, getters.getAccountId, getters[contract_id])
     },
     createNewBundleNFT ({getters, dispatch},  { token_id, metadata, bundles }) {
       dispatch('setStatus', StatusType.Minting)

@@ -4,7 +4,7 @@
       class="nft-cards__media"
       :src="urlData || placeholder()"
     >
-    <p>{{metadata.metadata.title}}</p>
+    <p class="nft-cards__title">{{metadata.metadata.title}}</p>
     <p
       v-if="isApprovedContract && !isNFTApproved"
       class="nft-cards__approve"
@@ -114,6 +114,13 @@ export default {
 .nft-cards__media-wrap {
   position: relative;
 
+  .effect-cards-box & {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
   &:hover {
     .nft-cards__info {
       opacity: 1;
@@ -148,5 +155,12 @@ export default {
   padding: 5px 8px;
   border-radius: 4px;
   cursor: text;
+}
+
+.nft-cards__title {
+  .effect-cards-box & {
+    padding: 0 5px;
+    font-size: 16px;
+  }
 }
 </style>

@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import untar from "js-untar"
 const CID_RE = /Qm[1-9A-HJ-NP-Za-km-z]{44,}|b[A-Za-z2-7]{58,}|B[A-Z2-7]{58,}|z[1-9A-HJ-NP-Za-km-z]{48,}|F[0-9A-F]{50,}/m
+const nearGas = "100000000000000000000000"
 
 // for creating new NFTs with EFFECTS
 export function createRandomNft(token_id, metadata, receiver_id, contract) {
@@ -10,7 +11,7 @@ export function createRandomNft(token_id, metadata, receiver_id, contract) {
         token_id,
         metadata,
         receiver_id,
-      }, "300000000000000", '9610000000000000000000')
+      }, nearGas, nearGas)
   } catch(err) {
     console.error(err, '')
     Vue.notify({
@@ -23,13 +24,14 @@ export function createRandomNft(token_id, metadata, receiver_id, contract) {
 
 // for creating new NFTs BY inputs FORM
 export function createUsualNFT(token_id, metadata, receiver_id, contract) {
+  console.log(token_id, metadata, contract, 'createUsualNFT')
   try {
     contract
       .nft_mint({
         token_id,
         metadata,
         receiver_id,
-      }, "300000000000000", '9610000000000000000000')
+      }, "300000000000000", nearGas)
   } catch(err) {
     console.error(err, '')
     Vue.notify({

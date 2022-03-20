@@ -10,12 +10,20 @@
       <form class="form-nft">
         <uploader @selected="setUploadedImg"/>
         <div class="form-ntf__inputs">
+          <span class="form-nft-send__inputs-title">Contract</span>
+          <div class="select-wrap">
+            <select v-model="nftObj.contract_id">
+              <option v-for="(item, key) in contractsArr" :key="key" :value="item.getter">{{item.name}}</option>
+            </select>
+          </div>
+          <span class="form-nft-send__inputs-title">Title</span>
           <input
             type="text"
             placeholder="NFT title"
             class="input form-nft__input"
             v-model="nftObj.metadata.title"
           >
+          <span class="form-nft-send__inputs-title">Description</span>
           <textarea
             type="text"
             placeholder="NFT description"
@@ -59,6 +67,7 @@ export default {
         },
         receiver_id: '',
         token_id: [],
+        contract_id: 'getEffectsContract',
       },
       savedGreeting: "",
       newGreeting: "",
@@ -78,6 +87,9 @@ export default {
       'getDeployedPictureMeta',
       'getNftsAreLoading',
       'getStatus',
+      'getContract',
+      'getBundleContract',
+      'getEffectsContract',
     ]),
     statusText() {
       switch (this.getStatus) {
@@ -95,6 +107,22 @@ export default {
         return ""
       }
     },
+    contractsArr() {
+      return [
+        {
+          name: this.getContract.contractId,
+          getter: 'getContract',
+        },
+        {
+          name: this.getBundleContract.contractId,
+          getter: 'getBundleContract',
+        },
+        {
+          name: this.getEffectsContract.contractId,
+          getter: 'getEffectsContract',
+        }
+      ]
+    }
   },
 
   watch: {
@@ -134,6 +162,7 @@ export default {
           media: this.getDeployedPictureMeta,
           copies: 1,
         },
+        contract_id: this.nftObj.contract_id
       })
     },
   },

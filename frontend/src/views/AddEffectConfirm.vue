@@ -120,6 +120,7 @@ export default {
       'getDeployedPictureMeta',
       'getContract',
       'getBundleContract',
+      'getEffectsContract',
     ]),
     getNav() {
       return [

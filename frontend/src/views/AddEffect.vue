@@ -26,12 +26,12 @@
 
       <div
         class="effect-cards-box"
-        v-if="getEffects && getEffects.length && NFTComputedData"
+        v-if="effectContractNFTData && effectContractNFTData.NFTS.length && NFTComputedData"
       >
         <effect-cards
-          @cardClicked="chooseEffect"
+          @card-clicked="chooseEffect"
           :show-id="false"
-          :cards="getEffects"
+          :cards="effectContractNFTData.NFTS"
           :choice="[getEffectChoice]"
           content-type="video"
         ></effect-cards>
@@ -93,6 +93,8 @@ export default {
       'getEffects',
       'getEffectChoice',
       'getDeployedPictureMeta',
+      'getEffectsContract',
+      'getNFTsByContract',
     ]),
     getNav() {
       return [
@@ -105,6 +107,9 @@ export default {
     },
     NFTComputedData() {
       return this.getAllNFTs.find((item) => item.token_id === this.$route.params.id)
+    },
+    effectContractNFTData() {
+      return this.getNFTsByContract.find((item) => item.contractName === this.getEffectsContract.contractId)
     },
     cardClass() {
       return (idx) => this.nftObj.token_id.indexOf(idx) !== -1

@@ -61,8 +61,9 @@ export async function initContract(store) {
 
     let obj = {}
 
-    const mainContracts = [nfts_contract.contractName, bundle_contract.contractName]
+    const mainContracts = [nfts_contract.contractName, bundle_contract.contractName, nfts_effects_contract.contractName]
 
+    // contract order changing, show main contracts on top. others lower
     if (mainContracts.includes(contract)) {
       obj = {
         contractName: contract,
@@ -100,7 +101,7 @@ export async function initContract(store) {
 
   // Initializing our contract APIs by contract name and configuration
   const cotractBundleSettings = await new Contract(walletBundleConnection.account(), bundle_contract.contractName, {
-    changeMethods: ['nft_bundle', 'nft_unbundle', 'nft_transfer'],
+    changeMethods: ['nft_mint', 'nft_bundle', 'nft_unbundle', 'nft_transfer'],
   })
   store.dispatch('setCurrentBundleContract', cotractBundleSettings)
 
@@ -112,7 +113,7 @@ export async function initContract(store) {
 
   // Initializing our contract APIs by contract name and configuration
   const cotractEffectsSettings = await new Contract(nftEffectsWallet.account(), nfts_effects_contract.contractName, {
-    changeMethods: ['nft_bundle', 'nft_unbundle', 'nft_transfer'],
+    changeMethods: ['nft_mint', 'nft_bundle', 'nft_unbundle', 'nft_transfer'],
   })
   store.dispatch('setCurrentEffectsContract', cotractEffectsSettings)
 
