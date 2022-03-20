@@ -3,6 +3,7 @@ import { getConfig } from './nearNets'
 
 const nfts_contract = getConfig({ env: process.env.NODE_ENV, contract: process.env.VUE_APP_NFTS_CONTRACT })
 const bundle_contract = getConfig({ env: process.env.NODE_ENV, contract: process.env.VUE_APP_BUNDLE_CONTRACT })
+const nfts_effects_contract = getConfig({ env: process.env.NODE_ENV, contract: process.env.VUE_APP_NFTS_EFFECTS_CONTRACT })
 // const nearConfig_bundle = getConfig({ env: process.env.NODE_ENV, contract: bundle_contract })
 // console.log(nearConfig_bundle, 'nearConfig_bundle 111')
 
@@ -85,23 +86,35 @@ export async function initContract(store) {
   // Initializing our contract APIs by contract name and configuration
   const cotractSettings = await new Contract(walletConnection.account(), nfts_contract.contractName, {
     // View methods are read only. They don't modify the state, but usually return some value.
-    viewMethods: ['nft_total_supply', 'nft_supply_for_owner', 'nft_metadata', 'nft_token', 'nft_tokens_for_owner', 'nft_tokens'],
+    viewMethods: ['nft_total_supply', 'nft_tokens_for_owner'],
     // Change methods can modify the state. But you don't receive the returned value when called.
-    changeMethods: ['nft_mint', 'nft_transfer', 'nft_transfer_call', 'nft_approve', 'nft_burn', 'nft_bundle', 'nft_unbundle'],
+    changeMethods: ['nft_mint', 'nft_transfer', 'nft_approve', 'nft_bundle', 'nft_unbundle'],
   })
   store.dispatch('setCurrentContract', cotractSettings)
 
   // near BUNDLE contract
+  // --------------------
+  // near BUNDLE contract
   const near_bundle = await connect(Object.assign({ deps: { keyStore: new keyStores.BrowserLocalStorageKeyStore() } }, bundle_contract))
   const walletBundleConnection = new WalletConnection(near_bundle)
-  const acc_bundle = await near_bundle.account(walletBundleConnection.getAccountId())
-  console.log(acc_bundle, 'aacc bundle')
 
   // Initializing our contract APIs by contract name and configuration
   const cotractBundleSettings = await new Contract(walletBundleConnection.account(), bundle_contract.contractName, {
-    changeMethods: ['nft_bundle', 'nft_unbundle'],
+    changeMethods: ['nft_bundle', 'nft_unbundle', 'nft_transfer'],
   })
   store.dispatch('setCurrentBundleContract', cotractBundleSettings)
+
+  // near NFT EFFECTS contract
+  // --------------------
+  // near NFT EFFECTS contract
+  const near_nft_effects = await connect(Object.assign({ deps: { keyStore: new keyStores.BrowserLocalStorageKeyStore() } }, nfts_effects_contract))
+  const nftEffectsWallet = new WalletConnection(near_nft_effects)
+
+  // Initializing our contract APIs by contract name and configuration
+  const cotractEffectsSettings = await new Contract(nftEffectsWallet.account(), nfts_effects_contract.contractName, {
+    changeMethods: ['nft_bundle', 'nft_unbundle', 'nft_transfer'],
+  })
+  store.dispatch('setCurrentEffectsContract', cotractEffectsSettings)
 
 }
 

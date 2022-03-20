@@ -29,8 +29,6 @@ const store = new Vuex.Store({
     nftChoice: [],
     nftLoading: false,
     contractLoading: false,
-    contract: null,
-    bundle_contract: null,
     account_id: null,
     effects: [],
     effectChoice: null,
@@ -48,6 +46,9 @@ const store = new Vuex.Store({
     effectModalStatus: false,
     droppedImage: null,
     nearAccount: null,
+    contract: null,
+    bundle_contract: null,
+    effects_contract: null,
   },
   mutations: {
     setIpfs (state, ipfsInstance) {
@@ -116,6 +117,9 @@ const store = new Vuex.Store({
     },
     SET_CURRENT_BUNDLE_CONTRACT (state, payload) {
       state.bundle_contract = payload
+    },
+    SET_CURRENT_EFFECTS_CONTRACT (state, payload) {
+      state.effects_contract.push(payload)
     },
     SET_NFT_COUNTER (state, payload) {
       state.NFTsTotal += payload
@@ -224,9 +228,15 @@ const store = new Vuex.Store({
       dispatch('setStatus', StatusType.Approving)
       approveNFT(approve_id, token_id, getters.getContract)
     },
-    sendNFTByToken ({getters, dispatch}, { receiver, token_id }) {
+    sendNFTByToken ({getters, dispatch}, { receiver, token_id, is_bundle_nft }) {
       dispatch('setStatus', StatusType.Approving)
-      sendNFT(receiver, token_id, getters.getContract)
+      console.log(is_bundle_nft, 'isBundleNFT')
+
+      if (is_bundle_nft) {
+        sendNFT(receiver, token_id, getters.getBundleContract)
+      } else {
+        sendNFT(receiver, token_id, getters.getContract)
+      }
     },
     pushNFTbyContract ({commit}, NFTS) {
       commit('SET_CURRENT_CONTRACT_NFT', NFTS)
@@ -243,6 +253,9 @@ const store = new Vuex.Store({
     },
     setCurrentBundleContract ({commit}, contract) {
       commit('SET_CURRENT_BUNDLE_CONTRACT', contract)
+    },
+    setCurrentEffectsContract ({commit}, contract) {
+      commit('SET_CURRENT_EFFECTS_CONTRACT', contract)
     },
     setNearWalletConnection ({commit}, wallet) {
       commit('SET_CURRENT_WALLET', wallet)
@@ -272,8 +285,6 @@ const store = new Vuex.Store({
     getNftsAreLoading: state => state.nftLoading,
     getContractLoading: state => state.contractLoading,
     getAccountId: state => state.account_id,
-    getContract: state => state.contract,
-    getBundleContract: state => state.bundle_contract,
     getNFTlimit: (state) => state.NFTlimit,
     getNFTsTotal: (state) => state.NFTsTotal,
     getAllNFTs: state => state.allNFTs,
@@ -286,6 +297,9 @@ const store = new Vuex.Store({
     getEffectModalStatus: state => state.effectModalStatus,
     getDroppedImage: state => state.droppedImage,
     getNearAccount: state => state.nearAccount,
+    getContract: state => state.contract,
+    getBundleContract: state => state.bundle_contract,
+    getEffectsContract: state => state.effects_contract,
   },
 })
 
