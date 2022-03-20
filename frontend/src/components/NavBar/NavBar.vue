@@ -93,7 +93,7 @@ export default {
 		box-shadow: none;
 		background-color: rgba(58, 31, 79, .4);
 		color: #00000047;
-		cursor: not-allowed;
+    pointer-events: none;
 
 		&:hover {
 			background-color: rgba(58, 31, 79, .4);

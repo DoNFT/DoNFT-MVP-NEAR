@@ -233,7 +233,7 @@ export default {
 
 .nft-cards__contract__item--bundle-data {
   width: 24%;
-  cursor: default;
+  cursor: initial;
 
   img {
     border: 1px solid #2d094970;

@@ -33,13 +33,7 @@
             <div class="form-nft__bottom">
               <button
                 class="main-btn"
-                @click="approveNFTHandler"
-                :disabled="!isNFTApproved(NFTComputedData) || !nftObj.receiver_id"
-              >Approve</button>
-              <button
-                class="main-btn"
                 type="submit"
-                :disabled="isNFTApproved(NFTComputedData)"
                 @click="sendNFTHandler"
               >Send</button>
             </div>
@@ -97,22 +91,6 @@ export default {
     },
     cardClass() {
       return (idx) => this.nftObj.token_id.indexOf(idx) !== -1
-    },
-    isNFTApproved() {
-      return (NFTComputedData) => {
-        let status = true
-
-        // if input ID equal to approved_account_ids key, its approved and able to send
-        if (NFTComputedData && NFTComputedData.approved_account_ids) {
-          Object.keys(this.NFTComputedData.approved_account_ids).forEach((item) => {
-            if (item === this.nftObj.receiver_id) {
-              status = false
-            }
-          })
-        }
-
-        return status
-      }
     },
     statusText() {
       switch (this.getStatus) {

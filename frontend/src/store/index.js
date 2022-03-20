@@ -194,7 +194,7 @@ const store = new Vuex.Store({
       if (getters.getIpfs) {
         url = await getImageForTokenByURI(getters.getIpfs, token.metadata.media)
       }
-      token.url = url
+      token.metadata.media_hash = url
       commit('SET_TOKEN_IMAGE', { ...token })
     },
     async getIPFSimage ({getters}, media) {

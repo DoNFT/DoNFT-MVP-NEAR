@@ -30,9 +30,6 @@ export function createUsualNFT(token_id, metadata, receiver_id, contract) {
         metadata,
         receiver_id,
       }, "300000000000000", '9610000000000000000000')
-      .then((data) => {
-        console.log(data, 'getNftTotal')
-      })
   } catch(err) {
     console.error(err, '')
     Vue.notify({
@@ -122,62 +119,9 @@ export function sendNFT(receiver_id, token_id, contract) {
       .nft_transfer({
         receiver_id,
         token_id,
-        approval_id: 1,
+        approval_id: 0,
         memo: 'testing'
       }, "300000000000000", '1')
-      .then((data) => {
-        console.log(data, 'nftTokensForOwner')
-      })
-  } catch(err) {
-    console.error(err, '')
-    Vue.notify({
-      group: 'foo',
-      title: 'Important message',
-      text: `Error - ${err}`,
-    })
-  }
-}
-
-// currently unavailable
-
-// export function burnNFT() {
-//   console.log('approve')
-//   window.contract
-//     .nft_burn({
-//       account_id: 'near_testing.testnet',
-//       token_id: this.nftObj.token_id[0],
-//     }, "300000000000000", '1210000000000000000000')
-//     .then((data) => {
-//       console.log(data, 'approveNFT')
-//     })
-// }
-
-// just for tests
-export function nftTokendata(contract, token_id) {
-  try {
-    contract
-      .nft_token({ token_id })
-      .then((data) => {
-        console.log(data, 'nftTokendata')
-      })
-  } catch(err) {
-    console.error(err, '')
-    Vue.notify({
-      group: 'foo',
-      title: 'Important message',
-      text: `Error - ${err}`,
-    })
-  }
-}
-
-// just for tests
-export function nftMetadata(contract) {
-  try {
-    contract
-      .nft_metadata()
-      .then((data) => {
-        console.log(data, 'nftMetadata')
-      })
   } catch(err) {
     console.error(err, '')
     Vue.notify({

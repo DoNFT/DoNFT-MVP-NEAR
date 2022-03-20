@@ -14,12 +14,13 @@
         <div
           v-for="item in getNFTsData"
           :key="item.token_id"
-          class="nft-cards__contract__item"
+          class="nft-cards__contract__item nft-cards__contract__item--bundle-data"
         >
           <token-card
             :metadata="item"
-            :key="item.token_id"
             :edit-available="false"
+            :is-approved-contract="getBundleContract.contractId"
+            @nft-approved-status="bundleStatusUpdate"
           />
         </div>
       </div>
@@ -44,9 +45,9 @@
           <button
             class="main-btn"
             type="submit"
-            :disabled="!getDroppedImage"
+            :disabled="checkBundleForApprove"
             @click.prevent="bundleNFTs"
-          >Submit</button>
+          >Bundle NFTs!</button>
         </div>
       </form>
     </main>
@@ -89,6 +90,7 @@ export default {
         },
       ],
       notificationVisible: false,
+      approvedNFTStatuses: [],
       nftArray: [],
     }
   },
@@ -141,6 +143,10 @@ export default {
       }
       return []
     },
+    // if at least one nft is not approved, disabling btn
+    checkBundleForApprove() {
+      return this.approvedNFTStatuses.some((item) => item === false)
+    }
   },
 
   watch: {
@@ -169,20 +175,25 @@ export default {
       this.nftObj.metadata.media = src 
       this.passNFT(this.nftObj.metadata)
     },
+    bundleStatusUpdate(data) {
+      this.approvedNFTStatuses.push(data)
+    },
     async bundleNFTs() {
       await this.setResult('base64')
       await this.setDeployedPictureMeta('base64')
       const bundleArr = this.nftArray.map((token) => {
         return this.getAllNFTs.find((item) => item.token_id === token)
       }).filter(Boolean)
-      console.log(bundleArr, 'this.this.bundleArr')
 
-      // TODO: make approval checking of ALL TOKENS, should be SAME
-      let approval_id = null
+      const bundlesArrApproved = bundleArr.map((item) => {
+        const obj = {
+          ...item,
+          contract: this.getContract.contractId,
+          approval_id: item.approved_account_ids[this.getBundleContract.contractId],
+        }
 
-      if (bundleArr[0].approved_account_ids) {
-        approval_id = bundleArr[0].approved_account_ids[this.getBundleContract.contractId]
-      }
+        return obj
+      })
 
       this.createNewBundleNFT({
         token_id: `token-${Date.now()}`,
@@ -192,7 +203,7 @@ export default {
           media: this.getDeployedPictureMeta,
           copies: 1,
         },
-        bundles: bundleArr.map((item) => ({ ...item, contract: this.getContract.contractId, approval_id })),
+        bundles: bundlesArrApproved,
       })
     },
   },

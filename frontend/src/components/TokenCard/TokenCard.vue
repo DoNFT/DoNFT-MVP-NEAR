@@ -4,6 +4,11 @@
       class="nft-cards__media"
       :src="urlData || placeholder()"
     >
+    <p>{{metadata.metadata.title}}</p>
+    <p
+      v-if="isApprovedContract && !isNFTApproved"
+      class="nft-cards__approve"
+    >Please approve NFT first</p>
     <router-link
       v-if="editAvailable"
       class="nft-cards__info"
@@ -21,12 +26,12 @@ import { placeholder } from '@/utilities'
 export default {
   name: "TokenCard",
 
-  props: [
-    'metadata',
-    'routeInfo',
-    'editAvailable',
-    'isBundle',
-  ],
+  props: {
+    metadata: Object,
+    editAvailable: Boolean,
+    isBundle: Boolean,
+    isApprovedContract: String,
+  },
   data() {
     return {
       urlData: null
@@ -49,8 +54,8 @@ export default {
           await this.setTokenImage(this.metadata)
         }
 
-        const url = this.getNFTsPool ? this.getNFTsPool.find((item) => item.token_id === this.metadata.token_id).url : null
-        this.urlData = url
+        const url = this.getNFTsPool ? this.getNFTsPool.find((item) => item.token_id === this.metadata.token_id) : null
+        this.urlData = url ? url.metadata.media_hash : null
       }
     },
     placeholder
@@ -63,6 +68,15 @@ export default {
     // todo: rethink logic of requests
     if (this.getIpfs) {
       this.loadContent()
+    }
+
+    // validation for bundle NFT page
+    if (this.isApprovedContract) {
+      if (this.metadata.approved_account_ids && this.metadata.approved_account_ids[this.isApprovedContract]) {
+        this.$emit('nft-approved-status', true)
+      } else {
+        this.$emit('nft-approved-status', false)
+      }
     }
   },
 
@@ -83,6 +97,14 @@ export default {
       'getAllNFTs',
       'getNFTsTotal',
     ]),
+
+    isNFTApproved() {
+      if (this.metadata.approved_account_ids && this.metadata.approved_account_ids[this.isApprovedContract]) {
+        return true
+      }
+
+      return false
+    }
   }
 }
 
@@ -117,5 +139,14 @@ export default {
     color: #fff;
     transform: scale(1.2);
   }
+}
+
+.nft-cards__approve {
+  font-size: 16px;
+  background: red;
+  color: #fff;
+  padding: 5px 8px;
+  border-radius: 4px;
+  cursor: text;
 }
 </style>

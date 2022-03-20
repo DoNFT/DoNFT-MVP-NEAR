@@ -38,10 +38,6 @@
                 class="main-btn"
                 :disabled="true"
               >Burn NFT</button>
-              <router-link
-                class="main-btn"
-                :to="{ name: 'SendNFT', params: { id: NFTComputedData.token_id }}"
-              >Send NFT</router-link>
               <button
                 class="main-btn"
                 type="submit"
@@ -50,10 +46,19 @@
               >Change Format</button>
               <button
                 class="main-btn"
+                @click="approveNFTHandler"
+                :disabled="!isNFTApproved(NFTComputedData) || !nftObj.receiver_id"
+              >Approve NFT</button>
+              <button
+                class="main-btn"
                 type="submit"
                 :disabled="!hasBundles"
                 @click="unbundleNFT"
               >Unbundle NFT</button>
+              <router-link
+                class="main-btn"
+                :to="{ name: 'SendNFT', params: { id: NFTComputedData.token_id }}"
+              >Send NFT page</router-link>
             </div>
           </div>
         </div>
@@ -129,6 +134,22 @@ export default {
         },
       ]
     },
+    isNFTApproved() {
+      return (NFTComputedData) => {
+        let status = true
+
+        // if input ID equal to approved_account_ids key, its approved and able to send
+        if (NFTComputedData && NFTComputedData.approved_account_ids) {
+          Object.keys(this.NFTComputedData.approved_account_ids).forEach((item) => {
+            if (item === this.getBundleContract.contractId) {
+              status = false
+            }
+          })
+        }
+
+        return status
+      }
+    },
     hasBundles() {
       return this.NFTComputedData && this.NFTComputedData.bundles && this.NFTComputedData.bundles.length
     },
@@ -184,7 +205,7 @@ export default {
 
   mounted() {
     if (this.NFTComputedData) {
-      if (this.NFTComputedData.bundles) {
+      if (this.NFTComputedData.bundles && this.NFTComputedData.bundles.length) {
         this.loadBundlesNFTsData()
       }
     }
@@ -199,11 +220,12 @@ export default {
     ]),
     async loadBundlesNFTsData() {
       const request = await this.getNearAccount.viewFunction(this.NFTComputedData.bundles[0].contract, 'nft_tokens_for_owner', { account_id: this.getBundleContract.contractId, limit: 30 })
-      console.log(request, 'REQUEST ! ! ! ! !  !! ! ')
-
       this.bundleNFTsData = request.filter((item) => {
         return this.NFTComputedData.bundles.find((bundleItem) => bundleItem.token_id === item.token_id)
       })
+    },
+    approveNFTHandler() {
+      this.setNFTApproveId({ token_id: this.NFTComputedData.token_id, approve_id: this.getBundleContract.contractId})
     },
     unbundleNFT() {
       this.triggerUnbundleNFT(this.NFTComputedData.token_id)
