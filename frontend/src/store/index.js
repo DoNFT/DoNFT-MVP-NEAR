@@ -119,7 +119,7 @@ const store = new Vuex.Store({
       state.bundle_contract = payload
     },
     SET_CURRENT_EFFECTS_CONTRACT (state, payload) {
-      state.effects_contract.push(payload)
+      state.effects_contract = payload
     },
     SET_NFT_COUNTER (state, payload) {
       state.NFTsTotal += payload
