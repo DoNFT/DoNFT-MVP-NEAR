@@ -230,7 +230,7 @@ const store = new Vuex.Store({
       // todo: discuss about dynamic change of minting contracts, to solve hardcode
       let contractData = null
 
-      if (minting_contract_id === 'nft-effects.near_testing.testnet') {
+      if (minting_contract_id === process.env.VUE_APP_NFTS_EFFECTS_CONTRACT) {
         contractData = getters.getEffectsContract
       }
       console.log(contractData, 'contractdata')

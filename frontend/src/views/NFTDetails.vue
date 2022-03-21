@@ -121,6 +121,7 @@ export default {
       'getContract',
       'getAccountId',
       'getBundleContract',
+      'getNFTsByContract',
     ]),
     bundleNFTsComputedData() {
       return this.bundleNFTsData
@@ -234,7 +235,17 @@ export default {
       this.bundleNFTsData = loadedBundleNFTs
     },
     approveNFTHandler() {
-      this.setNFTApproveId({ token_id: this.NFTComputedData.token_id, approve_id: this.getBundleContract.contractId})
+      let minting_contract_id = null
+
+      this.getNFTsByContract.forEach((contract) => {
+        contract.NFTS.forEach((nftData) => {
+          if (nftData.token_id === this.NFTComputedData.token_id) {
+            minting_contract_id = contract.contractName
+          }
+        })
+      })
+
+      this.setNFTApproveId({ token_id: this.NFTComputedData.token_id, approve_id: this.getBundleContract.contractId, minting_contract_id })
     },
     unbundleNFT() {
       this.triggerUnbundleNFT(this.NFTComputedData.token_id)
