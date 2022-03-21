@@ -30,22 +30,8 @@ export async function modifyPicture (objectURL, effectId) {
   return item
 }
 
-// hardcode until back fix new api
-export async function modifyTransferPicture (objectBase, effectId) {
-  let result = await api.post(`/effects/applyWithImgUrl/${effectId}?img_url='https://upload.wikimedia.org/wikipedia/commons/a/af/VitalikButerinProfile.jpg'`, "", { 
-    headers: {
-      'accept': 'image/gif', 
-      'Content-Type': 'text/html', 
-    }, 
-    responseType: 'blob' 
-  })
-  const item = URL.createObjectURL(result.data)
-
-  return item
-}
-
-export async function getPicture (objectURL) {
-  let result = await api.get(`${objectURL}`,)
-
-  return result.url
+export async function applyNFTsEffect (effectData) {
+  let result = await api.post('/effects/applyEffect', effectData)
+  console.log(result, 'result url')
+  return result.data
 }

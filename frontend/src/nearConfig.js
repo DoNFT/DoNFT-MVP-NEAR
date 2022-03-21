@@ -4,8 +4,6 @@ import { getConfig } from './nearNets'
 const nfts_contract = getConfig({ env: process.env.NODE_ENV, contract: process.env.VUE_APP_NFTS_CONTRACT })
 const bundle_contract = getConfig({ env: process.env.NODE_ENV, contract: process.env.VUE_APP_BUNDLE_CONTRACT })
 const nfts_effects_contract = getConfig({ env: process.env.NODE_ENV, contract: process.env.VUE_APP_NFTS_EFFECTS_CONTRACT })
-// const nearConfig_bundle = getConfig({ env: process.env.NODE_ENV, contract: bundle_contract })
-// console.log(nearConfig_bundle, 'nearConfig_bundle 111')
 
 // Initialize contract & set global variables
 export async function initContract(store) {
@@ -101,7 +99,7 @@ export async function initContract(store) {
 
   // Initializing our contract APIs by contract name and configuration
   const cotractBundleSettings = await new Contract(walletBundleConnection.account(), bundle_contract.contractName, {
-    changeMethods: ['nft_mint', 'nft_bundle', 'nft_unbundle', 'nft_transfer'],
+    changeMethods: ['nft_mint', 'nft_bundle', 'nft_unbundle', 'nft_approve', 'nft_transfer'],
   })
   store.dispatch('setCurrentBundleContract', cotractBundleSettings)
 
@@ -113,7 +111,7 @@ export async function initContract(store) {
 
   // Initializing our contract APIs by contract name and configuration
   const cotractEffectsSettings = await new Contract(nftEffectsWallet.account(), nfts_effects_contract.contractName, {
-    changeMethods: ['nft_mint', 'nft_bundle', 'nft_unbundle', 'nft_transfer'],
+    changeMethods: ['nft_mint', 'nft_bundle', 'nft_unbundle', 'nft_approve', 'nft_transfer'],
   })
   store.dispatch('setCurrentEffectsContract', cotractEffectsSettings)
 

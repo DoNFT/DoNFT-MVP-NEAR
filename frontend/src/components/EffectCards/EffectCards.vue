@@ -1,7 +1,7 @@
 <template>
   <div class="effect-cards">
-    <div v-for="(card, idx) in cards" class="effect-cards__item" :key="card.id" :class="cardClass(card.id || idx)">
-      <div @click="cardClicked(card.id || idx)" class="effect-cards__item__inner">
+    <div v-for="card in cards" class="effect-cards__item" :key="card.id" :class="cardClass(card.token_id)">
+      <div @click="cardClicked(card)" class="effect-cards__item__inner">
         <token-card
           :metadata="card"
         />
@@ -20,16 +20,20 @@ import TokenCard from '@/components/TokenCard/TokenCard'
 
 export default {
   name: "EffectCards",
-  props: ['cards', 'justification', 'cardSize', 'choice', 'showId', 'contentType'],
+  props: {
+    cards: Array,
+    choice: Array,
+    cardSize: String,
+    showId: Boolean,
+    contentType: String,
+  },
   components: {
     TokenCard,
   },
   methods: {
-    cardClicked(id) {
-      this.$emit('card-clicked', id)
-    },
-    getImage(card) {
-      return card.localImage || card.image
+    cardClicked(card) {
+      console.log(card, 'CARD')
+      this.$emit('card-clicked', card)
     },
     cardClass(idx) {
       return {

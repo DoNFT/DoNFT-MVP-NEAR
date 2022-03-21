@@ -19,13 +19,12 @@
               <div
                 class="nft-cards__contract__item"
                 v-for="item in contractData.NFTS"
-                :key="item.key"
+                :key="`nft--${item.token_id}`"
                 :class="{ 'chosen-card': cardClass(item.token_id)}"
                 @click="chooseNFT(item)"
               >
                 <token-card
                   :metadata="item"
-                  :key="item.token_id"
                   :edit-available="true"
                 />
               </div>
@@ -156,20 +155,10 @@ export default {
     },
   },
 
-  mounted() {
-    this.setEffects()
-  },
-
   methods: {
     ...mapActions([
-      'setResult',
       'passNFT',
-      'setDeployedPictureMeta',
-      'setEffectChoice',
-      'createNewRandomNFT',
-      'createNewUsualNFT',
       'setEffects',
-      'setTokenImage',
       'passChosenTokens',
       'passNFTlimit',
       'getListOfNFT',

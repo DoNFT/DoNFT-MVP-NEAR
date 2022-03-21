@@ -169,10 +169,8 @@ export async function deployNFTtoIPFS(ipfsInstance, imageURL, oldMeta, type) {
 export async function getImageForTokenByURI(ipfsInstance, imageAddress) {
   let image
   if (imageAddress) {
-    let cid = CID_RE.exec(imageAddress)?.[0]
-
-    // todo: differ IPFS address with other https files
-    if (cid) {
+    if (imageAddress.startsWith('ipfs') || imageAddress.startsWith('https://ipfs'))  {
+      let cid = CID_RE.exec(imageAddress)?.[0]
       let localImageURL = await getImageFromIpfs(ipfsInstance, cid)
       image = localImageURL
     } else {
@@ -187,7 +185,7 @@ async function getImageFromIpfs(ipfsInstance, cid) {
   try {
     blob = await loadFileFromIPFS(ipfsInstance, cid, 6000)
   } catch (e) {
-    console.log(e)
+    console.log(e, `getImageFromIpfs ERROR ${cid}`)
   }
   return blob ? URL.createObjectURL(blob) : null
 }

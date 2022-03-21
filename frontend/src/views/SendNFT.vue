@@ -22,10 +22,10 @@
           </div>
           <div class="form-nft-send__inputs">
             <div>
-              <span class="form-nft-send__inputs-title">Contract ID</span>
+              <span class="form-nft-send__inputs-title">Receipt ID</span>
               <input
                 type="text"
-                placeholder="Contract ID"
+                placeholder="Receipt ID"
                 class="input form-nft__input"
                 v-model="nftObj.receiver_id"
               >

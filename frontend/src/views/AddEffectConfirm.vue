@@ -17,8 +17,9 @@
               v-if="NFTComputedData && NFTComputedData.metadata"
             >
               <token-card
-                class="form-nft-send__media"
                 :metadata="NFTComputedData"
+                :is-approved-contract="getBundleContract.contractId"
+                @nft-approved-status="bundleStatusUpdate"
               />
             </div>
           </div>
@@ -30,22 +31,15 @@
             class="nft-cards"
             v-if="getEffect"
           >
-            <img
-              v-if="getEffect.image.endsWith('.jpg')"
-              class="form-nft-send__media"
-              :src="getEffect.image"
+            <token-card
+              :metadata="getEffect"
+              :is-approved-contract="getBundleContract.contractId"
+              @nft-approved-status="bundleStatusUpdate"
             />
-            <video
-              v-else
-              autoplay
-              loop
-              class="embed-responsive-item"
-            >
-              <source :src="getEffect.image" type="video/mp4">
-            </video>
           </div>
         </div>
         <div class="form-nft-send__inputs form-nft-send__inputs--effects">
+          <h1>Bundle metadata</h1>
           <span class="form-nft-send__inputs-title">Title</span>
           <input
             type="text"
@@ -63,6 +57,7 @@
           <div class="form-nft__bottom">
             <button
               class="main-btn"
+              :disabled="checkBundleForApprove"
               @click="handleMint"
             >Confirm</button>
           </div>
@@ -102,13 +97,8 @@ export default {
         token_id: [],
       },
       NFTData: {},
+      approvedNFTStatuses: [],
     }
-  },
-
-
-  mounted() {
-    this.setEffects()
-    this.setEffectChoice(this.$route.params.effectId)
   },
 
   computed: {
@@ -121,7 +111,12 @@ export default {
       'getContract',
       'getBundleContract',
       'getEffectsContract',
+      'getAccountId',
     ]),
+    // if at least one nft is not approved, disabling btn
+    checkBundleForApprove() {
+      return this.approvedNFTStatuses.some((item) => item === false)
+    },
     getNav() {
       return [
         {
@@ -178,32 +173,64 @@ export default {
     },
   },
 
+  mounted() {
+    this.setEffectChoice(this.$route.params.effectId)
+  },
+
   methods: {
     ...mapActions([
-      'setEffects',
       'setEffectChoice',
-      'setResult',
+      'setEffectResult',
       'setDeployedPictureMeta',
       'passNFT',
       'createNewBundleNFT',
     ]),
+    bundleStatusUpdate(data) {
+      this.approvedNFTStatuses.push(data)
+    },
     // minting NFT with NEW effects
     async handleMint() {
-      await this.setResult()
-      await this.setDeployedPictureMeta()
-      const bundleArr = [this.NFTComputedData]
+      const effectObj = {
+        original: {
+          contract: this.getContract.contractId,
+          tokenId: this.NFTComputedData.token_id,
+          contentUrl: this.NFTComputedData.metadata.media,
+        },
+        modificator: {
+          contract: this.getEffectsContract.contractId,
+          tokenId: this.getEffect.token_id,
+          contentUrl: this.getEffect.metadata.media,
+        },
+        sender: this.getAccountId,
+      }
+      await this.setEffectResult(effectObj)
+      const bundleArr = [
+        {
+          data: this.NFTComputedData,
+          contract: 'list',
+        },
+        {
+          data: this.getEffect,
+          contract: 'effects',
+        }
+      ]
 
       // TODO: make approval checking of ALL TOKENS, should be SAME
       let approval_id = null
 
-      if (bundleArr[0].approved_account_ids) {
-        approval_id = bundleArr[0].approved_account_ids[this.getBundleContract.contractId]
-      }
-      const newBundle = bundleArr.map((item) => ({ ...item, contract: this.getContract.contractId, approval_id }))
-      console.log(bundleArr, 'bundleArr')
-      console.log(approval_id, 'approval_id')
-      console.log(newBundle, 'newBundle')
+      const bundlesArrApproved = bundleArr.map((item) => {
+        const obj = {
+          ...item.data,
+          contract: item.contract === 'list' ? this.getContract.contractId : this.getEffectsContract.contractId,
+          approval_id: item.data.approved_account_ids[this.getBundleContract.contractId],
+        }
 
+        return obj
+      })
+      console.log(bundlesArrApproved, 'bundlesArrApproved')
+      console.log(approval_id, 'approval_id')
+
+      // its calling bundle, because effect NFT combining with usual NFT
       this.createNewBundleNFT({
         token_id: `token-${Date.now()}`,
         metadata: {
@@ -212,7 +239,7 @@ export default {
           media: this.getDeployedPictureMeta,
           copies: 1,
         },
-        bundles: bundleArr.map((item) => ({ ...item, contract: this.getContract.contractId, approval_id })),
+        bundles: bundlesArrApproved,
       })
     },
   },

@@ -5,10 +5,15 @@
       :src="urlData || placeholder()"
     >
     <p class="nft-cards__title">{{metadata.metadata.title}}</p>
-    <p
-      v-if="isApprovedContract && !isNFTApproved"
-      class="nft-cards__approve"
-    >Please approve NFT first</p>
+    <template v-if="isApprovedContract && !isNFTApproved">
+      <button
+        class="main-btn"
+        @click="approveNFTHandler"
+      >Approve NFT</button>
+      <p
+        class="nft-cards__approve"
+      >Please approve NFT first</p>
+    </template>
     <router-link
       v-if="editAvailable"
       class="nft-cards__info"
@@ -38,27 +43,23 @@ export default {
     }
   },
 
-  methods: {
-    ...mapActions([
-      'setTokenImage'
+  computed: {
+    ...mapGetters([
+      'getIpfs',
+      'getNFTsPool',
+      'getAllNFTs',
+      'getNFTsTotal',
+      'getBundleContract',
+      'getNFTsByContract',
     ]),
-    async loadContent () {
-      if (this.metadata) {
 
-        // for restricting loading of extra images, when its already were loaded
-        if (this.getNFTsPool && (this.getNFTsPool.length) < this.getNFTsTotal) {
-          await this.setTokenImage(this.metadata)
-        }
-
-        if (this.isBundle) {
-          await this.setTokenImage(this.metadata)
-        }
-
-        const url = this.getNFTsPool ? this.getNFTsPool.find((item) => item.token_id === this.metadata.token_id) : null
-        this.urlData = url ? url.metadata.media_hash : null
+    isNFTApproved() {
+      if (this.metadata.approved_account_ids && this.isApprovedContract in this.metadata.approved_account_ids) {
+        return true
       }
-    },
-    placeholder
+
+      return false
+    }
   },
 
   mounted() {
@@ -72,7 +73,7 @@ export default {
 
     // validation for bundle NFT page
     if (this.isApprovedContract) {
-      if (this.metadata.approved_account_ids && this.metadata.approved_account_ids[this.isApprovedContract]) {
+      if (this.metadata.approved_account_ids && this.isApprovedContract in this.metadata.approved_account_ids) {
         this.$emit('nft-approved-status', true)
       } else {
         this.$emit('nft-approved-status', false)
@@ -90,22 +91,43 @@ export default {
     },
   },
 
-  computed: {
-    ...mapGetters([
-      'getIpfs',
-      'getNFTsPool',
-      'getAllNFTs',
-      'getNFTsTotal',
+  methods: {
+    ...mapActions([
+      'setTokenImage',
+      'setNFTApproveId',
     ]),
+    async loadContent () {
+      if (this.metadata) {
 
-    isNFTApproved() {
-      if (this.metadata.approved_account_ids && this.metadata.approved_account_ids[this.isApprovedContract]) {
-        return true
+        // for restricting loading of extra images, when its already were loaded
+        if (this.getNFTsPool && (this.getNFTsPool.length) < this.getNFTsTotal) {
+          await this.setTokenImage(this.metadata)
+        }
+
+        if (this.isBundle) {
+          await this.setTokenImage(this.metadata)
+        }
+
+        const url = this.getNFTsPool ? this.getNFTsPool.find((item) => item.token_id === this.metadata.token_id) : null
+        this.urlData = url ? url.metadata.media_hash : null
       }
+    },
+    approveNFTHandler() {
+      let minting_contract_id = null
 
-      return false
-    }
-  }
+      this.getNFTsByContract.forEach((contract) => {
+        contract.NFTS.forEach((nftData) => {
+          if (nftData.token_id === this.metadata.token_id) {
+            minting_contract_id = contract.contractName
+          }
+        })
+      })
+
+      this.setNFTApproveId({ token_id: this.metadata.token_id, approve_id: this.isApprovedContract, minting_contract_id })
+    },
+    placeholder
+  },
+
 }
 
 </script>

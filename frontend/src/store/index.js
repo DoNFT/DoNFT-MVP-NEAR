@@ -15,7 +15,7 @@ import {
 
 
 import {StatusType, getIPFS} from "../utilities"
-import {getEffects, modifyPicture, modifyTransferPicture} from "../api"
+import {getEffects, modifyPicture, applyNFTsEffect} from "../api"
 
 Vue.use(Vuex)
 
@@ -179,9 +179,10 @@ const store = new Vuex.Store({
         commit('setImageResult', await modifyPicture(getters.getNFTforModification.media, getters.getEffectChoice))
       }
     },
-    async setStyleResult ({commit, dispatch, getters}) {
+    async setEffectResult ({commit, dispatch}, effectData) {
       dispatch('setStatus', StatusType.Applying)
-      commit('setImageResult', await modifyTransferPicture(getters.getDroppedImage, getters.getEffectChoice))
+      console.log(effectData, 'EFFFECT DATA')
+      commit('setDeployedPictureMeta', await applyNFTsEffect(effectData))
     },
     async setDeployedPictureMeta ({commit, dispatch, getters}, type) {
       dispatch('setStatus', StatusType.DeployingToIPFS)
@@ -225,9 +226,17 @@ const store = new Vuex.Store({
       dispatch('setStatus', StatusType.Minting)
       unbundleNFT(token_id, getters.getBundleContract)
     },
-    setNFTApproveId ({getters, dispatch}, { approve_id, token_id }) {
+    setNFTApproveId ({getters, dispatch}, { approve_id, token_id, minting_contract_id }) {
+      // todo: discuss about dynamic change of minting contracts, to solve hardcode
+      let contractData = null
+
+      if (minting_contract_id === 'nft-effects.near_testing.testnet') {
+        contractData = getters.getEffectsContract
+      }
+      console.log(contractData, 'contractdata')
+
       dispatch('setStatus', StatusType.Approving)
-      approveNFT(approve_id, token_id, getters.getContract)
+      approveNFT(approve_id, token_id, contractData || getters.getContract)
     },
     sendNFTByToken ({getters, dispatch}, { receiver, token_id, is_bundle_nft }) {
       dispatch('setStatus', StatusType.Approving)
@@ -276,7 +285,7 @@ const store = new Vuex.Store({
   },
   getters: {
     getEffects: state => state.effects,
-    getEffect: state => state.effects.find(x => x.id === state.effectChoice),
+    getEffect: state => state.allNFTs.find(x => x.token_id === state.effectChoice),
     getEffectChoice: state => state.effectChoice,
     getIpfs: state => state.ipfs,
     getResult: state => state.imageResult,

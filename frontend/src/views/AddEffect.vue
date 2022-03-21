@@ -31,12 +31,14 @@
         <effect-cards
           @card-clicked="chooseEffect"
           :show-id="false"
-          :cards="effectContractNFTData.NFTS"
+          :cards="filterEffectsContractCards"
           :choice="[getEffectChoice]"
           content-type="video"
         ></effect-cards>
         <router-link
           class="main-btn"
+          tag="button"
+          :disabled="!getEffectChoice"
           :to="{ name: 'AddEffectConfirm', params: {
             id: NFTComputedData.token_id,
             effectId: getEffectChoice,
@@ -80,22 +82,24 @@ export default {
     }
   },
 
-
-  mounted() {
-    this.setEffects()
-  },
-
   computed: {
     ...mapGetters([
       'getAllNFTs',
       'getNftsAreLoading',
       'getStatus',
-      'getEffects',
+      'getEffect',
       'getEffectChoice',
       'getDeployedPictureMeta',
       'getEffectsContract',
       'getNFTsByContract',
     ]),
+    filterEffectsContractCards() {
+      return this.effectContractNFTData.NFTS.filter((item) => {
+        if (item.token_id !== this.NFTComputedData.token_id) {
+          return item
+        }
+      })
+    },
     getNav() {
       return [
         {
@@ -167,18 +171,17 @@ export default {
 
   methods: {
     ...mapActions([
-      'setEffects',
       'setEffectChoice',
       'setResult',
       'setDeployedPictureMeta',
       'passNFT',
       'createNewRandomNFT',
     ]),
-    async chooseEffect(id) {
-      if (this.getEffectChoice && id === this.getEffectChoice) {
+    async chooseEffect(card) {
+      if (this.getEffectChoice && card.token_id === this.getEffectChoice) {
         this.setEffectChoice(null)
       } else {
-        this.setEffectChoice(id)
+        this.setEffectChoice(card.token_id)
       }
     },
   },
