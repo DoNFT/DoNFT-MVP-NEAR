@@ -38,7 +38,6 @@
         <router-link
           class="main-btn"
           tag="button"
-          :disabled="!getEffectChoice"
           :to="{ name: 'AddEffectConfirm', params: {
             id: NFTComputedData.token_id,
             effectId: getEffectChoice,
@@ -153,6 +152,7 @@ export default {
           this.NFTData = data
           this.nftObj.media = data.metadata.media
           this.passNFT(this.NFTComputedData.metadata)
+
         }
       },
     },

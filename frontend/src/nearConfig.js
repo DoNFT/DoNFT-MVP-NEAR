@@ -48,7 +48,7 @@ export async function initContract(store) {
     store.dispatch('setNearAccount', acc)
   }
 
-  await NFTsContracts.forEach(async (contract, key) => {
+  await Promise.all(NFTsContracts.map(async (contract, key) => {
     let request = null
 
     try {
@@ -80,7 +80,9 @@ export async function initContract(store) {
     if (request) {
       store.dispatch('setNFTsCounter', request.length)
     }
-  })
+
+    return request
+  }))
 
   // Initializing our contract APIs by contract name and configuration
   const cotractSettings = await new Contract(walletConnection.account(), nfts_contract.contractName, {
@@ -114,7 +116,9 @@ export async function initContract(store) {
     changeMethods: ['nft_mint', 'nft_bundle', 'nft_unbundle', 'nft_approve', 'nft_transfer'],
   })
   store.dispatch('setCurrentEffectsContract', cotractEffectsSettings)
-
+  console.log(store.getters.getNFTsTotal, 'getAllNFTs')
+  console.log('Near config INIT finished')
+  console.log(store.getters.getContractLoading, 'getContractLoading 1')
 }
 
 export function logout(getCurrentWallet) {

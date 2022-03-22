@@ -54,13 +54,49 @@ let routes = [
     path: '/add_effect/:id',
     name: 'AddEffect',
     component: AddEffect,
-    meta: { title: 'Do[NFT]', requiresAuth: true },
+    meta: {
+      title: 'Do[NFT]',
+      requiresAuth: true
+    },
+    beforeEnter(to, _from, next) {
+      const NFTChoice = store.getters.getAllNFTs.find(x => x.token_id === to.params.id)
+    
+      if (to.name === 'AddEffectConfirm' && !NFTChoice) {
+        next('/choose_nft')
+        Vue.notify({
+          group: 'foo',
+          type: 'error',
+          title: 'Important message',
+          text: `Sorry, NFT with ID ${to.params.id} does not exit`,
+        })
+      } else {
+        next()
+      }
+    },
   },
   {
     path: '/add_effect/:id/confirm/:effectId',
     name: 'AddEffectConfirm',
     component: AddEffectConfirm,
-    meta: { title: 'Do[NFT]', requiresAuth: true }
+    meta: {
+      title: 'Do[NFT]',
+      requiresAuth: true
+    },
+    beforeEnter(to, _from, next) {
+      const effectChoice = store.getters.getAllNFTs.find(x => x.token_id === to.params.effectId)
+    
+      if (to.name === 'AddEffectConfirm' && !effectChoice) {
+        next(`/add_effect/${to.params.id}`)
+        Vue.notify({
+          group: 'foo',
+          type: 'error',
+          title: 'Important message',
+          text: `Sorry, effect with ID ${to.params.effectId} does not exit`,
+        })
+      } else {
+        next()
+      }
+    },
   },
   {
     path: '/nft_details/:id',
@@ -85,7 +121,6 @@ const router = new Router({
 async function passResult(txHash, accountId, type) {
   const result = await provider.txStatus(txHash, accountId)
 
-  console.log(result, 'tx HASH result')
   if (result.status && 'SuccessValue' in result.status && type === 'send_nft') {
     console.log("Result: 2 ", result)
     store.dispatch('setStatus', StatusType.Approved)
@@ -122,14 +157,13 @@ router.beforeEach(async (to, _from, next) => {
         store.dispatch('setContractLoading', false)
       })
   }
-
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
   let user = null
+
   if (store.getters.getCurrentWallet) {
     user = store.getters.getCurrentWallet.isSignedIn()
   }
 
-  // todo: do not triggering, because beforeEach trigger earlier than contract initialize
   if (store.getters.getContract && requiresAuth && !user) {
     next('/login')
     Vue.notify({
@@ -140,7 +174,6 @@ router.beforeEach(async (to, _from, next) => {
   } else {
     next()
   }
-
   // handling transaction hashes, for displayng response to user
   const account_id = store.getters.getAccountId
   const url = new URL(document.location)
