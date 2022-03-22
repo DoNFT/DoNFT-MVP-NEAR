@@ -32,8 +32,7 @@
           />
           <button
             class="main-btn"
-            type="submit"
-            @click="createNewNFT"
+            @click.prevent="createNewNFT"
           >Submit</button>
         </div>
       </form>
@@ -137,19 +136,23 @@ export default {
       this.passNFT(this.nftObj.metadata)
     },
     async createNewNFT() {
-      await this.setResult('base64')
-      await this.setDeployedPictureMeta('base64')
+      if (!this.nftObj.metadata.title) {
+        alert('Title field is emptyy')
+      } else {
+        await this.setResult('base64')
+        await this.setDeployedPictureMeta('base64')
 
-      this.createNewUsualNFT({
-        token_id: `token-${Date.now()}`,
-        metadata: {
-          title: this.nftObj.metadata.title,
-          description: this.nftObj.metadata.description,
-          media: this.getDeployedPictureMeta,
-          copies: 1,
-        },
-        contract_id: this.nftObj.contract_id
-      })
+        this.createNewUsualNFT({
+          token_id: `token-${Date.now()}`,
+          metadata: {
+            title: this.nftObj.metadata.title,
+            description: this.nftObj.metadata.description,
+            media: this.getDeployedPictureMeta,
+            copies: 1,
+          },
+          contract_id: this.nftObj.contract_id
+        })
+      }
     },
   },
 }
