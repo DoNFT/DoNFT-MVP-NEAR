@@ -153,6 +153,7 @@ router.beforeEach(async (to, _from, next) => {
     result = await provider.txStatus(tx_hash, account_id)
   }
 
+  // may be need rework, current checking for disabling redirect on NFT approving
   if (result && result.transaction.actions[0] && result.transaction.actions[0].FunctionCall) {
     isApproveCalled = result.transaction.actions[0].FunctionCall.method_name === 'nft_approve'
   }

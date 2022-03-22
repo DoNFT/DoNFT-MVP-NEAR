@@ -101,7 +101,6 @@ export default {
     } else {
       this.nftArray = sessionStorage.getItem('tokens_id').split(',')
     }
-    this.setEffects()
   },
 
   computed: {
@@ -169,7 +168,6 @@ export default {
       'setResult',
       'setDeployedPictureMeta',
       'passNFT',
-      'setEffects',
     ]),
     setUploadedImg(src) {
       this.nftObj.metadata.media = src 

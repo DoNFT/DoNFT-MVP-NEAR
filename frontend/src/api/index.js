@@ -12,10 +12,6 @@ export async function getNftInfosByAddress(accountAddress) {
   return (await api.get(`/nfts/${accountAddress}`)).data
 }
 
-export async function getEffects() {
-  return (await api.get('/effects')).data
-}
-
 export async function modifyPicture (objectURL, effectId) {
   console.log(objectURL, 'object url')
   let result = await api.post(`/effects/applyWithImgUrl/${effectId}?img_url=${objectURL}`, "", { 
@@ -32,6 +28,5 @@ export async function modifyPicture (objectURL, effectId) {
 
 export async function applyNFTsEffect (effectData) {
   let result = await api.post('/effects/applyEffect', effectData)
-  console.log(result, 'result url')
   return result.data
 }

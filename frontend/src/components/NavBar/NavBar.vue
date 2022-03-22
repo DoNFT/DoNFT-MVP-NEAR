@@ -23,7 +23,6 @@
 </template>
 
 <script>
-import { logout } from "@/nearConfig"
 
 export default {
   name: "NavBar",
@@ -32,9 +31,6 @@ export default {
       type: Array,
       default: () => [],
     },
-  },
-  methods: {
-    logout: logout,
   },
 }
 </script>

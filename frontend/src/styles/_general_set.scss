@@ -135,6 +135,10 @@ button, input {
 	}
 }
 
+.main-btn--no-effect {
+	margin-top: 20px;
+}
+
 .main-btn--exit {
 	background-color: rgba(92, 233, 188, 1);
 	color: #000;
@@ -328,4 +332,9 @@ select::-ms-expand {
 .select-wrap:hover::after {
   color: #5ce9bc;
 	transform: translateY(-50%) rotate(180deg);
+}
+
+.effect-cards-box__no-effect {
+	margin-top: 50px;
+	margin-bottom: 20px;
 }

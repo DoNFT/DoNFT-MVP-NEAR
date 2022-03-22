@@ -158,7 +158,6 @@ export default {
   methods: {
     ...mapActions([
       'passNFT',
-      'setEffects',
       'passChosenTokens',
       'passNFTlimit',
       'getListOfNFT',

@@ -15,7 +15,7 @@ import {
 
 
 import {StatusType, getIPFS} from "../utilities"
-import {getEffects, modifyPicture, applyNFTsEffect} from "../api"
+import {modifyPicture, applyNFTsEffect} from "../api"
 
 Vue.use(Vuex)
 
@@ -30,7 +30,6 @@ const store = new Vuex.Store({
     nftLoading: false,
     contractLoading: false,
     account_id: null,
-    effects: [],
     effectChoice: null,
     deployedPictureMeta: null,
     nftTransactionHash: null,
@@ -56,9 +55,6 @@ const store = new Vuex.Store({
     },
     setAccountAddress (state, accountAddress) {
       state.accountAddress = accountAddress
-    },
-    setEffects (state, effects) {
-      state.effects = effects
     },
     setEffectChoice(state, choice) {
       state.effectChoice = choice
@@ -166,9 +162,6 @@ const store = new Vuex.Store({
     async setIpfs ({commit}) {
       const ipfs = await getIPFS()
       commit('setIpfs', await ipfs.create())
-    },
-    async setEffects ({commit}) {
-      commit('setEffects', await getEffects())
     },
     async setResult ({commit, dispatch, getters}, type) {
       dispatch('setStatus', StatusType.Applying)
@@ -284,7 +277,6 @@ const store = new Vuex.Store({
     },
   },
   getters: {
-    getEffects: state => state.effects,
     getEffect: state => state.allNFTs.find(x => x.token_id === state.effectChoice),
     getEffectChoice: state => state.effectChoice,
     getIpfs: state => state.ipfs,

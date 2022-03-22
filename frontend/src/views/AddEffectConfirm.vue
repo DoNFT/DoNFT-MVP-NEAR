@@ -215,9 +215,6 @@ export default {
         }
       ]
 
-      // TODO: make approval checking of ALL TOKENS, should be SAME
-      let approval_id = null
-
       const bundlesArrApproved = bundleArr.map((item) => {
         const obj = {
           ...item.data,
@@ -227,8 +224,6 @@ export default {
 
         return obj
       })
-      console.log(bundlesArrApproved, 'bundlesArrApproved')
-      console.log(approval_id, 'approval_id')
 
       // its calling bundle, because effect NFT combining with usual NFT
       this.createNewBundleNFT({

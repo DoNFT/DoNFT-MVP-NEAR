@@ -22,12 +22,12 @@
           </div>
         </div>
       </div>
-      <h1 class="h1--effects">NFT effects</h1>
 
       <div
         class="effect-cards-box"
         v-if="effectContractNFTData && effectContractNFTData.NFTS.length && NFTComputedData"
       >
+        <h1 class="h1--effects">NFT effects</h1>
         <effect-cards
           @card-clicked="chooseEffect"
           :show-id="false"
@@ -45,9 +45,14 @@
           }}"
         >Submit</router-link>
       </div>
-      <div v-else class="loading-container">
-        <spinner :size="92" color="#000" />
-        <h1>{{ statusText }}</h1>
+      <div v-else>
+        <h1 class="effect-cards-box__no-effect">You have no effects</h1>
+        <h2>Add some effects here</h2>
+        <router-link
+          class="main-btn main-btn--no-effect"
+          tag="button"
+          :to="{ name: 'CreateNFT'}"
+        >Create Effect</router-link>
       </div>
     </main>
   </div>
