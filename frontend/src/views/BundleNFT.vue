@@ -55,12 +55,12 @@
 </template>
 
 <script>
-import Spinner from "@/components/Spinner"
 import { mapGetters, mapActions } from "vuex"
-import { StatusType } from "@/utilities"
+import Spinner from "@/components/Spinner"
 import NavBar from '@/components/NavBar/NavBar'
 import Uploader from '@/components/Uploader/Uploader'
 import TokenCard from '@/components/TokenCard/TokenCard'
+import StatusType from "@/mixins/StatusMixin"
 
 export default {
   name: "BundleNFT",
@@ -94,6 +94,8 @@ export default {
       nftArray: [],
     }
   },
+
+  mixins: [StatusType],
 
   beforeMount() {
     if (this.getNFTArray && this.getNFTArray.length) {

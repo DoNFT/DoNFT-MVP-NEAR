@@ -136,25 +136,35 @@ export function sendNFT(receiver_id, token_id, contract) {
 
 // todo: make v1 to v2, or rethink v1 for more effective implementation
 async function pushImageToIpfs(ipfsInstance, objectURL) {
-  let cid = ''
   let cidV1 = ''
-  let data = null
-  await fetch(objectURL)
-    .then(res => {
-      console.log(res, 'buffer res')
-      return res.arrayBuffer()
-    })
-    .then(buffer => {
-      console.log(buffer, 'buffer data')
-      data = new Uint8Array(buffer)
-    })
-  cid = await ipfsInstance.add(data)
-  cidV1 = cid.path
+  try {
+    let cid = ''
+    let data = null
+    await fetch(objectURL)
+      .then(res => {
+        console.log(res, 'buffer res')
+        return res.arrayBuffer()
+      })
+      .then(buffer => {
+        console.log(buffer, 'buffer data')
+        data = new Uint8Array(buffer)
+      })
+    cid = await ipfsInstance.add(data)
+    cidV1 = cid.path
+  } catch(err) {
+    console.log(err, 'err pushImageToIpfs')
+  }
+
   return cidV1
 }
 
 async function pushObjectToIpfs(ipfsInstance, object) {
-  let cid = await ipfsInstance.add(JSON.stringify(object))
+  let cid = null
+  try {
+    cid = await ipfsInstance.add(JSON.stringify(object))
+  } catch(err) {
+    console.log(err, 'err pushObjectToIpfs')
+  }
   return cid
 }
 

@@ -45,11 +45,11 @@
 </template>
 
 <script>
-import Spinner from "@/components/Spinner"
 import { mapGetters, mapActions } from "vuex"
-import { StatusType } from "@/utilities"
+import Spinner from "@/components/Spinner"
 import NavBar from '@/components/NavBar/NavBar'
 import TokenCard from '@/components/TokenCard/TokenCard'
+import StatusType from "@/mixins/StatusMixin"
 
 export default {
   name: "SendNFT",
@@ -71,6 +71,8 @@ export default {
     }
   },
 
+  mixins: [StatusType],
+
   computed: {
     ...mapGetters([
       'getAllNFTs',
@@ -91,24 +93,6 @@ export default {
     },
     cardClass() {
       return (idx) => this.nftObj.token_id.indexOf(idx) !== -1
-    },
-    statusText() {
-      switch (this.getStatus) {
-      case StatusType.Approving:
-        return "Redirecting to Approve NFT Transaction"
-      case StatusType.Applying:
-        return "Applying the chosen effect..."
-      case StatusType.DeployingToIPFS:
-        return "Uploading the result to IPFS..."
-      case StatusType.Minting:
-        return "Minting..."
-      case StatusType.Minted:
-        return "Minted!"
-      case StatusType.Approved:
-        return "NFT transaction Succeded"
-      default:
-        return ""
-      }
     },
   },
 

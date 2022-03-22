@@ -87,9 +87,9 @@
 <script>
 import Spinner from "@/components/Spinner"
 import { mapGetters, mapActions } from "vuex"
-import { StatusType } from "@/utilities"
 import NavBar from '@/components/NavBar/NavBar'
 import TokenCard from '@/components/TokenCard/TokenCard'
+import StatusType from "@/mixins/StatusMixin"
 
 export default {
   name: "NFTDetails",
@@ -111,6 +111,8 @@ export default {
       bundleNFTsData: [],
     }
   },
+
+  mixins: [StatusType],
 
   computed: {
     ...mapGetters([
@@ -156,24 +158,6 @@ export default {
     },
     NFTComputedData() {
       return this.getAllNFTs.find((item) => item.token_id === this.$route.params.id)
-    },
-    statusText() {
-      switch (this.getStatus) {
-      case StatusType.Approving:
-        return "Redirecting to Approve NFT Transaction"
-      case StatusType.Applying:
-        return "Applying the chosen effect..."
-      case StatusType.DeployingToIPFS:
-        return "Uploading the result to IPFS..."
-      case StatusType.Minting:
-        return "Minting..."
-      case StatusType.Minted:
-        return "Minted!"
-      case StatusType.Approved:
-        return "NFT transaction Succeded"
-      default:
-        return ""
-      }
     },
   },
 

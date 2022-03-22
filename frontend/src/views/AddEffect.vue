@@ -59,12 +59,12 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from "vuex"
 import Spinner from "@/components/Spinner"
 import TokenCard from '@/components/TokenCard/TokenCard'
-import { mapGetters, mapActions } from "vuex"
-import { StatusType } from "@/utilities"
 import NavBar from '@/components/NavBar/NavBar'
 import EffectCards from "@/components/EffectCards/EffectCards.vue"
+import StatusType from "@/mixins/StatusMixin"
 
 export default {
   name: "AddEffect",
@@ -86,6 +86,8 @@ export default {
       NFTData: {},
     }
   },
+
+  mixins: [StatusType],
 
   computed: {
     ...mapGetters([
@@ -129,24 +131,6 @@ export default {
         const getKeyLength = Object.keys(tokenData.approved_account_ids).length
         return getKeyLength === 0
       })
-    },
-    statusText() {
-      switch (this.getStatus) {
-      case StatusType.Approving:
-        return "Redirecting to Approve NFT Transaction"
-      case StatusType.Applying:
-        return "Applying the chosen effect..."
-      case StatusType.DeployingToIPFS:
-        return "Uploading the result to IPFS..."
-      case StatusType.Minting:
-        return "Minting..."
-      case StatusType.Minted:
-        return "Minted!"
-      case StatusType.Approved:
-        return "NFT transaction Succeded"
-      default:
-        return ""
-      }
     },
   },
 
