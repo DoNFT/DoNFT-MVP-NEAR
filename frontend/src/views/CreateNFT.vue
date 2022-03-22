@@ -85,7 +85,6 @@ export default {
       ],
       notificationVisible: false,
       nftArray: [],
-      loadingStatuses: null,
     }
   },
 
