@@ -1,7 +1,14 @@
 <template>
   <div class="page">
     <nav-bar :navigation="getNav"/>
-    <div v-if="getNftsAreLoading || [0, 2, 3, 4].includes(getStatus)" class="loading-container">
+    <div
+      v-if="[
+        StatusType.Applying,
+        StatusType.DeployingToIPFS,
+        StatusType.DeployedToIPFS,
+        StatusType.Minting
+      ].includes(getStatus)" class="loading-container"
+    >
       <spinner :size="92" color="#000" />
       <h1>{{ statusText }}</h1>
     </div>
@@ -125,20 +132,6 @@ export default {
         },
       ]
     }
-  },
-
-  watch: {
-    getStatus: {
-      handler(value) {
-        this.$notify({
-          group: 'foo',
-          type: value < 5 ? 'info' : 'success',
-          title: 'Status:',
-          text: this.statusText,
-          duration: 5000,
-        })
-      },
-    },
   },
 
   methods: {

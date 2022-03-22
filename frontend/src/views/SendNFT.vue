@@ -97,17 +97,6 @@ export default {
   },
 
   watch: {
-    getStatus: {
-      handler(value) {
-        this.$notify({
-          group: 'foo',
-          type: value < 5 ? 'info' : 'success',
-          title: 'Status:',
-          text: `${this.statusText}`,
-          duration: 5000,
-        })
-      },
-    },
     getAllNFTs: {
       handler(value) {
         const data = value.find((item) => item.token_id === this.$route.params.id)

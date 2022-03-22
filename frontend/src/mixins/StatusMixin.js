@@ -1,6 +1,11 @@
 import { StatusType } from "@/utilities"
 
 export default {
+  data() {
+    return {
+      StatusType
+    }
+  },
   computed: {
     statusText() {
       switch (this.getStatus) {
@@ -18,5 +23,19 @@ export default {
         return ""
       }
     },
-  }
+  },
+
+  watch: {
+    getStatus: {
+      handler(value) {
+        this.$notify({
+          group: 'foo',
+          type: value < 5 ? 'info' : 'success',
+          title: 'Status:',
+          text: this.statusText,
+          duration: 5000,
+        })
+      },
+    },
+  },
 }

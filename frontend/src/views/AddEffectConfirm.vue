@@ -1,7 +1,7 @@
 <template>
   <div class="page">
     <nav-bar :navigation="getNav"/>
-    <div v-if="getNftsAreLoading || getStatus === 1" class="loading-container">
+    <div v-if="getNftsAreLoading || getStatus === StatusType.Approving" class="loading-container">
       <spinner :size="92" color="#000" />
       <h1>{{ statusText }}</h1>
     </div>
@@ -134,17 +134,6 @@ export default {
   },
 
   watch: {
-    getStatus: {
-      handler(value) {
-        this.$notify({
-          group: 'foo',
-          type: value < 5 ? 'info' : 'success',
-          title: 'Status:',
-          text: `${this.statusText}`,
-          duration: 5000,
-        })
-      },
-    },
     getAllNFTs: {
       handler(value) {
         const data = value.find((item) => item.token_id === this.$route.params.id)
