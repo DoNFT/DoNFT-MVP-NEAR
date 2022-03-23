@@ -192,15 +192,24 @@ export default {
       'getNFTByToken',
       'triggerUnbundleNFT',
     ]),
+    // requesting metadata of bundles NFT. to render them
     loadBundlesNFTsData() {
       const loadedBundleNFTs = []
 
       this.NFTComputedData.bundles.forEach(async (bundleData) => {
         const request = await this.getNearAccount.viewFunction(bundleData.contract, 'nft_tokens_for_owner', { account_id: this.getBundleContract.contractId, limit: 30 })
 
-        const foundNFTs = request.filter((item) => {
+        let foundNFTs = request.filter((item) => {
           return this.NFTComputedData.bundles.find((bundleItem) => bundleItem.token_id === item.token_id)
         })
+        
+        // this checking, for bundles NFTs from same contracts
+        if (loadedBundleNFTs && loadedBundleNFTs.length) {
+          foundNFTs = loadedBundleNFTs.map((item) => {
+            const foundItem = foundNFTs.find((loadedItem) => loadedItem.token_id === item.token_id)
+            return foundItem ? null : item
+          }).filter(Boolean)
+        }
 
         loadedBundleNFTs.push.apply(loadedBundleNFTs, foundNFTs)
       })
@@ -221,7 +230,7 @@ export default {
       this.setNFTApproveId({ token_id: this.NFTComputedData.token_id, approve_id: this.getBundleContract.contractId, minting_contract_id })
     },
     unbundleNFT() {
-      this.triggerUnbundleNFT(this.NFTComputedData.token_id)
+      this.triggerUnbundleNFT({ token_id: this.NFTComputedData.token_id, nft_data: this.NFTComputedData, bundles_data: this.bundleNFTsData})
     },
     changeFormat() {
       console.log('changeFormat')

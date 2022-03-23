@@ -37,7 +37,6 @@ const store = new Vuex.Store({
     imageResult: null,
     NFTdata: null,
     arrayNFTs: null,
-    NFTsPool: [],
     NFTlimit: 15,
     status: StatusType.ChoosingParameters,
     wallet: null,
@@ -98,9 +97,6 @@ const store = new Vuex.Store({
     },
     SET_CURRENT_CONTRACT (state, payload) {
       state.contract = payload
-    },
-    SET_TOKEN_IMAGE (state, tokenInfo) {
-      state.NFTsPool.push(tokenInfo)
     },
     SET_CURRENT_WALLET (state, payload) {
       state.wallet = payload
@@ -187,13 +183,14 @@ const store = new Vuex.Store({
       // const result = await nftTokensForOwner({dispatch}, 'nft-example6.pe4en.testnet', getters.getContract2, getters.getNFTlimit)
       commit('passAllNFTs', result)
     },
-    async setTokenImage ({commit, getters}, token) {
+    async setTokenImage ({getters}, token) {
       let url = null
+
       if (getters.getIpfs) {
         url = await getImageForTokenByURI(getters.getIpfs, token.metadata.media)
       }
-      token.metadata.media_hash = url
-      commit('SET_TOKEN_IMAGE', { ...token })
+
+      return url
     },
     async getIPFSimage ({getters}, media) {
       let url = null
@@ -208,15 +205,15 @@ const store = new Vuex.Store({
     },
     createNewUsualNFT ({getters, dispatch},  { token_id, metadata, contract_id }) {
       dispatch('setStatus', StatusType.Minting)
-      console.log(contract_id, 'contract')
       createUsualNFT(token_id, metadata, getters.getAccountId, getters[contract_id])
     },
     createNewBundleNFT ({getters, dispatch},  { token_id, metadata, bundles }) {
       dispatch('setStatus', StatusType.Minting)
       createBundleNFT(token_id, metadata, bundles, getters.getBundleContract)
     },
-    triggerUnbundleNFT ({getters, dispatch},  token_id) {
+    triggerUnbundleNFT ({getters, dispatch},  { token_id, nft_data, bundles_data }) {
       dispatch('setStatus', StatusType.Minting)
+      console.log(getters, token_id, nft_data, bundles_data, 'token_id, nft_data, bundle_data')
       unbundleNFT(token_id, getters.getBundleContract)
     },
     setNFTApproveId ({getters, dispatch}, { approve_id, token_id, minting_contract_id }) {
@@ -226,19 +223,17 @@ const store = new Vuex.Store({
       if (minting_contract_id === process.env.VUE_APP_NFTS_EFFECTS_CONTRACT) {
         contractData = getters.getEffectsContract
       }
-      console.log(contractData, 'contractdata')
 
       dispatch('setStatus', StatusType.Approving)
       approveNFT(approve_id, token_id, contractData || getters.getContract)
     },
-    sendNFTByToken ({getters, dispatch}, { receiver, token_id, is_bundle_nft }) {
+    sendNFTByToken ({getters, dispatch}, { receiver, token_data, is_bundle_nft }) {
       dispatch('setStatus', StatusType.Approving)
-      console.log(is_bundle_nft, 'isBundleNFT')
 
       if (is_bundle_nft) {
-        sendNFT(receiver, token_id, getters.getBundleContract)
+        sendNFT(receiver, token_data, getters.getBundleContract)
       } else {
-        sendNFT(receiver, token_id, getters.getContract)
+        sendNFT(receiver, token_data, getters.getContract)
       }
     },
     pushNFTbyContract ({commit}, NFTS) {
@@ -291,7 +286,6 @@ const store = new Vuex.Store({
     getNFTsTotal: (state) => state.NFTsTotal,
     getAllNFTs: state => state.allNFTs,
     getNFTsByContract: state => state.NFTsByContract,
-    getNFTsPool: state => state.NFTsPool,
     getNFTforModification: (state) => state.NFTdata,
     getNFTArray: (state) => state.arrayNFTs,
     getCurrentWallet: (state) => state.wallet,

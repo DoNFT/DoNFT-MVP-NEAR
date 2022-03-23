@@ -3,11 +3,11 @@
     <nav-bar :navigation="getNav"/>
     <div v-if="getNftsAreLoading || getStatus === 1" class="loading-container">
       <spinner :size="92" color="#000" />
-      <h1 class="h1--no-logo">{{ statusText }}</h1>
+      <h1>{{ statusText }}</h1>
     </div>
     <main v-else>
       <div>
-        <h1 class="h1--no-logo">Send NFTs</h1>
+        <h1 >Send NFTs</h1>
         <div
           class="form-nft-send form-nft__detail-page"
         >
@@ -33,7 +33,6 @@
             <div class="form-nft__bottom">
               <button
                 class="main-btn"
-                type="submit"
                 @click="sendNFTHandler"
               >Send</button>
             </div>
@@ -120,12 +119,16 @@ export default {
       'getNFTByToken',
     ]),
     sendNFTHandler() {
-      // if current NFT is BUNDLE, passing BUNDLE contract to smart contract
-      this.sendNFTByToken({
-        receiver: this.nftObj.receiver_id,
-        token_id: this.NFTComputedData.token_id,
-        is_bundle_nft: this.NFTComputedData.bundles && this.NFTComputedData.bundles.length,
-      })
+      // if current NFT is BUNDLE, passing BUNDLE contract as trigger
+      if (!this.nftObj.receiver_id) {
+        alert('Receiver ID field is empty')
+      } else {
+        this.sendNFTByToken({
+          receiver: this.nftObj.receiver_id,
+          token_data: this.NFTComputedData,
+          is_bundle_nft: this.NFTComputedData.bundles && this.NFTComputedData.bundles.length,
+        })
+      }
     }
   },
 }

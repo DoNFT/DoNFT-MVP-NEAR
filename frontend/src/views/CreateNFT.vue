@@ -7,7 +7,8 @@
         StatusType.DeployingToIPFS,
         StatusType.DeployedToIPFS,
         StatusType.Minting
-      ].includes(getStatus)" class="loading-container"
+      ].includes(getStatus)"
+      class="loading-container"
     >
       <spinner :size="92" color="#000" />
       <h1>{{ statusText }}</h1>

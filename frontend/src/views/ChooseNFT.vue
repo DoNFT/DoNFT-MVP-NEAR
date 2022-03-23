@@ -86,7 +86,6 @@ export default {
   computed: {
     ...mapGetters([
       'getEffectChoice',
-      'getEffects',
       'getDeployedPictureMeta',
       'getAllNFTs',
       'getNFTsByContract',

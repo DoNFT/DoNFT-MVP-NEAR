@@ -7,7 +7,8 @@
         StatusType.DeployingToIPFS,
         StatusType.DeployedToIPFS,
         StatusType.Minting
-      ].includes(getStatus)" class="loading-container"
+      ].includes(getStatus)"
+      class="loading-container"
     >
       <spinner :size="92" color="#000" />
       <h1>{{ statusText }}</h1>
@@ -124,22 +125,6 @@ export default {
       'getContract',
       'getBundleContract',
     ]),
-    statusText() {
-      switch (this.getStatus) {
-      case StatusType.Approving:
-        return "Redirecting to Approve NFT"
-      case StatusType.Applying:
-        return "Applying the chosen effect..."
-      case StatusType.DeployingToIPFS:
-        return "Uploading the result to IPFS..."
-      case StatusType.Minting:
-        return "NFT Minting..."
-      case StatusType.Minted:
-        return "NFT successfully Minted!"
-      default:
-        return "Done"
-      }
-    },
     getNFTsData() {
       // filter Boolean fixing error on loading of All NFTs by contract
       // as order different on loading every time, some of NFT loading at the end

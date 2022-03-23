@@ -24,7 +24,6 @@ export function createRandomNft(token_id, metadata, receiver_id, contract) {
 
 // for creating new NFTs BY inputs FORM
 export function createUsualNFT(token_id, metadata, receiver_id, contract) {
-  console.log(token_id, metadata, contract, 'createUsualNFT')
   try {
     contract
       .nft_mint({
@@ -49,7 +48,7 @@ export function createBundleNFT(token_id, metadata, bundles, contract) {
         token_id,
         metadata,
         bundles,
-      }, "300000000000000", '9610000000000000000000')
+      }, "300000000000000", nearGas)
   } catch(err) {
     console.error(err, '')
     Vue.notify({
@@ -79,7 +78,6 @@ export function unbundleNFT(token_id, contract) {
 
 export async function nftTokensForOwner({dispatch}, account_id, contract, limit) {
   let NFTs = []
-  console.log(account_id, contract, 'tokens')
   try {
     await contract
       .nft_tokens_for_owner({ account_id, limit })
@@ -104,7 +102,7 @@ export function approveNFT(account_id, token_id, contract) {
       .nft_approve({
         account_id,
         token_id,
-      }, "300000000000000", '520000000000000000000')
+      }, "300000000000000", nearGas)
   } catch(err) {
     console.error(err, '')
     Vue.notify({
@@ -115,15 +113,19 @@ export function approveNFT(account_id, token_id, contract) {
   }
 }
 
-export function sendNFT(receiver_id, token_id, contract) {
+export function sendNFT(receiver_id, token_data, contract) {
+  console.log(receiver_id, token_data.metadata.media_hash, contract, 'receiver_id, token_id, contract')
   try {
+    // todo: possibly will need to change logic of urls, discussable
+    URL.revokeObjectURL(token_data.metadata.media_hash)
+
     contract
       .nft_transfer({
         receiver_id,
-        token_id,
+        token_id: token_data.token_id,
         approval_id: 0,
-        memo: 'testing'
-      }, "300000000000000", '1')
+        memo: '',
+      }, "300000000000000", nearGas)
   } catch(err) {
     console.error(err, '')
     Vue.notify({

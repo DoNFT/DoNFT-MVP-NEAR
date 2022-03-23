@@ -46,7 +46,6 @@ export default {
   computed: {
     ...mapGetters([
       'getIpfs',
-      'getNFTsPool',
       'getAllNFTs',
       'getNFTsTotal',
       'getBundleContract',
@@ -98,18 +97,17 @@ export default {
     ]),
     async loadContent () {
       if (this.metadata) {
+        let url = null
 
-        // for restricting loading of extra images, when its already were loaded
-        if (this.getNFTsPool && (this.getNFTsPool.length) < this.getNFTsTotal) {
-          await this.setTokenImage(this.metadata)
+        if (!this.urlData) {
+          url = await this.setTokenImage(this.metadata)
         }
 
         if (this.isBundle) {
-          await this.setTokenImage(this.metadata)
+          url = await this.setTokenImage(this.metadata)
         }
 
-        const url = this.getNFTsPool ? this.getNFTsPool.find((item) => item.token_id === this.metadata.token_id) : null
-        this.urlData = url ? url.metadata.media_hash : null
+        this.urlData = url ? url : null
       }
     },
     approveNFTHandler() {
