@@ -3,10 +3,8 @@
   "version": "0.0.1",
   "license": "UNLICENSED",
   "scripts": {
-    "build:web": "vue-cli-service build",
-    "build:nft": "cd nft-contract && bash build.sh && cd .. && ls && cd market-contract && bash build.sh && cd ..",
-    "test:web": "vue-cli-service test:unit",
-    "test": "npm run build:contract:debug && cd contract && npm run test && cd .. && vue-cli-service test:unit",
+    "build": "vue-cli-service build",
+    "test": "vue-cli-service test:unit",
     "serve": "vue-cli-service serve --open",
     "lint": "eslint . --ext .js --ext .vue --fix"
   },

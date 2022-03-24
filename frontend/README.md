@@ -38,3 +38,13 @@ Version while dev 15.14.0
 - MAIN_ACCOUNT=your-account.testnet
 4. near deploy --accountId $NFT_CONTRACT_ID --wasmFile out/main.wasm
 5. near call $NFT_CONTRACT_ID new_default_meta '{"owner_id": "'$NFT_CONTRACT_ID'"}' --accountId $NFT_CONTRACT_ID
+
+## docker
+
+### build
+
+    docker build --rm --no-cache -t donft_frontend:latest .
+
+### run
+
+    docker run --rm  -p 8080:80  --name donft_frontend donft_frontend:latest
