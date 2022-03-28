@@ -46,8 +46,6 @@ export default {
   computed: {
     ...mapGetters([
       'getIpfs',
-      'getAllNFTs',
-      'getNFTsTotal',
       'getBundleContract',
       'getNFTsByContract',
     ]),
@@ -99,11 +97,7 @@ export default {
       if (this.metadata) {
         let url = null
 
-        if (!this.urlData) {
-          url = await this.setTokenImage(this.metadata)
-        }
-
-        if (this.isBundle) {
+        if (!this.urlData || this.isBundle) {
           url = await this.setTokenImage(this.metadata)
         }
 

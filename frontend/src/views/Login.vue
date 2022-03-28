@@ -26,7 +26,7 @@ export default {
   },
 
   mounted() {
-    if (this.getCurrentWallet) {
+    if (this.getCurrentWallet.isSignedIn()) {
       this.$router.push({name: 'ChooseNFT'})
     }
   },

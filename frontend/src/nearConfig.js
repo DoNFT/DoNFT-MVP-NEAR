@@ -1,9 +1,9 @@
 import { connect, Contract, keyStores, WalletConnection, utils } from 'near-api-js'
 import { getConfig } from './nearNets'
 
-const nfts_contract = getConfig({ env: process.env.NODE_ENV, contract: process.env.VUE_APP_NFTS_CONTRACT })
-const bundle_contract = getConfig({ env: process.env.NODE_ENV, contract: process.env.VUE_APP_BUNDLE_CONTRACT })
-const nfts_effects_contract = getConfig({ env: process.env.NODE_ENV, contract: process.env.VUE_APP_NFTS_EFFECTS_CONTRACT })
+const nfts_contract = getConfig({ env: process.env.VUE_APP_ENV, contract: process.env.VUE_APP_NFTS_CONTRACT })
+const bundle_contract = getConfig({ env: process.env.VUE_APP_ENV, contract: process.env.VUE_APP_BUNDLE_CONTRACT })
+const nfts_effects_contract = getConfig({ env: process.env.VUE_APP_ENV, contract: process.env.VUE_APP_NFTS_EFFECTS_CONTRACT })
 
 // Initialize contract & set global variables
 export async function initContract(store) {
