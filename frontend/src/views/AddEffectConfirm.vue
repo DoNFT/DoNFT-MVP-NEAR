@@ -3,69 +3,63 @@
     <nav-bar :navigation="getNav"/>
     <div v-if="getNftsAreLoading || getStatus === StatusType.Approving" class="loading-container">
       <spinner :size="92" color="#000" />
-      <h1>{{ statusText }}</h1>
+      <h2>{{ statusText }}</h2>
     </div>
     <main v-else>
       <div class="effect-confirm">
-        <div>
-          <h1>Selected NFT</h1>
+        <div class="effect-confirm__selected">
+          <h2>Selected NFT</h2>
           <div
             class="nft-cards-box"
           >
-            <div
-              class="nft-cards"
-              v-if="NFTComputedData && NFTComputedData.metadata"
-            >
-              <token-card
-                :metadata="NFTComputedData"
-                :is-approved-contract="getBundleContract.contractId"
-                @nft-approved-status="bundleStatusUpdate"
-              />
-            </div>
-          </div>
-        </div>
-        <div class="effect-confirm__inner">
-          <h1>NFT effects</h1>
-
-          <div
-            class="nft-cards"
-            v-if="getEffect"
-          >
             <token-card
-              :metadata="getEffect"
+              v-if="NFTComputedData && NFTComputedData.metadata"
+              :metadata="NFTComputedData"
               :is-approved-contract="getBundleContract.contractId"
               @nft-approved-status="bundleStatusUpdate"
             />
           </div>
         </div>
-        <div class="form-nft-send__inputs form-nft-send__inputs--effects">
-          <h1>Bundle metadata</h1>
-          <span class="form-nft-send__inputs-title">Title</span>
-          <input
-            type="text"
-            placeholder="NFT title"
-            class="input form-nft__input"
-            v-model="nftObj.metadata.title"
-          >
-          <span class="form-nft-send__inputs-title">Description</span>
-          <textarea
-            type="text"
-            placeholder="NFT description"
-            class="input form-nft__input form-nft__textarea"
-            v-model="nftObj.metadata.description"
+        <div class="effect-confirm__selected">
+          <h2>NFT effects</h2>
+
+          <token-card
+            v-if="getEffect"
+            :metadata="getEffect"
+            :is-approved-contract="getBundleContract.contractId"
+            @nft-approved-status="bundleStatusUpdate"
           />
-          <div class="form-nft__bottom">
-            <button
-              class="main-btn"
-              :disabled="checkBundleForApprove"
-              @click="handleMint"
-            >Confirm</button>
+        </div>
+        <div class="form-nft-send__inputs form-nft-send__inputs--effects">
+          <h2>Bundle metadata</h2>
+          <div class="effect-form-wrap">
+            <span class="form-nft-send__inputs-title">Title</span>
+            <input
+              type="text"
+              placeholder="NFT title"
+              class="input form-nft__input"
+              v-model="nftObj.metadata.title"
+            >
+            <span class="form-nft-send__inputs-title">Description</span>
+            <textarea
+              type="text"
+              placeholder="NFT description"
+              class="input form-nft__input form-nft__textarea"
+              v-model="nftObj.metadata.description"
+            />
+            <div class="form-nft__bottom">
+              <button
+                class="main-btn"
+                :disabled="checkBundleForApprove"
+                @click="handleMint"
+              >Confirm</button>
+            </div>
           </div>
         </div>
       </div>
       <div v-if="[0, 2, 3, 4].includes(getStatus)" class="loading-container">
         <spinner :size="92" color="#000" />
-        <h1>{{ statusText }}</h1>
+        <h2>{{ statusText }}</h2>
       </div>
     </main>
   </div>
@@ -215,22 +209,4 @@ export default {
 </script>
 
 <style lang="scss">
-.effect-confirm {
-  display: flex;
-
-  img {
-    width: 250px;
-    height: 250px;
-  }
-}
-
-.effect-confirm__inner {
-  margin-left: 50px;
-}
-
-.form-nft-send__inputs--effects {
-  height: 50%;
-  margin-top: auto;
-
-}
 </style>

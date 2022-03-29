@@ -1,0 +1,50 @@
+@mixin sm {
+  @media (max-width: $sm-top) {
+    @content;
+  }
+}
+
+@mixin md {
+  @media (min-width: $md-bottom) and (max-width: $md-top) {
+    @content;
+  }
+}
+
+@mixin lg {
+  @media (min-width: $lg-bottom) and (max-width: $lg-top) {
+    @content;
+  }
+}
+
+@mixin lg-desktop {
+  @media (min-width: $lg-desktop-bottom) {
+    @content;
+  }
+}
+
+@mixin html-font-size() {
+  @media (max-width: $sm-top) {
+    @media (orientation: portrait) {
+      font-size: 15px * 100vw / 320px;
+    }
+    @media (orientation: landscape) {
+      font-size: 8px * 100vw / 320px;
+    }
+  }
+  @media (min-width: $md-bottom) {
+    font-size: 18px * 100vw / 1920px;
+  }
+}
+
+$sm-small-top: 440px;
+$sm-top: 768px;
+$md-bottom: 769px;
+$md-top: 1024px;
+$lg-bottom: 1025px;
+$lg-top: 1439px;
+$lg-desktop-bottom: 1440px;
+
+$root-font-size-sm: 15px;
+$root-font-size-md: 8px;
+$root-font-size: 18px;
+

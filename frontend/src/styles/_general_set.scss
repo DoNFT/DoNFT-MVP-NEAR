@@ -1,4 +1,6 @@
 @import './fonts';
+@import './mixins';
+
 * {
 	box-sizing: border-box;
 	font-family: 'Roboto';
@@ -232,59 +234,6 @@ li {
   margin-bottom: 0;
 }
 
-.effect-cards-box {
-  margin-bottom: 50px;
-}
-
-
-.form-nft-send {
-  display: flex;
-}
-
-.form-nft-send__inputs-title {
-	font-size: 18px;
-	font-weight: 700;
-	margin-bottom: 7px;
-}
-
-.form-nft-send__inputs {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  margin-left: 40px;
-}
-
-.form-nft__bottom {
-  display: flex;
-  flex-direction: column;
-
-  .main-btn {
-    margin-bottom: 20px;
-  }
-
-  .main-btn:last-child {
-    margin-bottom: 0;
-  }
-}
-
-.form-nft-send__media {
-  display: block;
-  width: 230px;
-  height: 230px;
-}
-
-.link {
-	color: rgba(92, 233, 188, 1);
-
-	&:hover {
-		text-decoration: underline;
-	}
-}
-
-.h1--effects {
-	margin-top: 40px;
-}
-
 select {
   /* Reset Select */
   appearance: none;
@@ -333,4 +282,109 @@ select::-ms-expand {
 .effect-cards-box__no-effect {
 	margin-top: 50px;
 	margin-bottom: 20px;
+}
+
+
+.effect-cards-box {
+  margin-bottom: 50px;
+}
+
+
+.form-nft-send {
+  display: flex;
+}
+
+.form-nft-send__inputs-title {
+	font-size: 18px;
+	font-weight: 700;
+	margin-bottom: 7px;
+}
+
+.form-nft-send__inputs {
+  display: flex;
+  flex-direction: column;
+	width: 100%;
+}
+
+.form-nft__bottom {
+  display: flex;
+  flex-direction: column;
+	width: 20%;
+
+  .main-btn {
+    margin-bottom: 20px;
+  }
+
+  .main-btn:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.form-nft-send__media {
+  display: block;
+  width: 230px;
+  height: 230px;
+}
+
+.link {
+	color: rgba(92, 233, 188, 1);
+
+	&:hover {
+		text-decoration: underline;
+	}
+}
+
+.h1--effects {
+	margin-top: 40px;
+}
+
+.effect-confirm {
+  display: flex;
+  flex-wrap: wrap;
+	justify-content: space-between;
+
+  img {
+    width: 100%;
+    height: 350px;
+  }
+
+  h2 {
+    margin-bottom: 20px;
+  }
+
+	@include lg-desktop {
+
+		img {
+			width: 100%;
+			height: 320px;
+		}
+	}
+
+}
+
+.effect-confirm__selected {
+  width: 40%;
+
+	.nft-cards__approve {
+		max-width: 100%;
+	}
+
+	.main-btn {
+		min-width: auto;
+		width: 100%;
+	}
+
+	@include lg-desktop {
+		width: 28%;
+	}
+}
+
+.form-nft-send__inputs--effects {
+	width: 100%;
+  margin-top: 20px;
+
+	@include lg-desktop {
+		width: 33%;
+		margin-top: 0;
+	}
 }
