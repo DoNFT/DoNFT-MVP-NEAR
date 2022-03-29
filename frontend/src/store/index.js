@@ -11,11 +11,11 @@ import {
   unbundleNFT,
   sendNFT,
   getImageForTokenByURI,
-} from "../near_utilities"
+  checkForContract,
+} from "@/near_utilities"
 
-
-import {StatusType, getIPFS} from "../utilities"
-import {modifyPicture, applyNFTsEffect} from "../api"
+import {StatusType, getIPFS} from "@/utilities"
+import {modifyPicture, applyNFTsEffect} from "@/api"
 
 Vue.use(Vuex)
 
@@ -47,6 +47,7 @@ const store = new Vuex.Store({
     contract: null,
     bundle_contract: null,
     effects_contract: null,
+    mainContracts: [],
   },
   mutations: {
     setIpfs (state, ipfsInstance) {
@@ -86,8 +87,10 @@ const store = new Vuex.Store({
       // this one for main page rendering, contract separated data
       state.NFTsByContract.push(payload)
 
+      const NFTsWithContract = payload.NFTS.map((item) => ({ ...item, contract: payload.contractName }))
+
       // this one, for details pages rendering purposes
-      state.allNFTs.push.apply(state.allNFTs, payload.NFTS)
+      state.allNFTs.push.apply(state.allNFTs, NFTsWithContract)
     },
     SET_NFT_LIMIT (state, payload) {
       state.NFTlimit = payload
@@ -124,6 +127,9 @@ const store = new Vuex.Store({
     },
     SET_NEAR_ACCOUNT (state, payload) {
       state.nearAccount = payload
+    },
+    SET_MAIN_CONTRACTS (state, payload) {
+      state.mainContracts = payload
     },
   },
   actions: {
@@ -216,16 +222,12 @@ const store = new Vuex.Store({
       console.log(getters, token_id, nft_data, bundles_data, 'token_id, nft_data, bundle_data')
       unbundleNFT(token_id, getters.getBundleContract)
     },
-    setNFTApproveId ({getters, dispatch}, { approve_id, token_id, minting_contract_id }) {
-      // todo: discuss about dynamic change of minting contracts, to solve hardcode
-      let contractData = null
-
-      if (minting_contract_id === process.env.VUE_APP_NFTS_EFFECTS_CONTRACT) {
-        contractData = getters.getEffectsContract
-      }
+    async setNFTApproveId ({getters, dispatch}, { approve_id, token_id, minting_contract_id }) {
+      let contractData = await checkForContract(getters, minting_contract_id)
+      console.log(contractData, 'contract DATA')
 
       dispatch('setStatus', StatusType.Approving)
-      approveNFT(approve_id, token_id, contractData || getters.getContract)
+      approveNFT(approve_id, token_id, contractData)
     },
     sendNFTByToken ({getters, dispatch}, { receiver, token_data, is_bundle_nft }) {
       dispatch('setStatus', StatusType.Approving)
@@ -270,6 +272,9 @@ const store = new Vuex.Store({
     setNearAccount ({commit}, data) {
       commit('SET_NEAR_ACCOUNT', data)
     },
+    setMainContracts ({commit}, data) {
+      commit('SET_MAIN_CONTRACTS', data)
+    },
   },
   getters: {
     getEffect: state => state.allNFTs.find(x => x.token_id === state.effectChoice),
@@ -296,6 +301,7 @@ const store = new Vuex.Store({
     getContract: state => state.contract,
     getBundleContract: state => state.bundle_contract,
     getEffectsContract: state => state.effects_contract,
+    getMainContracts: state => state.mainContracts,
   },
 })
 

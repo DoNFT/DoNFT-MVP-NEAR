@@ -60,6 +60,7 @@ export async function initContract(store) {
     let obj = {}
 
     const mainContracts = [nfts_contract.contractName, bundle_contract.contractName, nfts_effects_contract.contractName]
+    store.dispatch('setMainContracts', mainContracts)
 
     // contract order changing, show main contracts on top. others lower
     if (mainContracts.includes(contract)) {
@@ -119,6 +120,20 @@ export async function initContract(store) {
   console.log(store.getters.getNFTsTotal, 'getAllNFTs')
   console.log('Near config INIT finished')
   console.log(store.getters.getContractLoading, 'getContractLoading 1')
+}
+
+// for ALL other extra Contracts, its need to use Change methods
+// cause Near require at least login, or init of contract, for using change methods
+export async function initNewContract(mintingContract) {
+  const contractConfig = getConfig({ env: process.env.VUE_APP_NETWORK, contract: mintingContract})
+  const nearConnectInstance = await connect(Object.assign({ deps: { keyStore: new keyStores.BrowserLocalStorageKeyStore() } }, contractConfig))
+  const nearNewWallet = new WalletConnection(nearConnectInstance)
+  const nearNewContractSettings = new Contract(nearNewWallet.account(), contractConfig.contractName, {
+    changeMethods: ['nft_mint', 'nft_bundle', 'nft_unbundle', 'nft_approve', 'nft_transfer'],
+  })
+  console.log(nearNewContractSettings, 'nearNewContractSettings')
+  
+  return nearNewContractSettings
 }
 
 export function logout(getCurrentWallet) {

@@ -105,17 +105,11 @@ export default {
       }
     },
     approveNFTHandler() {
-      let minting_contract_id = null
-
-      this.getNFTsByContract.forEach((contract) => {
-        contract.NFTS.forEach((nftData) => {
-          if (nftData.token_id === this.metadata.token_id) {
-            minting_contract_id = contract.contractName
-          }
-        })
+      this.setNFTApproveId({
+        token_id: this.metadata.token_id,
+        approve_id: this.isApprovedContract,
+        minting_contract_id: this.metadata.contract,
       })
-
-      this.setNFTApproveId({ token_id: this.metadata.token_id, approve_id: this.isApprovedContract, minting_contract_id })
     },
     placeholder
   },

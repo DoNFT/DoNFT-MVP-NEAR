@@ -113,10 +113,6 @@ button, input {
 		}
 	}
 
-	&:focus {
-		background-color:rgba(92, 233, 188, 1);
-	}
-
 	&:disabled {
 		box-shadow: none;
 		background-color: rgba(58, 31, 79, .4);

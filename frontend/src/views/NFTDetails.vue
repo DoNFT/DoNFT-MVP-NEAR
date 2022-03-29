@@ -199,35 +199,35 @@ export default {
       this.NFTComputedData.bundles.forEach(async (bundleData) => {
         const request = await this.getNearAccount.viewFunction(bundleData.contract, 'nft_tokens_for_owner', { account_id: this.getBundleContract.contractId, limit: 30 })
 
-        let foundNFTs = request.filter((item) => {
+        let requestedNFTs = request.filter((item) => {
           return this.NFTComputedData.bundles.find((bundleItem) => bundleItem.token_id === item.token_id)
         })
         
+        let requestedNFTsRepeated = []
+        
         // this checking, for bundles NFTs from same contracts
         if (loadedBundleNFTs && loadedBundleNFTs.length) {
-          foundNFTs = loadedBundleNFTs.map((item) => {
-            const foundItem = foundNFTs.find((loadedItem) => loadedItem.token_id === item.token_id)
-            return foundItem ? null : item
-          }).filter(Boolean)
+          requestedNFTsRepeated = loadedBundleNFTs.filter((item) => {
+            const foundItem = requestedNFTs.find((loadedItem) => loadedItem.token_id === item.token_id)
+            return !foundItem ? null : item
+          })
         }
 
-        loadedBundleNFTs.push.apply(loadedBundleNFTs, foundNFTs)
+        console.log(requestedNFTsRepeated, 'equestedNFTsRepeated.length NFTS 1 ')
+        if (requestedNFTsRepeated && !requestedNFTsRepeated.length) {
+          console.log(requestedNFTsRepeated, 'equestedNFTsRepeated.length NFTS2 ')
+          loadedBundleNFTs.push.apply(loadedBundleNFTs, requestedNFTs)
+        }
       })
 
       this.bundleNFTsData = loadedBundleNFTs
     },
     approveNFTHandler() {
-      let minting_contract_id = null
-
-      this.getNFTsByContract.forEach((contract) => {
-        contract.NFTS.forEach((nftData) => {
-          if (nftData.token_id === this.NFTComputedData.token_id) {
-            minting_contract_id = contract.contractName
-          }
-        })
+      this.setNFTApproveId({
+        token_id: this.NFTComputedData.token_id,
+        approve_id: this.getBundleContract.contractId,
+        minting_contract_id: this.NFTComputedData.contract,
       })
-
-      this.setNFTApproveId({ token_id: this.NFTComputedData.token_id, approve_id: this.getBundleContract.contractId, minting_contract_id })
     },
     unbundleNFT() {
       this.triggerUnbundleNFT({ token_id: this.NFTComputedData.token_id, nft_data: this.NFTComputedData, bundles_data: this.bundleNFTsData})

@@ -166,7 +166,6 @@ export default {
       const bundlesArrApproved = bundleArr.map((item) => {
         const obj = {
           ...item,
-          contract: this.getContract.contractId,
           approval_id: item.approved_account_ids[this.getBundleContract.contractId],
         }
 

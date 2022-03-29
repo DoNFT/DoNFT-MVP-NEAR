@@ -12,10 +12,71 @@ import store from "@/store"
 import { StatusType } from "@/utilities"
 
 import { providers } from "near-api-js"
+import { initContract } from "@/nearConfig"
+
 const provider = new providers.JsonRpcProvider(
   "https://rpc.testnet.near.org"
 )
-import { initContract } from "@/nearConfig"
+
+async function getTransactionForUser(to, next) {
+  // handling transaction hashes, for displayng response to user
+  const account_id = store.getters.getAccountId
+  const url = new URL(document.location)
+  const tx_hash = url.searchParams.get('transactionHashes')
+
+  let result = null
+  let isApproveCalled = false
+  let isRedirected = false
+
+  if (tx_hash) {
+    result = await provider.txStatus(tx_hash, account_id)
+  }
+
+  // may be need rework, current checking for disabling redirect on NFT approving
+  if (result && result.transaction.actions[0] && result.transaction.actions[0].FunctionCall) {
+    isApproveCalled = result.transaction.actions[0].FunctionCall.method_name === 'nft_approve'
+  }
+
+  if (isApproveCalled) {
+    passResult(tx_hash, account_id, 'Approve')
+    next()
+  }
+
+  // if (tx_hash && to.name === 'AddEffectConfirm') {
+  //   console.log('beforeEnter AddEffectConfirm')
+  //   passResult(tx_hash, account_id, to.name)
+  //   next({ name: 'ChooseNFT' })
+  // }
+
+  if (tx_hash && to.name === 'SendNFT') {
+    passResult(tx_hash, account_id, to.name)
+    isRedirected = true
+    next({ name: 'SendNFT' })
+  }
+
+  if (!isApproveCalled && tx_hash && ['ChooseNFT', 'BundleNFT', 'NFTDetails', 'CreateNFT', 'AddEffectConfirm'].includes(to.name)) {
+    passResult(tx_hash, account_id, to.name)
+    isRedirected = true
+    next({ name: 'ChooseNFT' })
+  } else {
+    next()
+  }
+
+  // for specific cases, in beforeEnter, when no transaction, although need some kind of validations
+  return isRedirected
+}
+
+async function passResult(txHash, accountId, type) {
+  const result = await provider.txStatus(txHash, accountId)
+  if (result.status && 'SuccessValue' in result.status && ['Approve'].includes(type)) {
+    store.dispatch('setStatus', StatusType.Approved)
+  }
+
+  if (result.status && 'SuccessValue' in result.status && ['SendNFT', 'CreateNFT', 'BundleNFT'].includes(type)) {
+    store.dispatch('setStatus', StatusType.Minted)
+  }
+}
+
 
 Vue.use(Router)
 
@@ -61,7 +122,7 @@ let routes = [
     beforeEnter(to, _from, next) {
       const NFTChoice = store.getters.getAllNFTs.find(x => x.token_id === to.params.id)
     
-      if (to.name === 'AddEffectConfirm' && !NFTChoice) {
+      if (to.name === 'AddEffect' && !NFTChoice) {
         next('/choose_nft')
         Vue.notify({
           group: 'foo',
@@ -82,11 +143,14 @@ let routes = [
       title: 'Do[NFT]',
       requiresAuth: true
     },
-    beforeEnter(to, _from, next) {
+    async beforeEnter(to, _from, next) {
       const effectChoice = store.getters.getAllNFTs.find(x => x.token_id === to.params.effectId)
+
+      const isRedirected = await getTransactionForUser(to, next)
     
-      if (to.name === 'AddEffectConfirm' && !effectChoice) {
+      if (to.name === 'AddEffectConfirm' && !effectChoice && !isRedirected) {
         next(`/add_effect/${to.params.id}`)
+        console.log(isRedirected, 'beforeEnter AddEffectConfirm !effectChoice 2')
         Vue.notify({
           group: 'foo',
           type: 'error',
@@ -94,6 +158,7 @@ let routes = [
           text: `Sorry, effect with ID ${to.params.effectId} does not exit`,
         })
       } else {
+        console.log(isRedirected, 'NEXT 1')
         next()
       }
     },
@@ -118,21 +183,6 @@ const router = new Router({
   routes
 })
 
-async function passResult(txHash, accountId, type) {
-  const result = await provider.txStatus(txHash, accountId)
-
-  if (result.status && 'SuccessValue' in result.status && type === 'send_nft') {
-    console.log("Result: 2 ", result)
-    store.dispatch('setStatus', StatusType.Approved)
-  }
-
-  if (result.status && 'SuccessValue' in result.status && ['SendNFT', 'CreateNFT'].includes(type)) {
-    console.log("Result: 2 ", result)
-    store.dispatch('setStatus', StatusType.Minted)
-  }
-}
-
-
 router.afterEach(async (to, from) => {
   Vue.nextTick(() => {
     from
@@ -147,7 +197,7 @@ router.afterEach(async (to, from) => {
 router.beforeEach(async (to, _from, next) => {
 
   if (!store.getters.getCurrentWallet) {
-    console.log('CONTRACT INIT')
+    console.log('---CONTRACT INIT---')
     await initContract(store)
       .then(() => {
         const user = store.getters.getCurrentWallet.isSignedIn()
@@ -174,33 +224,9 @@ router.beforeEach(async (to, _from, next) => {
   } else {
     next()
   }
-  // handling transaction hashes, for displayng response to user
-  const account_id = store.getters.getAccountId
-  const url = new URL(document.location)
-  const tx_hash = url.searchParams.get('transactionHashes')
 
-  let result = null
-  let isApproveCalled = false
-
-  if (tx_hash) {
-    result = await provider.txStatus(tx_hash, account_id)
-  }
-
-  // may be need rework, current checking for disabling redirect on NFT approving
-  if (result && result.transaction.actions[0] && result.transaction.actions[0].FunctionCall) {
-    isApproveCalled = result.transaction.actions[0].FunctionCall.method_name === 'nft_approve'
-  }
-
-  if (tx_hash && to.name === 'SendNFT') {
-    passResult(tx_hash, account_id, to.name)
-    router.push({ name: 'SendNFT' })
-  }
-
-  if (!isApproveCalled && tx_hash && ['ChooseNFT', 'BundleNFT', 'NFTDetails', 'CreateNFT', 'AddEffect', 'AddEffectConfirm'].includes(to.name)) {
-    router.push({ name: 'ChooseNFT' })
-    passResult(tx_hash, account_id, to.name)
-  } else {
-    next()
+  if (to.name !== 'AddEffectConfirm') {
+    getTransactionForUser(to, next)
   }
 })
 

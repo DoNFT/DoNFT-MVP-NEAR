@@ -1,7 +1,30 @@
 import Vue from 'vue'
 import untar from "js-untar"
 const CID_RE = /Qm[1-9A-HJ-NP-Za-km-z]{44,}|b[A-Za-z2-7]{58,}|B[A-Z2-7]{58,}|z[1-9A-HJ-NP-Za-km-z]{48,}|F[0-9A-F]{50,}/m
-const nearGas = "100000000000000000000000"
+const attachedGas = "100000000000000000000000"
+const attachedSmallGas = "300000000000000"
+const attachedTokens = "1"
+
+import {
+  initNewContract,
+} from "@/nearConfig"
+
+// firstly, search among 3 main contracts
+// if not found, init new Contract, for using change method
+export async function checkForContract(getters, minting_contract_id) {
+  let findMainContract = null
+
+  findMainContract = getters.getMainContracts.find((item) => item === minting_contract_id)
+
+  if (findMainContract) {
+    return [getters.getBundleContract, getters.getContract, getters.getEffectsContract].find((item) => item.contractId === findMainContract)
+  }
+  console.log(this, 'foundAmongMainContracts DATA')
+
+  if (!findMainContract) {
+    return await initNewContract(minting_contract_id, this)
+  }
+}
 
 // for creating new NFTs with EFFECTS
 export function createRandomNft(token_id, metadata, receiver_id, contract) {
@@ -11,7 +34,7 @@ export function createRandomNft(token_id, metadata, receiver_id, contract) {
         token_id,
         metadata,
         receiver_id,
-      }, nearGas, nearGas)
+      }, attachedGas, attachedTokens)
   } catch(err) {
     console.error(err, '')
     Vue.notify({
@@ -30,7 +53,7 @@ export function createUsualNFT(token_id, metadata, receiver_id, contract) {
         token_id,
         metadata,
         receiver_id,
-      }, "300000000000000", nearGas)
+      }, attachedGas, attachedTokens)
   } catch(err) {
     console.error(err, '')
     Vue.notify({
@@ -48,7 +71,7 @@ export function createBundleNFT(token_id, metadata, bundles, contract) {
         token_id,
         metadata,
         bundles,
-      }, "300000000000000", nearGas)
+      }, attachedSmallGas, '100000000000000000000000')
   } catch(err) {
     console.error(err, '')
     Vue.notify({
@@ -65,7 +88,7 @@ export function unbundleNFT(token_id, contract) {
     contract
       .nft_unbundle({
         token_id,
-      }, "300000000000000", '1')
+      }, attachedSmallGas, attachedTokens)
   } catch(err) {
     console.error(err, '')
     Vue.notify({
@@ -97,12 +120,13 @@ export async function nftTokensForOwner({dispatch}, account_id, contract, limit)
 }
 
 export function approveNFT(account_id, token_id, contract) {
+  console.log(contract, 'contract')
   try {
     contract
       .nft_approve({
         account_id,
         token_id,
-      }, "300000000000000", nearGas)
+      }, attachedSmallGas, '700000000000000000000')
   } catch(err) {
     console.error(err, '')
     Vue.notify({
@@ -124,8 +148,8 @@ export function sendNFT(receiver_id, token_data, contract) {
         receiver_id,
         token_id: token_data.token_id,
         approval_id: 0,
-        memo: '',
-      }, "300000000000000", nearGas)
+        memo: 'NFT send',
+      }, attachedGas, attachedTokens)
   } catch(err) {
     console.error(err, '')
     Vue.notify({
@@ -136,7 +160,6 @@ export function sendNFT(receiver_id, token_data, contract) {
   }
 }
 
-// todo: make v1 to v2, or rethink v1 for more effective implementation
 async function pushImageToIpfs(ipfsInstance, objectURL) {
   let cidV1 = ''
   try {

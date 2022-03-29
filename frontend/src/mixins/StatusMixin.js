@@ -9,6 +9,8 @@ export default {
   computed: {
     statusText() {
       switch (this.getStatus) {
+      case StatusType.Approved:
+        return "NFT successfully approved!"
       case StatusType.Approving:
         return "Redirecting to Approve NFT"
       case StatusType.Applying:
