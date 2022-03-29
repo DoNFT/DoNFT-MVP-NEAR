@@ -1,8 +1,7 @@
 import Vue from 'vue'
 import untar from "js-untar"
 const CID_RE = /Qm[1-9A-HJ-NP-Za-km-z]{44,}|b[A-Za-z2-7]{58,}|B[A-Z2-7]{58,}|z[1-9A-HJ-NP-Za-km-z]{48,}|F[0-9A-F]{50,}/m
-const attachedGas = "100000000000000000000000"
-const attachedSmallGas = "300000000000000"
+const attachedGas = "300000000000000"
 const attachedTokens = "1"
 
 import {
@@ -26,25 +25,6 @@ export async function checkForContract(getters, minting_contract_id) {
   }
 }
 
-// for creating new NFTs with EFFECTS
-export function createRandomNft(token_id, metadata, receiver_id, contract) {
-  try {
-    contract
-      .nft_mint({
-        token_id,
-        metadata,
-        receiver_id,
-      }, attachedGas, attachedTokens)
-  } catch(err) {
-    console.error(err, '')
-    Vue.notify({
-      group: 'foo',
-      title: 'Important message',
-      text: `Error - ${err}`,
-    })
-  }
-}
-
 // for creating new NFTs BY inputs FORM
 export function createUsualNFT(token_id, metadata, receiver_id, contract) {
   try {
@@ -53,7 +33,7 @@ export function createUsualNFT(token_id, metadata, receiver_id, contract) {
         token_id,
         metadata,
         receiver_id,
-      }, attachedGas, attachedTokens)
+      }, attachedGas, '100000000000000000000000')
   } catch(err) {
     console.error(err, '')
     Vue.notify({
@@ -71,7 +51,7 @@ export function createBundleNFT(token_id, metadata, bundles, contract) {
         token_id,
         metadata,
         bundles,
-      }, attachedSmallGas, '100000000000000000000000')
+      }, attachedGas, '100000000000000000000000')
   } catch(err) {
     console.error(err, '')
     Vue.notify({
@@ -88,7 +68,7 @@ export function unbundleNFT(token_id, contract) {
     contract
       .nft_unbundle({
         token_id,
-      }, attachedSmallGas, attachedTokens)
+      }, attachedGas, attachedTokens)
   } catch(err) {
     console.error(err, '')
     Vue.notify({
@@ -126,7 +106,7 @@ export function approveNFT(account_id, token_id, contract) {
       .nft_approve({
         account_id,
         token_id,
-      }, attachedSmallGas, '700000000000000000000')
+      }, attachedGas, '700000000000000000000')
   } catch(err) {
     console.error(err, '')
     Vue.notify({
@@ -149,7 +129,7 @@ export function sendNFT(receiver_id, token_data, contract) {
         token_id: token_data.token_id,
         approval_id: 0,
         memo: 'NFT send',
-      }, attachedSmallGas, attachedTokens)
+      }, attachedGas, attachedTokens)
   } catch(err) {
     console.error(err, '')
     Vue.notify({

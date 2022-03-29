@@ -19,11 +19,12 @@
         <uploader @selected="setUploadedImg"/>
         <div class="form-ntf__inputs">
           <span class="form-nft-send__inputs-title">Contract</span>
-          <div class="select-wrap">
-            <select v-model="nftObj.contract_id">
-              <option v-for="(item, key) in contractsArr" :key="key" :value="item.getter">{{item.name}}</option>
-            </select>
-          </div>
+          <input
+            type="text"
+            placeholder="NFT Contract"
+            class="input form-nft__input"
+            v-model="nftObj.contract_id"
+          >
           <span class="form-nft-send__inputs-title">Title</span>
           <input
             type="text"
@@ -74,7 +75,7 @@ export default {
         },
         receiver_id: '',
         token_id: [],
-        contract_id: 'getEffectsContract',
+        contract_id: 'nft-list.near_testing.testnet',
       },
       savedGreeting: "",
       newGreeting: "",

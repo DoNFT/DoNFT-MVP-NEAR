@@ -153,7 +153,6 @@ export default {
       'setResult',
       'setDeployedPictureMeta',
       'passNFT',
-      'createNewRandomNFT',
     ]),
     async chooseEffect(card) {
       if (this.getEffectChoice && card.token_id === this.getEffectChoice) {

@@ -117,9 +117,6 @@ export async function initContract(store) {
     changeMethods: ['nft_mint', 'nft_bundle', 'nft_unbundle', 'nft_approve', 'nft_transfer'],
   })
   store.dispatch('setCurrentEffectsContract', cotractEffectsSettings)
-  console.log(store.getters.getNFTsTotal, 'getAllNFTs')
-  console.log('Near config INIT finished')
-  console.log(store.getters.getContractLoading, 'getContractLoading 1')
 }
 
 // for ALL other extra Contracts, its need to use Change methods
@@ -131,7 +128,6 @@ export async function initNewContract(mintingContract) {
   const nearNewContractSettings = new Contract(nearNewWallet.account(), contractConfig.contractName, {
     changeMethods: ['nft_mint', 'nft_bundle', 'nft_unbundle', 'nft_approve', 'nft_transfer'],
   })
-  console.log(nearNewContractSettings, 'nearNewContractSettings')
   
   return nearNewContractSettings
 }

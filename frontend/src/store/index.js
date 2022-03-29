@@ -5,7 +5,6 @@ import {
   nftTokensForOwner,
   deployNFTtoIPFS,
   approveNFT,
-  createRandomNft,
   createUsualNFT,
   createBundleNFT,
   unbundleNFT,
@@ -205,13 +204,10 @@ const store = new Vuex.Store({
       }
       return url
     },
-    createNewRandomNFT ({getters, dispatch},  { token_id, metadata }) {
+    async createNewUsualNFT ({getters, dispatch},  { token_id, metadata, contract_id }) {
       dispatch('setStatus', StatusType.Minting)
-      createRandomNft(token_id, metadata, getters.getAccountId, getters.getContract)
-    },
-    createNewUsualNFT ({getters, dispatch},  { token_id, metadata, contract_id }) {
-      dispatch('setStatus', StatusType.Minting)
-      createUsualNFT(token_id, metadata, getters.getAccountId, getters[contract_id])
+      let contractData = await checkForContract(getters, contract_id)
+      createUsualNFT(token_id, metadata, getters.getAccountId, contractData)
     },
     createNewBundleNFT ({getters, dispatch},  { token_id, metadata, bundles }) {
       dispatch('setStatus', StatusType.Minting)
