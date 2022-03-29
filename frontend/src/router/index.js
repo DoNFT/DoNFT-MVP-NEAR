@@ -48,13 +48,7 @@ async function getTransactionForUser(to, next) {
   //   next({ name: 'ChooseNFT' })
   // }
 
-  if (tx_hash && to.name === 'SendNFT') {
-    passResult(tx_hash, account_id, to.name)
-    isRedirected = true
-    next({ name: 'SendNFT' })
-  }
-
-  if (!isApproveCalled && tx_hash && ['ChooseNFT', 'BundleNFT', 'NFTDetails', 'CreateNFT', 'AddEffectConfirm'].includes(to.name)) {
+  if (!isApproveCalled && tx_hash && ['ChooseNFT', 'BundleNFT', 'NFTDetails', 'CreateNFT', 'AddEffectConfirm', 'SendNFT'].includes(to.name)) {
     passResult(tx_hash, account_id, to.name)
     isRedirected = true
     next({ name: 'ChooseNFT' })
