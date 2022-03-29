@@ -126,7 +126,7 @@ export default {
         this.sendNFTByToken({
           receiver: this.nftObj.receiver_id,
           token_data: this.NFTComputedData,
-          is_bundle_nft: this.NFTComputedData.bundles && this.NFTComputedData.bundles.length,
+          minting_contract_id: this.NFTComputedData.contract,
         })
       }
     }

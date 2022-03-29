@@ -149,7 +149,7 @@ export function sendNFT(receiver_id, token_data, contract) {
         token_id: token_data.token_id,
         approval_id: 0,
         memo: 'NFT send',
-      }, attachedGas, attachedTokens)
+      }, attachedSmallGas, attachedTokens)
   } catch(err) {
     console.error(err, '')
     Vue.notify({

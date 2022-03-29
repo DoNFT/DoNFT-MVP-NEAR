@@ -229,14 +229,11 @@ const store = new Vuex.Store({
       dispatch('setStatus', StatusType.Approving)
       approveNFT(approve_id, token_id, contractData)
     },
-    sendNFTByToken ({getters, dispatch}, { receiver, token_data, is_bundle_nft }) {
+    async sendNFTByToken ({getters, dispatch}, { receiver, token_data, minting_contract_id }) {
       dispatch('setStatus', StatusType.Approving)
+      let contractData = await checkForContract(getters, minting_contract_id)
 
-      if (is_bundle_nft) {
-        sendNFT(receiver, token_data, getters.getBundleContract)
-      } else {
-        sendNFT(receiver, token_data, getters.getContract)
-      }
+      sendNFT(receiver, token_data, contractData)
     },
     pushNFTbyContract ({commit}, NFTS) {
       commit('SET_CURRENT_CONTRACT_NFT', NFTS)
