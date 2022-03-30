@@ -100,6 +100,7 @@ button, input {
 	padding: 0.3em 0.75em;
 	transition: background-color .1s ease-in-out;
 	min-width: 150px;
+	max-width: 250px;
 	text-align: center;
 
 	span {
@@ -304,12 +305,16 @@ select::-ms-expand {
   display: flex;
   flex-direction: column;
 	width: 100%;
+
+	.form-nft-send & {
+		margin-left: 40px;
+		width: 40%;
+	}
 }
 
 .form-nft__bottom {
   display: flex;
   flex-direction: column;
-	width: 20%;
 
   .main-btn {
     margin-bottom: 20px;

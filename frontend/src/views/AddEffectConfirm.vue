@@ -57,7 +57,14 @@
           </div>
         </div>
       </div>
-      <div v-if="[0, 2, 3, 4].includes(getStatus)" class="loading-container">
+      <div
+        v-if="[
+          StatusType.Applying,
+          StatusType.DeployingToIPFS,
+          StatusType.DeployedToIPFS,
+          StatusType.Minting
+        ].includes(getStatus)" class="loading-container"
+      >
         <spinner :size="92" color="#000" />
         <h2>{{ statusText }}</h2>
       </div>
