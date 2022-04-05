@@ -118,7 +118,7 @@ export function approveNFT(account_id, token_id, contract) {
 }
 
 export function sendNFT(receiver_id, token_data, contract) {
-  console.log(receiver_id, token_data.metadata.media_hash, contract, 'receiver_id, token_id, contract')
+  console.log(receiver_id, token_data, contract, 'receiver_id, token_id, contract')
   try {
     // todo: possibly will need to change logic of urls, discussable
     URL.revokeObjectURL(token_data.metadata.media_hash)

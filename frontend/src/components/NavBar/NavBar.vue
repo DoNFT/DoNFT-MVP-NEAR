@@ -18,6 +18,16 @@
           <span>{{ item.text }}</span>
         </router-link>
       </div>
+      <template v-if="showGenerateNft">
+        <button
+          class="navbar__nav-wrap main-btn"
+          @click="generateRandomNFT(false)"
+        >Random NFT</button>
+        <button
+          class="navbar__nav-wrap main-btn"
+          @click="generateRandomNFT(true)"
+        >Random Effect NFT</button>
+      </template>
     </nav>
   </div>
 </template>
@@ -31,7 +41,16 @@ export default {
       type: Array,
       default: () => [],
     },
+    showGenerateNft: {
+      type: Boolean,
+      default: false,
+    }
   },
+  methods: {
+    generateRandomNFT(val) {
+      this.$emit("generate-random-nft", val)
+    },
+  }
 }
 </script>
 
