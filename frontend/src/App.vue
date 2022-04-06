@@ -1,6 +1,10 @@
 <template>
   <div id="root">
-    <notifications group="foo" />
+
+    <notifications
+      group="foo"
+      v-if="getStatus !== StatusType.ChoosingParameters"
+    />
 
     <div v-if="getContractLoading" class="loading-container loading-container--app">
       <spinner :size="92" color="#000" />
@@ -27,6 +31,7 @@ import HeadBar from '@/components/HeadBar/HeadBar.vue'
 import Spinner from "@/components/Spinner"
 import EffectsModalTemplate from "@/components/EffectsModalTemplate/EffectsModalTemplate.vue"
 import { mapActions, mapGetters } from "vuex"
+import StatusType from "@/mixins/StatusMixin"
 
 export default {
   name: "App",
@@ -37,12 +42,15 @@ export default {
     EffectsModalTemplate,
   },
 
+  mixins: [StatusType],
+
   computed: {
     ...mapGetters([
       'getCurrentWallet',
       'getContractLoading',
       'getContract',
       'getEffectModalStatus',
+      'getStatus',
     ]),
     // checking for wallet and contract, until they loaded
     isSignedIn() {

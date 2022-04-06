@@ -186,6 +186,7 @@ export default {
           try {
             await this.setEffectResult(effectObj)
           } catch(err) {
+            console.log(err)
             if (err instanceof AppError) {
               throw err 
             } else {
