@@ -31,11 +31,8 @@ export async function initContract(store) {
     try {
       tokens = await fetch(url, { headers }).then((res) => res.json())
     } catch(err) {
-      if(err instanceof AppError) {
-        alert(err.message)
-      } else {
-        alert("Undefined getTokens error")
-      }
+      console.log(err)
+      throw SystemErrors.GET_NEAR_ACCOUNT
     }
 
     return tokens

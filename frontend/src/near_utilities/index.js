@@ -176,6 +176,8 @@ export async function deployNFTtoIPFS(ipfsInstance, imageURL, oldMeta, type) {
       console.log(err)
       alert("Undefined error")
     }
+
+    throw SystemErrors.IPFS_SAVE
   }
 }
 

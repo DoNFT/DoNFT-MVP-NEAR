@@ -180,8 +180,13 @@ const store = new Vuex.Store({
         dispatch('setStatus', StatusType.DeployingToIPFS)
         commit('setDeployedPictureMeta', await deployNFTtoIPFS(getters.getIpfs, getters.getResult, getters.getNFTforModification, type))
       } catch(err) {
-        console.log(err)
-        throw SystemErrors.NFT_EFFECT_CONFIRM
+        if(err instanceof AppError) {
+          alert(err.message)
+        }
+        else {
+          console.log(err)
+          alert("Undefined error")
+        }
       }
     },
     async setTokenImage ({getters}, token) {

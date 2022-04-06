@@ -13,7 +13,7 @@ import { StatusType } from "@/utilities"
 
 import { providers } from "near-api-js"
 import { initContract } from "@/nearConfig"
-import { SystemErrors } from "@/utilities"
+import { AppError } from "@/utilities"
 
 const provider = new providers.JsonRpcProvider(
   "https://rpc.testnet.near.org"
@@ -202,8 +202,14 @@ router.beforeEach(async (to, _from, next) => {
           store.commit('SET_CURRENT_CONTRACT_LOADING', false)
         })
     } catch(err) {
-      console.log(err)
-      throw SystemErrors.INIT_NEAR_CONTRACT
+      if(err instanceof AppError) {
+        alert(err.message)
+      }
+      else {
+        console.log(err)
+        alert("Undefined error")
+      }
+  
     }
   }
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
