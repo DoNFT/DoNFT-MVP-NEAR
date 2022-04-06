@@ -175,13 +175,13 @@ export default {
 
     // Creating Random NFT, depend on Math random
     // currently only for VUE_APP_NFTS_CONTRACT and VUE_APP_NFTS_EFFECTS_CONTRACT
-    async generateRandomNFT(isRandomEffect) {
+    async generateRandomNFT(nftType) {
       try {
         let contract_id = process.env.VUE_APP_NFTS_CONTRACT
         let randomNumber = Math.floor(Math.random() * 5)
         let randomImage =  require(`@/assets/randomNFT/${randomNumber}.jpg`)
 
-        if (isRandomEffect) {
+        if (nftType === 'effectNFT') {
           contract_id = process.env.VUE_APP_NFTS_EFFECTS_CONTRACT
           randomNumber = Math.floor(Math.random() * 7)
           randomImage =  require(`@/assets/randomEffectNFT/${randomNumber}.jpg`)

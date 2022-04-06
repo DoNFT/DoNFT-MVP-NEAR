@@ -21,11 +21,11 @@
       <template v-if="showGenerateNft">
         <button
           class="navbar__nav-wrap main-btn"
-          @click="generateRandomNFT(false)"
+          @click="generateRandomNFT('testNFT')"
         >Random NFT</button>
         <button
           class="navbar__nav-wrap main-btn"
-          @click="generateRandomNFT(true)"
+          @click="generateRandomNFT('effectNFT')"
         >Random Effect NFT</button>
       </template>
     </nav>
