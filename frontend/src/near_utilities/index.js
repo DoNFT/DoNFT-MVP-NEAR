@@ -1,5 +1,7 @@
 import Vue from 'vue'
 import untar from "js-untar"
+import { SystemErrors, AppError } from "@/utilities"
+
 const CID_RE = /Qm[1-9A-HJ-NP-Za-km-z]{44,}|b[A-Za-z2-7]{58,}|B[A-Z2-7]{58,}|z[1-9A-HJ-NP-Za-km-z]{48,}|F[0-9A-F]{50,}/m
 const attachedGas = "300000000000000"
 const attachedTokens = "1"
@@ -12,14 +14,13 @@ import {
 // if not found, init new Contract, for using change method
 export async function checkForContract(getters, minting_contract_id) {
   let findMainContract = null
-
+  
   findMainContract = getters.getMainContracts.find((item) => item === minting_contract_id)
-
+  
   if (findMainContract) {
     return [getters.getBundleContract, getters.getContract, getters.getEffectsContract].find((item) => item.contractId === findMainContract)
   }
-  console.log(this, 'foundAmongMainContracts DATA')
-
+  
   if (!findMainContract) {
     return await initNewContract(minting_contract_id, this)
   }
@@ -35,12 +36,13 @@ export function createUsualNFT(token_id, metadata, receiver_id, contract) {
         receiver_id,
       }, attachedGas, '100000000000000000000000')
   } catch(err) {
-    console.error(err, '')
     Vue.notify({
       group: 'foo',
       title: 'Important message',
       text: `Error - ${err}`,
     })
+    console.log(err)
+    throw SystemErrors.CONTRACT_FAIL
   }
 }
 
@@ -53,12 +55,13 @@ export function createBundleNFT(token_id, metadata, bundles, contract) {
         bundles,
       }, attachedGas, '100000000000000000000000')
   } catch(err) {
-    console.error(err, '')
     Vue.notify({
       group: 'foo',
       title: 'Important message',
       text: `Error - ${err}`,
     })
+    console.log(err)
+    throw SystemErrors.CONTRACT_FAIL
   }
 }
 
@@ -70,33 +73,14 @@ export function unbundleNFT(token_id, contract) {
         token_id,
       }, attachedGas, attachedTokens)
   } catch(err) {
-    console.error(err, '')
     Vue.notify({
       group: 'foo',
       title: 'Important message',
       text: `Error - ${err}`,
     })
+    console.log(err)
+    throw SystemErrors.CONTRACT_FAIL
   }
-}
-
-export async function nftTokensForOwner({dispatch}, account_id, contract, limit) {
-  let NFTs = []
-  try {
-    await contract
-      .nft_tokens_for_owner({ account_id, limit })
-      .then((data) => NFTs = data)
-
-    dispatch('setNFTsLoading', false)
-  } catch(err) {
-    console.error(err, '')
-    Vue.notify({
-      group: 'foo',
-      title: 'Important message',
-      text: `Cant load Owner NFTs. Error - ${err}`,
-    })
-  }
-
-  return NFTs
 }
 
 export function approveNFT(account_id, token_id, contract) {
@@ -108,12 +92,13 @@ export function approveNFT(account_id, token_id, contract) {
         token_id,
       }, attachedGas, '700000000000000000000')
   } catch(err) {
-    console.error(err, '')
     Vue.notify({
       group: 'foo',
       title: 'Important message',
       text: `Error - ${err}`,
     })
+    console.log(err)
+    throw SystemErrors.CONTRACT_FAIL
   }
 }
 
@@ -131,12 +116,13 @@ export function sendNFT(receiver_id, token_data, contract) {
         memo: 'NFT send',
       }, attachedGas, attachedTokens)
   } catch(err) {
-    console.error(err, '')
     Vue.notify({
       group: 'foo',
       title: 'Important message',
       text: `Error - ${err}`,
     })
+    console.log(err)
+    throw SystemErrors.CONTRACT_FAIL
   }
 }
 
@@ -157,7 +143,8 @@ async function pushImageToIpfs(ipfsInstance, objectURL) {
     cid = await ipfsInstance.add(data)
     cidV1 = cid.path
   } catch(err) {
-    console.log(err, 'err pushImageToIpfs')
+    console.log(err)
+    throw SystemErrors.IPFS_IMAGE_SAVE
   }
 
   return cidV1
@@ -168,17 +155,28 @@ async function pushObjectToIpfs(ipfsInstance, object) {
   try {
     cid = await ipfsInstance.add(JSON.stringify(object))
   } catch(err) {
-    console.log(err, 'err pushObjectToIpfs')
+    console.log(err)
+    throw SystemErrors.IPFS_OBJECT_SAVE
   }
   return cid
 }
 
 export async function deployNFTtoIPFS(ipfsInstance, imageURL, oldMeta, type) {
-  let imageCID = await pushImageToIpfs(ipfsInstance, imageURL, type)
-  let meta = JSON.parse(JSON.stringify(oldMeta))
-  meta.animation_url = `ipfs://${imageCID}`
-  await pushObjectToIpfs(ipfsInstance, meta)
-  return `https://ipfs.io/ipfs/${imageCID}`
+  try {
+    let imageCID = await pushImageToIpfs(ipfsInstance, imageURL, type)
+    let meta = JSON.parse(JSON.stringify(oldMeta))
+    meta.animation_url = `ipfs://${imageCID}`
+    await pushObjectToIpfs(ipfsInstance, meta)
+    return `https://ipfs.io/ipfs/${imageCID}`
+  } catch(err) {
+    if(err instanceof AppError) {
+      alert(err.message)
+    }
+    else {
+      console.log(err)
+      alert("Undefined error")
+    }
+  }
 }
 
 export async function getImageForTokenByURI(ipfsInstance, imageAddress) {
@@ -200,7 +198,8 @@ async function getImageFromIpfs(ipfsInstance, cid) {
   try {
     blob = await loadFileFromIPFS(ipfsInstance, cid, 6000)
   } catch (e) {
-    console.log(e, `getImageFromIpfs ERROR ${cid}`)
+    console.log(e)
+    throw SystemErrors.IPFS_GET_IMAGE
   }
   return blob ? URL.createObjectURL(blob) : null
 }

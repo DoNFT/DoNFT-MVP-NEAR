@@ -1,5 +1,6 @@
 import { connect, Contract, keyStores, WalletConnection, utils } from 'near-api-js'
 import { getConfig } from './nearNets'
+import { SystemErrors, AppError } from "@/utilities"
 
 const nfts_contract = getConfig({ env: process.env.VUE_APP_NETWORK, contract: process.env.VUE_APP_NFTS_CONTRACT })
 const bundle_contract = getConfig({ env: process.env.VUE_APP_NETWORK, contract: process.env.VUE_APP_BUNDLE_CONTRACT })
@@ -7,7 +8,7 @@ const nfts_effects_contract = getConfig({ env: process.env.VUE_APP_NETWORK, cont
 
 // Initialize contract & set global variables
 export async function initContract(store) {
-  store.dispatch('setContractLoading', true)
+  store.commit('SET_CURRENT_CONTRACT_LOADING', true)
   // Initialize connection to the NEAR testnet
   const near = await connect(Object.assign({ deps: { keyStore: new keyStores.BrowserLocalStorageKeyStore() } }, nfts_contract))
 
@@ -30,22 +31,32 @@ export async function initContract(store) {
     try {
       tokens = await fetch(url, { headers }).then((res) => res.json())
     } catch(err) {
-      console.log(err, 'accountContracts err')
+      if(err instanceof AppError) {
+        alert(err.message)
+      } else {
+        alert("Undefined getTokens error")
+      }
     }
 
     return tokens
   }
-  const NFTsContracts = await getTokens(store.getters.getAccountId, 50)
+  let NFTsContracts = []
 
   let acc = []
 
   if (store.getters.getAccountId) {
-    acc = await near.account(store.getters.getAccountId)
+    try {
+      acc = await near.account(store.getters.getAccountId)
+      NFTsContracts = await getTokens(store.getters.getAccountId, 50)
 
-    const balance = await acc.getAccountBalance()
-    const amountInNEAR = utils.format.formatNearAmount(balance.total)
-    store.dispatch('setNearBalance', amountInNEAR)
-    store.dispatch('setNearAccount', acc)
+      const balance = await acc.getAccountBalance()
+      const amountInNEAR = utils.format.formatNearAmount(balance.total)
+      store.dispatch('setNearBalance', amountInNEAR)
+      store.dispatch('setNearAccount', acc)
+    } catch(err) {
+      console.log(err)
+      throw SystemErrors.GET_NEAR_ACCOUNT
+    }
   }
 
   await Promise.all(NFTsContracts.map(async (contract, key) => {
@@ -54,7 +65,11 @@ export async function initContract(store) {
     try {
       request = await acc.viewFunction(contract, 'nft_tokens_for_owner', { account_id: store.getters.getAccountId, limit: 30 })
     } catch(err) {
-      console.log(err, 'accountContracts err')
+      if(err instanceof AppError) {
+        alert(err.message)
+      } else {
+        alert("Undefined accountContracts error")
+      }
     }
 
     let obj = {}
@@ -122,13 +137,14 @@ export async function initContract(store) {
 // for ALL other extra Contracts, its need to use Change methods
 // cause Near require at least login, or init of contract, for using change methods
 export async function initNewContract(mintingContract) {
+  console.log(mintingContract, 'initNewContract')
   const contractConfig = getConfig({ env: process.env.VUE_APP_NETWORK, contract: mintingContract})
   const nearConnectInstance = await connect(Object.assign({ deps: { keyStore: new keyStores.BrowserLocalStorageKeyStore() } }, contractConfig))
   const nearNewWallet = new WalletConnection(nearConnectInstance)
   const nearNewContractSettings = new Contract(nearNewWallet.account(), contractConfig.contractName, {
     changeMethods: ['nft_mint', 'nft_bundle', 'nft_unbundle', 'nft_approve', 'nft_transfer'],
   })
-  
+  console.log(nearConnectInstance, 'nearConnectInstance')
   return nearNewContractSettings
 }
 

@@ -90,6 +90,7 @@ import { mapGetters, mapActions } from "vuex"
 import NavBar from '@/components/NavBar/NavBar'
 import TokenCard from '@/components/TokenCard/TokenCard'
 import StatusType from "@/mixins/StatusMixin"
+import { AppError } from "@/utilities"
 
 export default {
   name: "NFTDetails",
@@ -213,9 +214,7 @@ export default {
           })
         }
 
-        console.log(requestedNFTsRepeated, 'equestedNFTsRepeated.length NFTS 1 ')
         if (requestedNFTsRepeated && !requestedNFTsRepeated.length) {
-          console.log(requestedNFTsRepeated, 'equestedNFTsRepeated.length NFTS2 ')
           loadedBundleNFTs.push.apply(loadedBundleNFTs, requestedNFTs)
         }
       })
@@ -230,7 +229,16 @@ export default {
       })
     },
     unbundleNFT() {
-      this.triggerUnbundleNFT({ token_id: this.NFTComputedData.token_id, nft_data: this.NFTComputedData, bundles_data: this.bundleNFTsData})
+      try {
+        this.triggerUnbundleNFT({ token_id: this.NFTComputedData.token_id, nft_data: this.NFTComputedData, bundles_data: this.bundleNFTsData})
+      } catch(err) {
+        if(err instanceof AppError) {
+          alert(err.message)
+        } else {
+          console.log(err)
+          alert("Undefined error")
+        }
+      }
     },
     changeFormat() {
       console.log('changeFormat')

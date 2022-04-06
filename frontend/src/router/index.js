@@ -13,6 +13,7 @@ import { StatusType } from "@/utilities"
 
 import { providers } from "near-api-js"
 import { initContract } from "@/nearConfig"
+import { SystemErrors } from "@/utilities"
 
 const provider = new providers.JsonRpcProvider(
   "https://rpc.testnet.near.org"
@@ -42,10 +43,10 @@ async function getTransactionForUser(to, next) {
     next()
   }
 
-  // if (tx_hash && to.name === 'AddEffectConfirm') {
+  // if (isApproveCalled && to.name === 'AddEffectConfirm') {
   //   console.log('beforeEnter AddEffectConfirm')
   //   passResult(tx_hash, account_id, to.name)
-  //   next({ name: 'ChooseNFT' })
+  //   next({ name: 'AddEffectConfirm' })
   // }
 
   if (!isApproveCalled && tx_hash && ['ChooseNFT', 'BundleNFT', 'NFTDetails', 'CreateNFT', 'AddEffectConfirm', 'SendNFT'].includes(to.name)) {
@@ -144,7 +145,6 @@ let routes = [
     
       if (to.name === 'AddEffectConfirm' && !effectChoice && !isRedirected) {
         next(`/add_effect/${to.params.id}`)
-        console.log(isRedirected, 'beforeEnter AddEffectConfirm !effectChoice 2')
         Vue.notify({
           group: 'foo',
           type: 'error',
@@ -152,8 +152,8 @@ let routes = [
           text: `Sorry, effect with ID ${to.params.effectId} does not exit`,
         })
       } else {
-        console.log(isRedirected, 'NEXT 1')
-        next()
+        console.log(to, 'NEXT to')
+        next(`/add_effect/${to.params.id}/confirm/${to.params.effectId}`)
       }
     },
   },
@@ -192,14 +192,19 @@ router.beforeEach(async (to, _from, next) => {
 
   if (!store.getters.getCurrentWallet) {
     console.log('---CONTRACT INIT---')
-    await initContract(store)
-      .then(() => {
-        const user = store.getters.getCurrentWallet.isSignedIn()
-        if (!user) {
-          router.push('/login')
-        }
-        store.dispatch('setContractLoading', false)
-      })
+    try {
+      await initContract(store)
+        .then(() => {
+          const user = store.getters.getCurrentWallet.isSignedIn()
+          if (!user) {
+            router.push('/login')
+          }
+          store.commit('SET_CURRENT_CONTRACT_LOADING', false)
+        })
+    } catch(err) {
+      console.log(err)
+      throw SystemErrors.INIT_NEAR_CONTRACT
+    }
   }
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
   let user = null

@@ -55,6 +55,7 @@ import Spinner from "@/components/Spinner"
 import NavBar from '@/components/NavBar/NavBar'
 import Uploader from '@/components/Uploader/Uploader'
 import StatusType from "@/mixins/StatusMixin"
+import { AppError } from "@/utilities"
 
 export default {
   name: "CreateNFT",
@@ -134,19 +135,28 @@ export default {
       if (!this.nftObj.metadata.title) {
         alert('Title field is emptyy')
       } else {
-        await this.setResult('base64')
-        await this.setDeployedPictureMeta('base64')
+        try {
+          await this.setResult('base64')
+          await this.setDeployedPictureMeta('base64')
 
-        this.createNewUsualNFT({
-          token_id: `token-${Date.now()}`,
-          metadata: {
-            title: this.nftObj.metadata.title,
-            description: this.nftObj.metadata.description,
-            media: this.getDeployedPictureMeta,
-            copies: 1,
-          },
-          contract_id: this.nftObj.contract_id
-        })
+          this.createNewUsualNFT({
+            token_id: `token-${Date.now()}`,
+            metadata: {
+              title: this.nftObj.metadata.title,
+              description: this.nftObj.metadata.description,
+              media: this.getDeployedPictureMeta,
+              copies: 1,
+            },
+            contract_id: this.nftObj.contract_id
+          })
+        } catch(err) {
+          if(err instanceof AppError) {
+            alert(err.message)
+          } else {
+            console.log(err)
+            alert("Undefined error")
+          }
+        }
       }
     },
   },

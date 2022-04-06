@@ -2,7 +2,6 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 
 import {
-  nftTokensForOwner,
   deployNFTtoIPFS,
   approveNFT,
   createUsualNFT,
@@ -15,6 +14,7 @@ import {
 
 import {StatusType, getIPFS} from "@/utilities"
 import {modifyPicture, applyNFTsEffect} from "@/api"
+import {SystemErrors, AppError} from "@/utilities"
 
 Vue.use(Vuex)
 
@@ -142,20 +142,8 @@ const store = new Vuex.Store({
       sessionStorage.setItem("tokens_id", data)
       commit('setNFTArray', data)
     },
-    // async setBalance ({commit, state}) {
-    //   commit('setAccountBalance', await getAccountBalance(state.ethersProvider, state.accountAddress))
-    // },
-    setContractLoading ({commit}, data) {
-      commit('SET_CURRENT_CONTRACT_LOADING', data)
-    },
     setEffectChoice ({commit}, choice) {
       commit('setEffectChoice', choice)
-    },
-    setNFTsLoading ({commit}, isLoading) {
-      commit('setNFTsLoading', isLoading)
-    },
-    setWrappedNFTsLoading ({commit}, isLoading) {
-      commit('setWrappedNFTsLoading', isLoading)
     },
     setStatus ({commit}, status) {
       commit("setStatus", status)
@@ -165,28 +153,36 @@ const store = new Vuex.Store({
       commit('setIpfs', await ipfs.create())
     },
     async setResult ({commit, dispatch, getters}, type) {
-      dispatch('setStatus', StatusType.Applying)
-      if (type === "base64") {
-        commit('setImageResult', getters.getNFTforModification.media)
-      } else {
-        console.log(getters.getNFTforModification.media, 'getters.getNFTforModification.media')
-        commit('setImageResult', await modifyPicture(getters.getNFTforModification.media, getters.getEffectChoice))
+      try {
+        dispatch('setStatus', StatusType.Applying)
+        if (type === "base64") {
+          commit('setImageResult', getters.getNFTforModification.media)
+        } else {
+          console.log(getters.getNFTforModification.media, 'getters.getNFTforModification.media')
+          commit('setImageResult', await modifyPicture(getters.getNFTforModification.media, getters.getEffectChoice))
+        }
+      } catch(err) {
+        console.log(err)
+        throw SystemErrors.NFT_EFFECT_CONFIRM
       }
     },
     async setEffectResult ({commit, dispatch}, effectData) {
-      dispatch('setStatus', StatusType.Applying)
-      console.log(effectData, 'EFFFECT DATA')
-      commit('setDeployedPictureMeta', await applyNFTsEffect(effectData))
+      try {
+        dispatch('setStatus', StatusType.Applying)
+        commit('setDeployedPictureMeta', await applyNFTsEffect(effectData))
+      } catch(err) {
+        console.log(err)
+        throw SystemErrors.NFT_EFFECT_CONFIRM
+      }
     },
     async setDeployedPictureMeta ({commit, dispatch, getters}, type) {
-      dispatch('setStatus', StatusType.DeployingToIPFS)
-      commit('setDeployedPictureMeta', await deployNFTtoIPFS(getters.getIpfs, getters.getResult, getters.getNFTforModification, type))
-    },
-    async getListOfNFT ({commit, dispatch, getters}) {
-      dispatch('setNFTsLoading', true)
-      const result = await nftTokensForOwner({dispatch}, getters.getAccountId, getters.getContract, getters.getNFTlimit)
-      // const result = await nftTokensForOwner({dispatch}, 'nft-example6.pe4en.testnet', getters.getContract2, getters.getNFTlimit)
-      commit('passAllNFTs', result)
+      try {
+        dispatch('setStatus', StatusType.DeployingToIPFS)
+        commit('setDeployedPictureMeta', await deployNFTtoIPFS(getters.getIpfs, getters.getResult, getters.getNFTforModification, type))
+      } catch(err) {
+        console.log(err)
+        throw SystemErrors.NFT_EFFECT_CONFIRM
+      }
     },
     async setTokenImage ({getters}, token) {
       let url = null
@@ -205,31 +201,80 @@ const store = new Vuex.Store({
       return url
     },
     async createNewUsualNFT ({getters, dispatch},  { token_id, metadata, contract_id }) {
-      dispatch('setStatus', StatusType.Minting)
-      let contractData = await checkForContract(getters, contract_id)
-      createUsualNFT(token_id, metadata, getters.getAccountId, contractData)
+      try {
+        dispatch('setStatus', StatusType.Minting)
+        let contractData = await checkForContract(getters, contract_id)
+        createUsualNFT(token_id, metadata, getters.getAccountId, contractData)
+      } catch(err) {
+        if(err instanceof AppError) {
+          alert(err.message)
+        } else {
+          console.log(err)
+          alert("Undefined error")
+        }
+
+        throw SystemErrors.MINT_NFT
+      }
     },
-    createNewBundleNFT ({getters, dispatch},  { token_id, metadata, bundles }) {
-      dispatch('setStatus', StatusType.Minting)
-      createBundleNFT(token_id, metadata, bundles, getters.getBundleContract)
+    createNewBundleNFT ({dispatch},  { token_id, metadata, bundles }) {
+      try {
+        dispatch('setStatus', StatusType.Minting)
+        createBundleNFT(token_id, metadata, bundles, 'getters.getBundleContract')
+      } catch(err) {
+        if(err instanceof AppError) {
+          alert(err.message)
+        } else {
+          console.log(err)
+          alert("Undefined error")
+        }
+
+        throw SystemErrors.SET_BUNDLE_NFTS
+      }
     },
-    triggerUnbundleNFT ({getters, dispatch},  { token_id, nft_data, bundles_data }) {
-      dispatch('setStatus', StatusType.Minting)
-      console.log(getters, token_id, nft_data, bundles_data, 'token_id, nft_data, bundle_data')
-      unbundleNFT(token_id, getters.getBundleContract)
+    triggerUnbundleNFT ({getters, dispatch},  { token_id }) {
+      try {
+        dispatch('setStatus', StatusType.Minting)
+        unbundleNFT(token_id, getters.getBundleContract)
+      } catch(err) {
+        if(err instanceof AppError) {
+          alert(err.message)
+        } else {
+          console.log(err)
+          alert("Undefined error")
+        }
+
+        throw SystemErrors.UNBUNDLE_NFTS
+      }
     },
     async setNFTApproveId ({getters, dispatch}, { approve_id, token_id, minting_contract_id }) {
-      let contractData = await checkForContract(getters, minting_contract_id)
-      console.log(contractData, 'contract DATA')
-
-      dispatch('setStatus', StatusType.Approving)
-      approveNFT(approve_id, token_id, contractData)
+      try {
+        let contractData = await checkForContract(getters, minting_contract_id)
+  
+        dispatch('setStatus', StatusType.Approving)
+        approveNFT(approve_id, token_id, contractData)
+      } catch(err) {
+        if(err instanceof AppError) {
+          alert(err.message)
+        } else {
+          console.log(err)
+          alert("Undefined error")
+        }
+      }
     },
     async sendNFTByToken ({getters, dispatch}, { receiver, token_data, minting_contract_id }) {
-      dispatch('setStatus', StatusType.Approving)
-      let contractData = await checkForContract(getters, minting_contract_id)
-
-      sendNFT(receiver, token_data, contractData)
+      try {
+        dispatch('setStatus', StatusType.Approving)
+        let contractData = await checkForContract(getters, minting_contract_id)
+  
+        sendNFT(receiver, token_data, contractData)
+      } catch(err) {
+        if(err instanceof AppError) {
+          alert(err.message)
+        } else {
+          console.log(err)
+          alert("Undefined error")
+        }
+      }
     },
     pushNFTbyContract ({commit}, NFTS) {
       commit('SET_CURRENT_CONTRACT_NFT', NFTS)

@@ -78,6 +78,7 @@ import Spinner from "@/components/Spinner"
 import TokenCard from '@/components/TokenCard/TokenCard'
 import NavBar from '@/components/NavBar/NavBar'
 import StatusType from "@/mixins/StatusMixin"
+import { AppError } from "@/utilities"
 
 export default {
   name: "AddEffectConfirm",
@@ -164,52 +165,66 @@ export default {
     },
     // minting NFT with NEW effects
     async handleMint() {
-      const effectObj = {
-        original: {
-          contract: this.getContract.contractId,
-          tokenId: this.NFTComputedData.token_id,
-          contentUrl: this.NFTComputedData.metadata.media,
-        },
-        modificator: {
-          contract: this.getEffectsContract.contractId,
-          tokenId: this.getEffect.token_id,
-          contentUrl: this.getEffect.metadata.media,
-        },
-        sender: this.getAccountId,
+      if (!this.nftObj.metadata.title) {
+        alert('Title field is empty')
+      } else {
+        try {
+          const effectObj = {
+            original: {
+              contract: this.getContract.contractId,
+              tokenId: this.NFTComputedData.token_id,
+              contentUrl: this.NFTComputedData.metadata.media,
+            },
+            modificator: {
+              contract: this.getEffectsContract.contractId,
+              tokenId: this.getEffect.token_id,
+              contentUrl: this.getEffect.metadata.media,
+            },
+            sender: this.getAccountId,
+          }
+          await this.setEffectResult(effectObj)
+
+          const bundleArr = [
+            {
+              data: this.NFTComputedData,
+              contract: 'list',
+            },
+            {
+              data: this.getEffect,
+              contract: 'effects',
+            }
+          ]
+
+          const bundlesArrApproved = bundleArr.map((item) => {
+            const obj = {
+              ...item.data,
+              contract: item.contract === 'list' ? this.getContract.contractId : this.getEffectsContract.contractId,
+              approval_id: item.data.approved_account_ids[this.getBundleContract.contractId],
+            }
+
+            return obj
+          })
+
+          // its calling bundle, because effect NFT combining with usual NFT
+          this.createNewBundleNFT({
+            token_id: `token-${Date.now()}`,
+            metadata: {
+              title: this.nftObj.metadata.title,
+              description: this.nftObj.metadata.description,
+              media: this.getDeployedPictureMeta,
+              copies: 1,
+            },
+            bundles: bundlesArrApproved,
+          })
+        } catch(err) {
+          if(err instanceof AppError) {
+            alert(err.message)
+          } else {
+            console.log(err)
+            alert("Undefined error")
+          }
+        }
       }
-      await this.setEffectResult(effectObj)
-      const bundleArr = [
-        {
-          data: this.NFTComputedData,
-          contract: 'list',
-        },
-        {
-          data: this.getEffect,
-          contract: 'effects',
-        }
-      ]
-
-      const bundlesArrApproved = bundleArr.map((item) => {
-        const obj = {
-          ...item.data,
-          contract: item.contract === 'list' ? this.getContract.contractId : this.getEffectsContract.contractId,
-          approval_id: item.data.approved_account_ids[this.getBundleContract.contractId],
-        }
-
-        return obj
-      })
-
-      // its calling bundle, because effect NFT combining with usual NFT
-      this.createNewBundleNFT({
-        token_id: `token-${Date.now()}`,
-        metadata: {
-          title: this.nftObj.metadata.title,
-          description: this.nftObj.metadata.description,
-          media: this.getDeployedPictureMeta,
-          copies: 1,
-        },
-        bundles: bundlesArrApproved,
-      })
     },
   },
 }

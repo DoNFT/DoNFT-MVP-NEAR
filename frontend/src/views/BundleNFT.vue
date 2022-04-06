@@ -69,6 +69,7 @@ import NavBar from '@/components/NavBar/NavBar'
 import Uploader from '@/components/Uploader/Uploader'
 import TokenCard from '@/components/TokenCard/TokenCard'
 import StatusType from "@/mixins/StatusMixin"
+import { AppError } from "@/utilities"
 
 export default {
   name: "BundleNFT",
@@ -157,31 +158,40 @@ export default {
       this.approvedNFTStatuses.push(data)
     },
     async bundleNFTs() {
-      await this.setResult('base64')
-      await this.setDeployedPictureMeta('base64')
-      const bundleArr = this.nftArray.map((token) => {
-        return this.getAllNFTs.find((item) => item.token_id === token)
-      }).filter(Boolean)
+      try {
+        await this.setResult('base64')
+        await this.setDeployedPictureMeta('base64')
+        const bundleArr = this.nftArray.map((token) => {
+          return this.getAllNFTs.find((item) => item.token_id === token)
+        }).filter(Boolean)
 
-      const bundlesArrApproved = bundleArr.map((item) => {
-        const obj = {
-          ...item,
-          approval_id: item.approved_account_ids[this.getBundleContract.contractId],
+        const bundlesArrApproved = bundleArr.map((item) => {
+          const obj = {
+            ...item,
+            approval_id: item.approved_account_ids[this.getBundleContract.contractId],
+          }
+
+          return obj
+        })
+
+        this.createNewBundleNFT({
+          token_id: `token-${Date.now()}`,
+          metadata: {
+            title: this.nftObj.metadata.title,
+            description: this.nftObj.metadata.description,
+            media: this.getDeployedPictureMeta,
+            copies: 1,
+          },
+          bundles: bundlesArrApproved,
+        })
+      } catch(err) {
+        if(err instanceof AppError) {
+          alert(err.message)
+        } else {
+          console.log(err)
+          alert("Undefined error")
         }
-
-        return obj
-      })
-
-      this.createNewBundleNFT({
-        token_id: `token-${Date.now()}`,
-        metadata: {
-          title: this.nftObj.metadata.title,
-          description: this.nftObj.metadata.description,
-          media: this.getDeployedPictureMeta,
-          copies: 1,
-        },
-        bundles: bundlesArrApproved,
-      })
+      }
     },
   },
 }

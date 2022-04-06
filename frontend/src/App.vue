@@ -61,7 +61,6 @@ export default {
 
   methods: {
     ...mapActions([
-      'getListOfNFT',
       'setIpfs',
     ]),
   },

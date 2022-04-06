@@ -58,20 +58,7 @@ import TokenCard from '@/components/TokenCard/TokenCard'
 import { mapGetters, mapActions } from "vuex"
 import NavBar from '@/components/NavBar/NavBar'
 import StatusType from "@/mixins/StatusMixin"
-
-const getBase64FromUrl = async (url) => {
-  const data = await fetch(url)
-  const blob = await data.blob()
-
-  return new Promise((resolve) => {
-    const reader = new FileReader()
-    reader.readAsDataURL(blob) 
-    reader.onloadend = () => {
-      const base64data = reader.result   
-      resolve(base64data)
-    }
-  })
-}
+import { AppError, SystemErrors } from "@/utilities"
 
 export default {
   name: "ChooseNFT",
@@ -104,6 +91,7 @@ export default {
       nftArray: [],
       urlData: [],
       contractLimit: 2,
+      getErrorStatus: 0,
     }
   },
 
@@ -164,48 +152,73 @@ export default {
       'passNFT',
       'passChosenTokens',
       'passNFTlimit',
-      'getListOfNFT',
       'setResult',
       'setDeployedPictureMeta',
       'createNewUsualNFT',
     ]),
+    async getBase64FromUrl(url) {
+      const data = await fetch(url)
+      const blob = await data.blob()
+
+      return new Promise((resolve) => {
+        const reader = new FileReader()
+        reader.readAsDataURL(blob) 
+        reader.onerror = () => {
+          throw SystemErrors.GET_BASE_64
+        }
+        reader.onloadend = () => {
+          const base64data = reader.result   
+          resolve(base64data)
+        }
+      })
+    },
+
     // Creating Random NFT, depend on Math random
     // currently only for VUE_APP_NFTS_CONTRACT and VUE_APP_NFTS_EFFECTS_CONTRACT
     async generateRandomNFT(isRandomEffect) {
-      let contract_id = process.env.VUE_APP_NFTS_CONTRACT
-      let randomNumber = Math.floor(Math.random() * 5)
-      let randomImage =  require(`@/assets/randomNFT/${randomNumber}.jpg`)
+      try {
+        let contract_id = process.env.VUE_APP_NFTS_CONTRACT
+        let randomNumber = Math.floor(Math.random() * 5)
+        let randomImage =  require(`@/assets/randomNFT/${randomNumber}.jpg`)
 
-      if (isRandomEffect) {
-        contract_id = process.env.VUE_APP_NFTS_EFFECTS_CONTRACT
-        randomNumber = Math.floor(Math.random() * 7)
-        randomImage =  require(`@/assets/randomEffectNFT/${randomNumber}.jpg`)
+        if (isRandomEffect) {
+          contract_id = process.env.VUE_APP_NFTS_EFFECTS_CONTRACT
+          randomNumber = Math.floor(Math.random() * 7)
+          randomImage =  require(`@/assets/randomEffectNFT/${randomNumber}.jpg`)
+        }
+
+        const imageBase64 = await this.getBase64FromUrl(randomImage)
+
+        this.randomNFTsData = {
+          metadata: {
+            title: `Title of ${randomNumber} random NFT`,
+            description: `Description of ${randomNumber} random NFT`,
+            media: imageBase64,
+            copies: 1,
+          },
+        }
+
+        this.passNFT(this.randomNFTsData.metadata)
+
+        await this.setResult('base64')
+        await this.setDeployedPictureMeta('base64')
+
+        this.createNewUsualNFT({
+          token_id: `token-${Date.now()}`,
+          metadata: {
+            ...this.randomNFTsData.metadata,
+            media: this.getDeployedPictureMeta,
+          },
+          contract_id,
+        })
+      } catch(err) {
+        if(err instanceof AppError) {
+          alert(err.message)
+        } else {
+          console.log(err)
+          alert("Undefined error")
+        }
       }
-
-      const imageBase64 = await getBase64FromUrl(randomImage)
-
-      this.randomNFTsData = {
-        metadata: {
-          title: `Title of ${randomNumber} random NFT`,
-          description: `Description of ${randomNumber} random NFT`,
-          media: imageBase64,
-          copies: 1,
-        },
-      }
-
-      this.passNFT(this.randomNFTsData.metadata)
-
-      await this.setResult('base64')
-      await this.setDeployedPictureMeta('base64')
-
-      this.createNewUsualNFT({
-        token_id: `token-${Date.now()}`,
-        metadata: {
-          ...this.randomNFTsData.metadata,
-          media: this.getDeployedPictureMeta,
-        },
-        contract_id,
-      })
     },
     loadMoreNFT() {
       this.contractLimit += 2

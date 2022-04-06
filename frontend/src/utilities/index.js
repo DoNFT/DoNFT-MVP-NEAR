@@ -22,3 +22,30 @@ export const StatusType = Object.freeze({
 })
 
 export const getIPFS = () => import(/* webpackChunkName: "ipfs" */ 'ipfs-core')
+
+export class AppError extends Error {
+  constructor(message, code) {
+    super(message)
+    this.code = code
+  }
+}
+
+export const SystemErrors = {
+  // IPFS
+  IPFS_IMAGE_SAVE: new AppError("Failed to save media on IPFS", 100),
+  IPFS_OBJECT_SAVE: new AppError("Failed to save object on IPFS", 110),
+  IPFS_GET_IMAGE: new AppError("Failed to get media from IPFS", 120),
+  IPFS_SAVE: new AppError("Failed to save media on IPFS", 130),
+
+  // NFT
+  MINT_NFT: new AppError("Failed to mint NFT", 200),
+  GENERATE_RANDOM_NFT: new AppError("Failed to mint Random NFT", 210),
+  GET_BASE_64: new AppError("Failed to get base 64 of Image", 220),
+  GET_BUNDLE_NFTS: new AppError("Failed to get bundle NFTs", 230),
+  SET_BUNDLE_NFTS: new AppError("Failed to set bundle NFTs", 240),
+  UNBUNDLE_NFTS: new AppError("Failed to unbundle NFTs", 250),
+  GET_NEAR_ACCOUNT: new AppError("Failed to get NEAR account", 260),
+  INIT_NEAR_CONTRACT: new AppError("Failed to init NEAR contract", 270),
+  NFT_EFFECT_CONFIRM: new AppError("Failed to apply effect to NFT", 280),
+  CONTRACT_UNKNOWN: new AppError("Failed to load contract", 290),
+}
