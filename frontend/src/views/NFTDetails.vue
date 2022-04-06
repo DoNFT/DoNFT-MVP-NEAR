@@ -228,9 +228,9 @@ export default {
         minting_contract_id: this.NFTComputedData.contract,
       })
     },
-    unbundleNFT() {
+    async unbundleNFT() {
       try {
-        this.triggerUnbundleNFT({ token_id: this.NFTComputedData.token_id, nft_data: this.NFTComputedData, bundles_data: this.bundleNFTsData})
+        await this.triggerUnbundleNFT({ token_id: this.NFTComputedData.token_id, nft_data: this.NFTComputedData, bundles_data: this.bundleNFTsData})
       } catch(err) {
         if(err instanceof AppError) {
           alert(err.message)

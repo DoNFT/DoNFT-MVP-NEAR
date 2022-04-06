@@ -69,7 +69,7 @@ import NavBar from '@/components/NavBar/NavBar'
 import Uploader from '@/components/Uploader/Uploader'
 import TokenCard from '@/components/TokenCard/TokenCard'
 import StatusType from "@/mixins/StatusMixin"
-import { AppError } from "@/utilities"
+import { SystemErrors, AppError } from "@/utilities"
 
 export default {
   name: "BundleNFT",
@@ -159,8 +159,27 @@ export default {
     },
     async bundleNFTs() {
       try {
-        await this.setResult('base64')
-        await this.setDeployedPictureMeta('base64')
+
+        try {
+          await this.setResult('base64')
+        } catch(err) {
+          if (err instanceof AppError) {
+            throw err 
+          } else {
+            throw SystemErrors.NFT_EFFECT_CONFIRM
+          }
+        }
+
+        try {
+          await this.setDeployedPictureMeta('base64')
+        } catch(err) {
+          if (err instanceof AppError) {
+            throw err 
+          } else {
+            throw SystemErrors.IPFS_SAVE
+          }
+        }
+
         const bundleArr = this.nftArray.map((token) => {
           return this.getAllNFTs.find((item) => item.token_id === token)
         }).filter(Boolean)
@@ -174,16 +193,24 @@ export default {
           return obj
         })
 
-        this.createNewBundleNFT({
-          token_id: `token-${Date.now()}`,
-          metadata: {
-            title: this.nftObj.metadata.title,
-            description: this.nftObj.metadata.description,
-            media: this.getDeployedPictureMeta,
-            copies: 1,
-          },
-          bundles: bundlesArrApproved,
-        })
+        try {
+          await this.createNewBundleNFT({
+            token_id: `token-${Date.now()}`,
+            metadata: {
+              title: this.nftObj.metadata.title,
+              description: this.nftObj.metadata.description,
+              media: this.getDeployedPictureMeta,
+              copies: 1,
+            },
+            bundles: bundlesArrApproved,
+          })
+        } catch(err) {
+          if (err instanceof AppError) {
+            throw err 
+          } else {
+            throw SystemErrors.BUNDLE_NFTS
+          }
+        }
       } catch(err) {
         if(err instanceof AppError) {
           alert(err.message)

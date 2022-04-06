@@ -78,7 +78,7 @@ import Spinner from "@/components/Spinner"
 import TokenCard from '@/components/TokenCard/TokenCard'
 import NavBar from '@/components/NavBar/NavBar'
 import StatusType from "@/mixins/StatusMixin"
-import { AppError } from "@/utilities"
+import { AppError, SystemErrors } from "@/utilities"
 
 export default {
   name: "AddEffectConfirm",
@@ -182,7 +182,17 @@ export default {
             },
             sender: this.getAccountId,
           }
-          await this.setEffectResult(effectObj)
+
+          try {
+            await this.setEffectResult(effectObj)
+          } catch(err) {
+            if (err instanceof AppError) {
+              throw err 
+            } else {
+              throw SystemErrors.NFT_EFFECT_CONFIRM
+            }
+          }
+
 
           const bundleArr = [
             {
@@ -206,16 +216,26 @@ export default {
           })
 
           // its calling bundle, because effect NFT combining with usual NFT
-          this.createNewBundleNFT({
-            token_id: `token-${Date.now()}`,
-            metadata: {
-              title: this.nftObj.metadata.title,
-              description: this.nftObj.metadata.description,
-              media: this.getDeployedPictureMeta,
-              copies: 1,
-            },
-            bundles: bundlesArrApproved,
-          })
+
+
+          try {
+            await this.createNewBundleNFT({
+              token_id: `token-${Date.now()}`,
+              metadata: {
+                title: this.nftObj.metadata.title,
+                description: this.nftObj.metadata.description,
+                media: this.getDeployedPictureMeta,
+                copies: 1,
+              },
+              bundles: bundlesArrApproved,
+            })
+          } catch(err) {
+            if (err instanceof AppError) {
+              throw err 
+            } else {
+              throw SystemErrors.BUNDLE_NFTS
+            }
+          }
         } catch(err) {
           if(err instanceof AppError) {
             alert(err.message)

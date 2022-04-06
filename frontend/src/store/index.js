@@ -161,8 +161,11 @@ const store = new Vuex.Store({
           commit('setImageResult', await modifyPicture(getters.getNFTforModification.media, getters.getEffectChoice))
         }
       } catch(err) {
-        console.log(err)
-        throw SystemErrors.NFT_EFFECT_CONFIRM
+        if (err instanceof AppError) {
+          throw err
+        } else {
+          throw SystemErrors.NFT_EFFECT_CONFIRM
+        }
       }
     },
     async setEffectResult ({commit, dispatch}, effectData) {
@@ -170,8 +173,11 @@ const store = new Vuex.Store({
         dispatch('setStatus', StatusType.Applying)
         commit('setDeployedPictureMeta', await applyNFTsEffect(effectData))
       } catch(err) {
-        console.log(err)
-        throw SystemErrors.NFT_EFFECT_CONFIRM
+        if (err instanceof AppError) {
+          throw err
+        } else {
+          throw SystemErrors.NFT_EFFECT_CONFIRM
+        }
       }
     },
     async setDeployedPictureMeta ({commit, dispatch, getters}, type) {
@@ -181,8 +187,7 @@ const store = new Vuex.Store({
       } catch(err) {
         if(err instanceof AppError) {
           alert(err.message)
-        }
-        else {
+        } else {
           console.log(err)
           alert("Undefined error")
         }
@@ -208,45 +213,28 @@ const store = new Vuex.Store({
       try {
         dispatch('setStatus', StatusType.Minting)
         let contractData = await checkForContract(getters, contract_id)
-        createUsualNFT(token_id, metadata, getters.getAccountId, contractData)
+        console.log(contractData, 'contractData')
+        await createUsualNFT(token_id, metadata, getters.getAccountId, contractData)
       } catch(err) {
-        if(err instanceof AppError) {
-          alert(err.message)
-        } else {
-          console.log(err)
-          alert("Undefined error")
-        }
-
+        console.log(err)
         throw SystemErrors.MINT_NFT
       }
     },
-    createNewBundleNFT ({dispatch},  { token_id, metadata, bundles }) {
+    async createNewBundleNFT ({dispatch},  { token_id, metadata, bundles }) {
       try {
         dispatch('setStatus', StatusType.Minting)
-        createBundleNFT(token_id, metadata, bundles, 'getters.getBundleContract')
+        await createBundleNFT(token_id, metadata, bundles, 'getters.getBundleContract')
       } catch(err) {
-        if(err instanceof AppError) {
-          alert(err.message)
-        } else {
-          console.log(err)
-          alert("Undefined error")
-        }
-
-        throw SystemErrors.SET_BUNDLE_NFTS
+        console.log(err)
+        throw SystemErrors.BUNDLE_NFTS
       }
     },
-    triggerUnbundleNFT ({getters, dispatch},  { token_id }) {
+    async triggerUnbundleNFT ({getters, dispatch},  { token_id }) {
       try {
         dispatch('setStatus', StatusType.Minting)
-        unbundleNFT(token_id, getters.getBundleContract)
+        await unbundleNFT(token_id, getters.getBundleContract)
       } catch(err) {
-        if(err instanceof AppError) {
-          alert(err.message)
-        } else {
-          console.log(err)
-          alert("Undefined error")
-        }
-
+        console.log(err)
         throw SystemErrors.UNBUNDLE_NFTS
       }
     },
@@ -255,7 +243,7 @@ const store = new Vuex.Store({
         let contractData = await checkForContract(getters, minting_contract_id)
   
         dispatch('setStatus', StatusType.Approving)
-        approveNFT(approve_id, token_id, contractData)
+        await approveNFT(approve_id, token_id, contractData)
       } catch(err) {
         if(err instanceof AppError) {
           alert(err.message)
@@ -270,7 +258,7 @@ const store = new Vuex.Store({
         dispatch('setStatus', StatusType.Approving)
         let contractData = await checkForContract(getters, minting_contract_id)
   
-        sendNFT(receiver, token_data, contractData)
+        await sendNFT(receiver, token_data, contractData)
       } catch(err) {
         if(err instanceof AppError) {
           alert(err.message)

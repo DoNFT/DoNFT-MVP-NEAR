@@ -40,7 +40,7 @@ export const SystemErrors = {
   // NFT
   MINT_NFT: new AppError("Failed to mint NFT", 200),
   GET_BASE_64: new AppError("Failed to get base 64 of Image", 220),
-  SET_BUNDLE_NFTS: new AppError("Failed to set bundle NFTs", 240),
+  BUNDLE_NFTS: new AppError("Failed to bundle NFTs", 240),
   UNBUNDLE_NFTS: new AppError("Failed to unbundle NFTs", 250),
   GET_NEAR_ACCOUNT: new AppError("Failed to get NEAR account", 260),
   GET_NEAR_NFTS: new AppError("Failed to get account NFTs", 260),

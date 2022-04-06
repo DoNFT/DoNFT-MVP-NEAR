@@ -180,6 +180,7 @@ export default {
         let contract_id = process.env.VUE_APP_NFTS_CONTRACT
         let randomNumber = Math.floor(Math.random() * 5)
         let randomImage =  require(`@/assets/randomNFT/${randomNumber}.jpg`)
+        let imageBase64 = null
 
         if (nftType === 'effectNFT') {
           contract_id = process.env.VUE_APP_NFTS_EFFECTS_CONTRACT
@@ -187,7 +188,15 @@ export default {
           randomImage =  require(`@/assets/randomEffectNFT/${randomNumber}.jpg`)
         }
 
-        const imageBase64 = await this.getBase64FromUrl(randomImage)
+        try {
+          imageBase64 = await this.getBase64FromUrl(randomImage)
+        } catch(err) {
+          if (err instanceof AppError) {
+            throw err 
+          } else {
+            throw SystemErrors.GET_BASE_64
+          }
+        }
 
         this.randomNFTsData = {
           metadata: {
@@ -200,18 +209,44 @@ export default {
 
         this.passNFT(this.randomNFTsData.metadata)
 
-        await this.setResult('base64')
-        await this.setDeployedPictureMeta('base64')
+        try {
+          await this.setResult('base64')
+        } catch(err) {
+          if (err instanceof AppError) {
+            throw err 
+          } else {
+            throw SystemErrors.NFT_EFFECT_CONFIRM
+          }
+        }
 
-        this.createNewUsualNFT({
-          token_id: `token-${Date.now()}`,
-          metadata: {
-            ...this.randomNFTsData.metadata,
-            media: this.getDeployedPictureMeta,
-          },
-          contract_id,
-        })
+        try {
+          await this.setDeployedPictureMeta('base64')
+        } catch(err) {
+          if (err instanceof AppError) {
+            throw err 
+          } else {
+            throw SystemErrors.IPFS_SAVE
+          }
+        }
+
+        try {
+          await this.createNewUsualNFT({
+            token_id: `token-${Date.now()}`,
+            metadata: {
+              ...this.randomNFTsData.metadata,
+              media: this.getDeployedPictureMeta,
+            },
+            contract_id,
+          })
+        } catch(err) {
+          if (err instanceof AppError) {
+            throw err 
+          } else {
+            throw SystemErrors.MINT_NFT
+          }
+        }
       } catch(err) {
+        console.log(err, 'MAIN ERROR')
         if(err instanceof AppError) {
           alert(err.message)
         } else {
