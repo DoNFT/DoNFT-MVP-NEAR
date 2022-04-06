@@ -323,6 +323,10 @@ select::-ms-expand {
   .main-btn:last-child {
     margin-bottom: 0;
   }
+
+	.form-nft__detail-page & {
+		margin-top: auto;
+	}
 }
 
 .form-nft-send__media {
