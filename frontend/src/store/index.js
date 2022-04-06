@@ -161,6 +161,8 @@ const store = new Vuex.Store({
           commit('setImageResult', await modifyPicture(getters.getNFTforModification.media, getters.getEffectChoice))
         }
       } catch(err) {
+        dispatch('setStatus', StatusType.ChoosingParameters)
+
         if (err instanceof AppError) {
           throw err
         } else {
@@ -173,6 +175,8 @@ const store = new Vuex.Store({
         dispatch('setStatus', StatusType.Applying)
         commit('setDeployedPictureMeta', await applyNFTsEffect(effectData))
       } catch(err) {
+        dispatch('setStatus', StatusType.ChoosingParameters)
+
         if (err instanceof AppError) {
           throw err
         } else {
@@ -185,6 +189,8 @@ const store = new Vuex.Store({
         dispatch('setStatus', StatusType.DeployingToIPFS)
         commit('setDeployedPictureMeta', await deployNFTtoIPFS(getters.getIpfs, getters.getResult, getters.getNFTforModification, type))
       } catch(err) {
+        dispatch('setStatus', StatusType.ChoosingParameters)
+
         if(err instanceof AppError) {
           alert(err.message)
         } else {
@@ -234,6 +240,8 @@ const store = new Vuex.Store({
         dispatch('setStatus', StatusType.Minting)
         await unbundleNFT(token_id, getters.getBundleContract)
       } catch(err) {
+        dispatch('setStatus', StatusType.ChoosingParameters)
+
         console.log(err)
         throw SystemErrors.UNBUNDLE_NFTS
       }
@@ -245,6 +253,8 @@ const store = new Vuex.Store({
         dispatch('setStatus', StatusType.Approving)
         await approveNFT(approve_id, token_id, contractData)
       } catch(err) {
+        dispatch('setStatus', StatusType.ChoosingParameters)
+
         if(err instanceof AppError) {
           alert(err.message)
         } else {
@@ -260,6 +270,8 @@ const store = new Vuex.Store({
   
         await sendNFT(receiver, token_data, contractData)
       } catch(err) {
+        dispatch('setStatus', StatusType.ChoosingParameters)
+
         if(err instanceof AppError) {
           alert(err.message)
         } else {
