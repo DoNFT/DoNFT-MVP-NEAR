@@ -43,6 +43,7 @@ export const SystemErrors = {
   SET_BUNDLE_NFTS: new AppError("Failed to set bundle NFTs", 240),
   UNBUNDLE_NFTS: new AppError("Failed to unbundle NFTs", 250),
   GET_NEAR_ACCOUNT: new AppError("Failed to get NEAR account", 260),
+  GET_NEAR_NFTS: new AppError("Failed to get account NFTs", 260),
   INIT_NEAR_CONTRACT: new AppError("Failed to init NEAR contract", 270),
   NFT_EFFECT_CONFIRM: new AppError("Failed to apply effect to NFT", 280),
   CONTRACT_UNKNOWN: new AppError("Failed to load contract", 290),

@@ -32,7 +32,7 @@ export async function initContract(store) {
       tokens = await fetch(url, { headers }).then((res) => res.json())
     } catch(err) {
       console.log(err)
-      throw SystemErrors.GET_NEAR_ACCOUNT
+      throw SystemErrors.GET_NEAR_NFTS
     }
 
     return tokens
@@ -62,11 +62,7 @@ export async function initContract(store) {
     try {
       request = await acc.viewFunction(contract, 'nft_tokens_for_owner', { account_id: store.getters.getAccountId, limit: 30 })
     } catch(err) {
-      if(err instanceof AppError) {
-        alert(err.message)
-      } else {
-        alert("Undefined accountContracts error")
-      }
+      throw SystemErrors.GET_NEAR_NFTS
     }
 
     let obj = {}
