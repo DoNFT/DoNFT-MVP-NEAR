@@ -152,7 +152,6 @@ let routes = [
           text: `Sorry, effect with ID ${to.params.effectId} does not exit`,
         })
       } else {
-        console.log(to, 'NEXT to')
         next(`/add_effect/${to.params.id}/confirm/${to.params.effectId}`)
       }
     },

@@ -76,7 +76,6 @@ export default {
         this.$emit('selected', this.imgSource)
         this.setDroppedImage(this.imgSource)
       }
-      console.log(this.imgSource, 'this.imgSource')
       reader.readAsDataURL(img)
     }
 

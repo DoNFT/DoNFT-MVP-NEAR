@@ -1,6 +1,6 @@
 import { connect, Contract, keyStores, WalletConnection, utils } from 'near-api-js'
 import { getConfig } from './nearNets'
-import { SystemErrors, AppError } from "@/utilities"
+import { SystemErrors } from "@/utilities"
 
 const nfts_contract = getConfig({ env: process.env.VUE_APP_NETWORK, contract: process.env.VUE_APP_NFTS_CONTRACT })
 const bundle_contract = getConfig({ env: process.env.VUE_APP_NETWORK, contract: process.env.VUE_APP_BUNDLE_CONTRACT })

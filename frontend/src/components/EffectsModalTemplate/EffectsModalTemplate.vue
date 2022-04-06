@@ -74,7 +74,6 @@ export default {
       await this.setStyleResult('base64')
       await this.setDeployedPictureMeta('base64')
       this.setEffectModal(false)
-      console.log(this.getDeployedPictureMeta, 'getDeployedPictureMeta')
     }
   },
 }
