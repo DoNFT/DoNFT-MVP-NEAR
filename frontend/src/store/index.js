@@ -247,38 +247,16 @@ const store = new Vuex.Store({
       }
     },
     async setNFTApproveId ({getters, dispatch}, { approve_id, token_id, minting_contract_id }) {
-      try {
-        let contractData = checkForContract(getters, minting_contract_id)
-  
-        dispatch('setStatus', StatusType.Approving)
-        await approveNFT(approve_id, token_id, contractData)
-      } catch(err) {
-        dispatch('setStatus', StatusType.ChoosingParameters)
+      let contractData = checkForContract(getters, minting_contract_id)
 
-        if(err instanceof AppError) {
-          alert(err.message)
-        } else {
-          console.log(err)
-          alert("Undefined error")
-        }
-      }
+      dispatch('setStatus', StatusType.Approving)
+      await approveNFT(approve_id, token_id, contractData)
     },
     async sendNFTByToken ({getters, dispatch}, { receiver, token_data, minting_contract_id }) {
-      try {
-        dispatch('setStatus', StatusType.Approving)
-        let contractData = checkForContract(getters, minting_contract_id)
-  
-        await sendNFT(receiver, token_data, contractData)
-      } catch(err) {
-        dispatch('setStatus', StatusType.ChoosingParameters)
+      dispatch('setStatus', StatusType.Approving)
+      let contractData = checkForContract(getters, minting_contract_id)
 
-        if(err instanceof AppError) {
-          alert(err.message)
-        } else {
-          console.log(err)
-          alert("Undefined error")
-        }
-      }
+      await sendNFT(receiver, token_data, contractData)
     },
     pushNFTbyContract ({commit}, NFTS) {
       commit('SET_CURRENT_CONTRACT_NFT', NFTS)
