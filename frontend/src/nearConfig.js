@@ -129,9 +129,9 @@ export async function initContract(store) {
 
 // for ALL other extra Contracts, its need to use Change methods
 // cause Near require at least login, or init of contract, for using change methods
-export async function initNewContract(mintingContract) {
+export function initNewContract(mintingContract) {
   const contractConfig = getConfig({ env: process.env.VUE_APP_NETWORK, contract: mintingContract})
-  const nearConnectInstance = await connect(Object.assign({ deps: { keyStore: new keyStores.BrowserLocalStorageKeyStore() } }, contractConfig))
+  const nearConnectInstance = connect(Object.assign({ deps: { keyStore: new keyStores.BrowserLocalStorageKeyStore() } }, contractConfig))
   const nearNewWallet = new WalletConnection(nearConnectInstance)
   const nearNewContractSettings = new Contract(nearNewWallet.account(), contractConfig.contractName, {
     changeMethods: ['nft_mint', 'nft_bundle', 'nft_unbundle', 'nft_approve', 'nft_transfer'],

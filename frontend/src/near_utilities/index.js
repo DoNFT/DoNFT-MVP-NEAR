@@ -11,7 +11,7 @@ import {
 
 // firstly, search among 3 main contracts
 // if not found, init new Contract, for using change method
-export async function checkForContract(getters, minting_contract_id) {
+export function checkForContract(getters, minting_contract_id) {
   let findMainContract = null
   
   findMainContract = getters.getMainContracts.find((item) => item === minting_contract_id)
@@ -21,7 +21,7 @@ export async function checkForContract(getters, minting_contract_id) {
   }
   
   if (!findMainContract) {
-    return await initNewContract(minting_contract_id, this)
+    return initNewContract(minting_contract_id, this)
   }
 }
 
@@ -36,6 +36,7 @@ export async function createUsualNFT(token_id, metadata, receiver_id, contract) 
 }
 
 export async function createBundleNFT(token_id, metadata, bundles, contract) {
+  console.log(contract, 'contract')
   await contract
     .nft_bundle({
       token_id,
@@ -53,7 +54,6 @@ export async function unbundleNFT(token_id, contract) {
 }
 
 export async function approveNFT(account_id, token_id, contract) {
-  console.log(contract, 'contract')
   await contract
     .nft_approve({
       account_id,

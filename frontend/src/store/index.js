@@ -218,7 +218,7 @@ const store = new Vuex.Store({
     async createNewUsualNFT ({getters, dispatch},  { token_id, metadata, contract_id }) {
       try {
         dispatch('setStatus', StatusType.Minting)
-        let contractData = await checkForContract(getters, contract_id)
+        let contractData = checkForContract(getters, contract_id)
         console.log(contractData, 'contractData')
         await createUsualNFT(token_id, metadata, getters.getAccountId, contractData)
       } catch(err) {
@@ -226,10 +226,10 @@ const store = new Vuex.Store({
         throw SystemErrors.MINT_NFT
       }
     },
-    async createNewBundleNFT ({dispatch},  { token_id, metadata, bundles }) {
+    async createNewBundleNFT ({getters, dispatch},  { token_id, metadata, bundles }) {
       try {
         dispatch('setStatus', StatusType.Minting)
-        await createBundleNFT(token_id, metadata, bundles, 'getters.getBundleContract')
+        await createBundleNFT(token_id, metadata, bundles, getters.getBundleContract)
       } catch(err) {
         console.log(err)
         throw SystemErrors.BUNDLE_NFTS
@@ -248,7 +248,7 @@ const store = new Vuex.Store({
     },
     async setNFTApproveId ({getters, dispatch}, { approve_id, token_id, minting_contract_id }) {
       try {
-        let contractData = await checkForContract(getters, minting_contract_id)
+        let contractData = checkForContract(getters, minting_contract_id)
   
         dispatch('setStatus', StatusType.Approving)
         await approveNFT(approve_id, token_id, contractData)
@@ -266,7 +266,7 @@ const store = new Vuex.Store({
     async sendNFTByToken ({getters, dispatch}, { receiver, token_data, minting_contract_id }) {
       try {
         dispatch('setStatus', StatusType.Approving)
-        let contractData = await checkForContract(getters, minting_contract_id)
+        let contractData = checkForContract(getters, minting_contract_id)
   
         await sendNFT(receiver, token_data, contractData)
       } catch(err) {

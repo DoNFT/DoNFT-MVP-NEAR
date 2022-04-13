@@ -43,17 +43,15 @@ async function getTransactionForUser(to, next) {
     next()
   }
 
-  // if (isApproveCalled && to.name === 'AddEffectConfirm') {
-  //   console.log('beforeEnter AddEffectConfirm')
-  //   passResult(tx_hash, account_id, to.name)
-  //   next({ name: 'AddEffectConfirm' })
-  // }
-
   if (!isApproveCalled && tx_hash && ['ChooseNFT', 'BundleNFT', 'NFTDetails', 'CreateNFT', 'AddEffectConfirm', 'SendNFT'].includes(to.name)) {
     passResult(tx_hash, account_id, to.name)
     isRedirected = true
     next({ name: 'ChooseNFT' })
   } else {
+    if (!["AddEffect", "AddEffectConfirm"].includes(to.name)) {
+      next({ name: to.name })
+    }
+
     next()
   }
 
