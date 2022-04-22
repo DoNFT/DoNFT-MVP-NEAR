@@ -46,7 +46,11 @@ const store = new Vuex.Store({
     contract: null,
     bundle_contract: null,
     effects_contract: null,
-    mainContracts: [],
+    mainContracts: [
+      process.env.VUE_APP_NFTS_CONTRACT,
+      process.env.VUE_APP_NFTS_EFFECTS_CONTRACT,
+      process.env.VUE_APP_BUNDLE_CONTRACT,
+    ],
   },
   mutations: {
     setIpfs (state, ipfsInstance) {
@@ -126,9 +130,6 @@ const store = new Vuex.Store({
     },
     SET_NEAR_ACCOUNT (state, payload) {
       state.nearAccount = payload
-    },
-    SET_MAIN_CONTRACTS (state, payload) {
-      state.mainContracts = payload
     },
   },
   actions: {
@@ -291,9 +292,6 @@ const store = new Vuex.Store({
     },
     setNearAccount ({commit}, data) {
       commit('SET_NEAR_ACCOUNT', data)
-    },
-    setMainContracts ({commit}, data) {
-      commit('SET_MAIN_CONTRACTS', data)
     },
   },
   getters: {

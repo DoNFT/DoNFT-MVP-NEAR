@@ -247,12 +247,12 @@ export default {
         }
       } catch(err) {
         console.log(err, 'MAIN ERROR')
-        if(err instanceof AppError) {
-          alert(err.message)
-        } else {
-          console.log(err)
-          alert("Undefined error")
-        }
+        // if(err instanceof AppError) {
+        //   alert(err.message)
+        // } else {
+        //   console.log(err)
+        //   alert("Undefined error")
+        // }
       }
     },
     loadMoreNFT() {

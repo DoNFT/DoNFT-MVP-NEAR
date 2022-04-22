@@ -42,18 +42,13 @@ export async function initContract(store) {
   let acc = []
 
   if (store.getters.getAccountId) {
-    try {
-      acc = await near.account(store.getters.getAccountId)
-      NFTsContracts = await getTokens(store.getters.getAccountId, 50)
+    acc = await near.account(store.getters.getAccountId)
+    NFTsContracts = await getTokens(store.getters.getAccountId, 50)
 
-      const balance = await acc.getAccountBalance()
-      const amountInNEAR = utils.format.formatNearAmount(balance.total)
-      store.dispatch('setNearBalance', amountInNEAR)
-      store.dispatch('setNearAccount', acc)
-    } catch(err) {
-      console.log(err)
-      throw SystemErrors.GET_NEAR_ACCOUNT
-    }
+    const balance = await acc.getAccountBalance()
+    const amountInNEAR = utils.format.formatNearAmount(balance.total)
+    store.dispatch('setNearBalance', amountInNEAR)
+    store.dispatch('setNearAccount', acc)
   }
 
   await Promise.all(NFTsContracts.map(async (contract, key) => {
@@ -68,7 +63,6 @@ export async function initContract(store) {
     let obj = {}
 
     const mainContracts = [nfts_contract.contractName, bundle_contract.contractName, nfts_effects_contract.contractName]
-    store.dispatch('setMainContracts', mainContracts)
 
     // contract order changing, show main contracts on top. others lower
     if (mainContracts.includes(contract)) {
@@ -129,13 +123,17 @@ export async function initContract(store) {
 
 // for ALL other extra Contracts, its need to use Change methods
 // cause Near require at least login, or init of contract, for using change methods
-export function initNewContract(mintingContract) {
+export async function initNewContract(mintingContract) {
   const contractConfig = getConfig({ env: process.env.VUE_APP_NETWORK, contract: mintingContract})
-  const nearConnectInstance = connect(Object.assign({ deps: { keyStore: new keyStores.BrowserLocalStorageKeyStore() } }, contractConfig))
+  console.log(contractConfig, 'config')
+  const nearConnectInstance = await connect(Object.assign({ deps: { keyStore: new keyStores.BrowserLocalStorageKeyStore() } }, contractConfig))
+  console.log(nearConnectInstance, 'nearConnectInstance')
   const nearNewWallet = new WalletConnection(nearConnectInstance)
+  console.log(nearNewWallet, 'nearNewWallet')
   const nearNewContractSettings = new Contract(nearNewWallet.account(), contractConfig.contractName, {
     changeMethods: ['nft_mint', 'nft_bundle', 'nft_unbundle', 'nft_approve', 'nft_transfer'],
   })
+  console.log(nearNewContractSettings, 'nearNewContractSettings')
   return nearNewContractSettings
 }
 

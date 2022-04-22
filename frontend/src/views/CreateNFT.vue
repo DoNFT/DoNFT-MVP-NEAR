@@ -138,6 +138,7 @@ export default {
         try {
           await this.setResult('base64')
           await this.setDeployedPictureMeta('base64')
+          console.log(this.getDeployedPictureMeta, 'this.getDeployedPictureMeta')
 
           this.createNewUsualNFT({
             token_id: `token-${Date.now()}`,
