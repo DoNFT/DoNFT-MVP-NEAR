@@ -2,15 +2,14 @@ import untar from "js-untar"
 import { SystemErrors } from "@/utilities"
 import { NFTStorage } from "nft.storage/dist/bundle.esm.min.js"
 
-const CID_RE = /Qm[1-9A-HJ-NP-Za-km-z]{44,}|b[A-Za-z2-7]{58,}|B[A-Z2-7]{58,}|z[1-9A-HJ-NP-Za-km-z]{48,}|F[0-9A-F]{50,}/m
 const attachedGas = "300000000000000"
 const attachedTokens = "1"
 
-import {
-  initNewContract,
-} from "@/nearConfig"
+import { initNewContract } from "@/nearConfig"
 
 const API_KEY = process.env.VUE_APP_NFT_STORAGE_API_KEY
+
+import { uploadtoIPFS, CID_RE } from "@/api"
 
 const client = new NFTStorage({
   token: API_KEY,
@@ -22,9 +21,6 @@ export function checkForContract(getters, minting_contract_id) {
   let findMainContract = null
   
   findMainContract = getters.getMainContracts.find((item) => item === minting_contract_id)
-  console.log(findMainContract, 'FIND')
-  console.log(minting_contract_id, 'minting_contract_id')
-  console.log(getters.getMainContracts, 'getters.getMainContracts')
   
   if (findMainContract) {
     return [getters.getBundleContract, getters.getContract, getters.getEffectsContract].find((item) => item.contractId === findMainContract)
@@ -93,23 +89,21 @@ async function pushImageToIpfs(ipfsInstance, objectURL) {
     description: 'test',
     image: null
   }
+
+  const backIPFS = await uploadtoIPFS(objectURL)
+  console.log(backIPFS, 'CIT uploadtoIPFS')
+
   await fetch(objectURL)
-    .then(res => {
+    .then(async (res) => {
       console.log(res, 'buffer res')
-      return res.arrayBuffer()
-    })
-    .then(buffer => {
-      console.log(buffer, 'buffer data')
-      const byteArray = new Uint8Array(buffer)
-      const blob = new Blob([byteArray], {type: 'image/*'})
-      console.log(blob, 'blob data')
-      data.image = blob
+      data.image = await res.blob()
     })
   console.log(data, 'data pushImageToIpfs')
   cid = await client.store(data)
   console.log(cid, 'CIT pushImageToIpfs')
+  let executedCID = CID_RE.exec(cid.data.image.href)?.[0]
   // currently saving only href on ipfs
-  cidV1 = cid.data.image.href
+  cidV1 = `https://${executedCID}.ipfs.nftstorage.link/blob`
 
   return cidV1
 }
