@@ -1,5 +1,5 @@
 import untar from "js-untar"
-import { SystemErrors } from "@/utilities"
+import { SystemErrors, CID_RE  } from "@/utilities"
 import { NFTStorage } from "nft.storage/dist/bundle.esm.min.js"
 
 const attachedGas = "300000000000000"
@@ -9,7 +9,7 @@ import { initNewContract } from "@/nearConfig"
 
 const API_KEY = process.env.VUE_APP_NFT_STORAGE_API_KEY
 
-import { uploadtoIPFS, CID_RE } from "@/api"
+import { uploadtoIPFS} from "@/api"
 
 const client = new NFTStorage({
   token: API_KEY,
@@ -142,6 +142,9 @@ export async function getImageForTokenByURI(ipfsInstance, imageAddress) {
     if (imageAddress.startsWith('ipfs') || imageAddress.startsWith('https://ipfs'))  {
       let cid = CID_RE.exec(imageAddress)?.[0]
       let localImageURL = await getImageFromIpfs(ipfsInstance, `${cid}/blob`)
+      if (!localImageURL) {
+        localImageURL = await getImageFromIpfs(ipfsInstance, cid)
+      }
       image = localImageURL
     } else {
       image = imageAddress

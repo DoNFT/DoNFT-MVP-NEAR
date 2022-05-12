@@ -218,26 +218,16 @@ export default {
 
           // its calling bundle, because effect NFT combining with usual NFT
 
-
-          try {
-            await this.createNewBundleNFT({
-              token_id: `token-${Date.now()}`,
-              metadata: {
-                title: this.nftObj.metadata.title,
-                description: this.nftObj.metadata.description,
-                media: this.getDeployedPictureMeta,
-                copies: 1,
-              },
-              bundles: bundlesArrApproved,
-            })
-          } catch(err) {
-            console.log(err)
-            if (err instanceof AppError) {
-              throw err 
-            } else {
-              throw SystemErrors.BUNDLE_NFTS
-            }
-          }
+          await this.createNewBundleNFT({
+            token_id: `token-${Date.now()}`,
+            metadata: {
+              title: this.nftObj.metadata.title,
+              description: this.nftObj.metadata.description,
+              media: this.getDeployedPictureMeta,
+              copies: 1,
+            },
+            bundles: bundlesArrApproved,
+          })
         } catch(err) {
           if(err instanceof AppError) {
             alert(err.message)
