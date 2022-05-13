@@ -53,7 +53,7 @@
           <button
             class="main-btn"
             type="submit"
-            :disabled="checkBundleForApprove || !nftObj.metadata.media"
+            :disabled="checkBundleForApprove"
             @click.prevent="bundleNFTs"
           >Bundle NFTs!</button>
         </div>
@@ -177,24 +177,26 @@ export default {
     },
     async bundleNFTs() {
       try {
-
-        try {
-          await this.setResult('base64')
-        } catch(err) {
-          if (err instanceof AppError) {
-            throw err 
-          } else {
-            throw SystemErrors.NFT_EFFECT_CONFIRM
+        // bundling shoung be available even when no img uploaded
+        if (this.nftObj.metadata.media) {
+          try {
+            await this.setResult('base64')
+          } catch(err) {
+            if (err instanceof AppError) {
+              throw err 
+            } else {
+              throw SystemErrors.NFT_EFFECT_CONFIRM
+            }
           }
-        }
 
-        try {
-          await this.setDeployedPictureMeta('base64')
-        } catch(err) {
-          if (err instanceof AppError) {
-            throw err 
-          } else {
-            throw SystemErrors.IPFS_SAVE
+          try {
+            await this.setDeployedPictureMeta('base64')
+          } catch(err) {
+            if (err instanceof AppError) {
+              throw err 
+            } else {
+              throw SystemErrors.IPFS_SAVE
+            }
           }
         }
 
