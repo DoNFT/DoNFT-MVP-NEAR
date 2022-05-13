@@ -229,22 +229,14 @@ export default {
           }
         }
 
-        try {
-          await this.createNewUsualNFT({
-            token_id: `token-${Date.now()}`,
-            metadata: {
-              ...this.randomNFTsData.metadata,
-              media: this.getDeployedPictureMeta,
-            },
-            contract_id,
-          })
-        } catch(err) {
-          if (err instanceof AppError) {
-            throw err 
-          } else {
-            throw SystemErrors.MINT_NFT
-          }
-        }
+        await this.createNewUsualNFT({
+          token_id: `token-${Date.now()}`,
+          metadata: {
+            ...this.randomNFTsData.metadata,
+            media: this.getDeployedPictureMeta,
+          },
+          contract_id,
+        })
       } catch(err) {
         console.log(err, 'MAIN ERROR')
         // if(err instanceof AppError) {

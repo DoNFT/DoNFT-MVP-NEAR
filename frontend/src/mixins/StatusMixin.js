@@ -30,6 +30,7 @@ export default {
   watch: {
     getStatus: {
       handler(value) {
+        console.log(value, 'VALUE getStatus')
         this.$notify({
           group: 'foo',
           type: value < 5 ? 'info' : 'success',

@@ -193,11 +193,14 @@ export default {
       'triggerUnbundleNFT',
     ]),
     // requesting metadata of bundles NFT. to render them
+    // todo: bundle contract could contain infinite number of nft,
+    // so there can be a problem with searching for bundle nfts
     loadBundlesNFTsData() {
       const loadedBundleNFTs = []
 
       this.NFTComputedData.bundles.forEach(async (bundleData) => {
-        const request = await this.getNearAccount.viewFunction(bundleData.contract, 'nft_tokens_for_owner', { account_id: this.getBundleContract.contractId, limit: 30 })
+        const request = await this.getNearAccount.viewFunction(bundleData.contract, 'nft_tokens_for_owner', { account_id: this.getBundleContract.contractId, limit: 100 })
+        console.log(request, 'request')
 
         let requestedNFTs = request.filter((item) => {
           return this.NFTComputedData.bundles.find((bundleItem) => bundleItem.token_id === item.token_id)

@@ -1,19 +1,19 @@
 import untar from "js-untar"
 import { SystemErrors, CID_RE  } from "@/utilities"
-import { NFTStorage } from "nft.storage/dist/bundle.esm.min.js"
+// import { NFTStorage } from "nft.storage/dist/bundle.esm.min.js"
 
 const attachedGas = "300000000000000"
 const attachedTokens = "1"
 
 import { initNewContract } from "@/nearConfig"
 
-const API_KEY = process.env.VUE_APP_NFT_STORAGE_API_KEY
+// const API_KEY = process.env.VUE_APP_NFT_STORAGE_API_KEY
 
 import { uploadtoIPFS} from "@/api"
 
-const client = new NFTStorage({
-  token: API_KEY,
-})
+// const client = new NFTStorage({
+//   token: API_KEY,
+// })
 
 // firstly, search among 3 main contracts
 // if not found, init new Contract, for using change method
@@ -83,27 +83,12 @@ export async function sendNFT(receiver_id, token_data, contract) {
 
 async function pushImageToIpfs(ipfsInstance, objectURL) {
   let cidV1 = ''
-  let cid = ''
-  let data = {
-    name: 'test',
-    description: 'test',
-    image: null
-  }
 
-  const backIPFS = await uploadtoIPFS(objectURL)
-  console.log(backIPFS, 'CIT uploadtoIPFS')
-
-  await fetch(objectURL)
-    .then(async (res) => {
-      console.log(res, 'buffer res')
-      data.image = await res.blob()
-    })
-  console.log(data, 'data pushImageToIpfs')
-  cid = await client.store(data)
-  console.log(cid, 'CIT pushImageToIpfs')
-  let executedCID = CID_RE.exec(cid.data.image.href)?.[0]
+  const imageIPFS = await uploadtoIPFS(objectURL)
+  console.log(imageIPFS, 'CIT uploadtoIPFS')
+  let executedCID = CID_RE.exec(imageIPFS)?.[0]
   // currently saving only href on ipfs
-  cidV1 = `https://${executedCID}.ipfs.nftstorage.link/blob`
+  cidV1 = `https://ipfs.io/ipfs/${executedCID}`
 
   return cidV1
 }
@@ -137,18 +122,30 @@ export async function deployNFTtoIPFS(ipfsInstance, imageURL, oldMeta, type) {
 }
 
 export async function getImageForTokenByURI(ipfsInstance, imageAddress) {
-  let image
-  if (imageAddress) {
-    if (imageAddress.startsWith('ipfs') || imageAddress.startsWith('https://ipfs'))  {
-      let cid = CID_RE.exec(imageAddress)?.[0]
-      let localImageURL = await getImageFromIpfs(ipfsInstance, `${cid}/blob`)
-      if (!localImageURL) {
-        localImageURL = await getImageFromIpfs(ipfsInstance, cid)
-      }
-      image = localImageURL
+  let image = null
+  console.log(imageAddress, 'imageAddress')
+
+  if (!imageAddress) {
+    return null
+  }
+
+  if (imageAddress.startsWith('ipfs') || imageAddress.startsWith('https://ipfs'))  {
+    let ipfsAddres = imageAddress
+
+    // nft.storage return images with /blob in the end
+    // server on apply effect return image without /blob
+    let cid = CID_RE.exec(imageAddress)?.[0]
+    let localImageURL = null
+
+    if (ipfsAddres.endsWith("/blob")) {
+      localImageURL = await getImageFromIpfs(ipfsInstance, `${cid}/blob`)
     } else {
-      image = imageAddress
+      localImageURL = await getImageFromIpfs(ipfsInstance, cid)
     }
+
+    image = localImageURL
+  } else {
+    image = imageAddress
   }
   return image
 }

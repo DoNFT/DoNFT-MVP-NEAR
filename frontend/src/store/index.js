@@ -155,7 +155,6 @@ const store = new Vuex.Store({
     },
     async setResult ({commit, dispatch, getters}, type) {
       try {
-        dispatch('setStatus', StatusType.Applying)
         if (type === "base64") {
           commit('setImageResult', getters.getNFTforModification.media)
         } else {
