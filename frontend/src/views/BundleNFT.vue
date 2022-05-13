@@ -53,7 +53,7 @@
           <button
             class="main-btn"
             type="submit"
-            :disabled="checkBundleForApprove"
+            :disabled="checkBundleForApprove || !nftObj.metadata.media"
             @click.prevent="bundleNFTs"
           >Bundle NFTs!</button>
         </div>
@@ -87,6 +87,7 @@ export default {
         metadata: {
           title: 'NFT token 2 title',
           description: 'NFT token 2 description',
+          media: '',
         },
         token_id: [],
       },
