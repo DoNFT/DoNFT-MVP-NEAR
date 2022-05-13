@@ -143,6 +143,23 @@ export default {
     }
   },
 
+  // removed watcher from mixin, because watcher triggering twice on status change
+  watch: {
+    getStatus: {
+      handler(curVal) {
+        if (curVal !== -1) {
+          this.$notify({
+            group: 'foo',
+            type: curVal < 5 ? 'info' : 'success',
+            title: 'Status:',
+            text: this.statusText,
+            duration: 5000,
+          })
+        }
+      },
+    },
+  },
+
   methods: {
     ...mapActions([
       'createNewBundleNFT',
@@ -192,6 +209,7 @@ export default {
 
           return obj
         })
+        console.log(this.getDeployedPictureMeta, 'this.getDeployedPictureMeta')
 
         await this.createNewBundleNFT({
           token_id: `token-${Date.now()}`,

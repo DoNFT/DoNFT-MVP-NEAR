@@ -93,32 +93,17 @@ async function pushImageToIpfs(ipfsInstance, objectURL) {
   return cidV1
 }
 
-// async function pushObjectToIpfs(ipfsInstance, object) {
-//   let cid = null
-//   cid = await ipfsInstance.add(JSON.stringify(object))
-//   return cid
-// }
-
 export async function deployNFTtoIPFS(ipfsInstance, imageURL, oldMeta, type) {
   let imageCID = null
-  let meta = null
 
   try {
     imageCID = await pushImageToIpfs(ipfsInstance, imageURL, type)
-    meta = JSON.parse(JSON.stringify(oldMeta))
-    meta.animation_url = imageCID
   } catch(err) {
     console.log(err)
     throw SystemErrors.IPFS_SAVE
   }
 
-  try {
-    // await pushObjectToIpfs(ipfsInstance, meta)
-    return imageCID
-  } catch(err) {
-    console.log(err)
-    throw SystemErrors.IPFS_SAVE
-  }
+  return imageCID
 }
 
 export async function getImageForTokenByURI(ipfsInstance, imageAddress) {

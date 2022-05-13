@@ -68,7 +68,7 @@ const store = new Vuex.Store({
     setNFTsLoading (state, blob) {
       state.nftLoading = blob
     },
-    setDeployedPictureMeta (state, meta) {
+    SET_DEPLOYED_PICTURE_META (state, meta) {
       state.deployedPictureMeta = meta
     },
     setNFThash (state, transactionHash) {
@@ -173,7 +173,7 @@ const store = new Vuex.Store({
     async setEffectResult ({commit, dispatch}, effectData) {
       try {
         dispatch('setStatus', StatusType.Applying)
-        commit('setDeployedPictureMeta', await applyNFTsEffect(effectData))
+        commit('SET_DEPLOYED_PICTURE_META', await applyNFTsEffect(effectData))
       } catch(err) {
         dispatch('setStatus', StatusType.ChoosingParameters)
 
@@ -187,7 +187,7 @@ const store = new Vuex.Store({
     async setDeployedPictureMeta ({commit, dispatch, getters}, type) {
       try {
         dispatch('setStatus', StatusType.DeployingToIPFS)
-        commit('setDeployedPictureMeta', await deployNFTtoIPFS(getters.getIpfs, getters.getResult, getters.getNFTforModification, type))
+        commit('SET_DEPLOYED_PICTURE_META', await deployNFTtoIPFS(getters.getIpfs, getters.getResult, getters.getNFTforModification, type))
       } catch(err) {
         dispatch('setStatus', StatusType.ChoosingParameters)
 

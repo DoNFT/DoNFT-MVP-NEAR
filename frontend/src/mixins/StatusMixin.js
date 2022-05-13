@@ -26,20 +26,4 @@ export default {
       }
     },
   },
-
-  watch: {
-    getStatus: {
-      handler(value) {
-        if (value !== -1) {
-          this.$notify({
-            group: 'foo',
-            type: value < 5 ? 'info' : 'success',
-            title: 'Status:',
-            text: this.statusText,
-            duration: 5000,
-          })
-        }
-      },
-    },
-  },
 }
