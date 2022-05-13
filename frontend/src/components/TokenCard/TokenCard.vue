@@ -97,6 +97,13 @@ export default {
       if (this.metadata) {
         let url = null
 
+        // this one for showing blob image from applyEffect
+        // when effect and nft were merged
+        if (this.metadata.metadata && this.metadata.metadata.reference) {
+          this.urlData = this.metadata.metadata.reference
+          return
+        }
+
         if (!this.urlData || this.isBundle) {
           url = await this.setTokenImage(this.metadata)
         }

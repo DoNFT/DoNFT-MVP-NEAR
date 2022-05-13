@@ -69,6 +69,12 @@
         <h2>{{ statusText }}</h2>
       </div>
     </main>
+    <modal-template
+      v-if="showApproveModal"
+      :token-meta="nftObj"
+      @submit="bundleImageApproved"
+      @close="closeModal"
+    />
   </div>
 </template>
 
@@ -78,6 +84,7 @@ import Spinner from "@/components/Spinner"
 import TokenCard from '@/components/TokenCard/TokenCard'
 import NavBar from '@/components/NavBar/NavBar'
 import StatusType from "@/mixins/StatusMixin"
+import ModalTemplate from '@/components/ModalTemplate/ModalTemplate'
 import { AppError, SystemErrors } from "@/utilities"
 
 export default {
@@ -87,6 +94,7 @@ export default {
     Spinner,
     NavBar,
     TokenCard,
+    ModalTemplate
   },
 
   data() {
@@ -95,11 +103,14 @@ export default {
         metadata: {
           title: '',
           description: '',
+          media: '',
         },
         token_id: [],
       },
       NFTData: {},
       approvedNFTStatuses: [],
+      bundlesArrApproved: null,
+      showApproveModal: false,
     }
   },
 
@@ -159,9 +170,26 @@ export default {
       'setDeployedPictureMeta',
       'passNFT',
       'createNewBundleNFT',
+      'setStatus',
     ]),
     bundleStatusUpdate(data) {
       this.approvedNFTStatuses.push(data)
+    },
+    closeModal() {
+      this.showApproveModal = false
+      this.setStatus(StatusType.ChoosingParameters)
+    },
+    bundleImageApproved() {
+      this.createNewBundleNFT({
+        token_id: `token-${Date.now()}`,
+        metadata: {
+          title: this.nftObj.metadata.title,
+          description: this.nftObj.metadata.description,
+          media: this.getDeployedPictureMeta.cid,
+          copies: 1,
+        },
+        bundles: this.bundlesArrApproved,
+      })
     },
     // minting NFT with NEW effects
     async handleMint() {
@@ -185,6 +213,7 @@ export default {
 
           try {
             await this.setEffectResult(effectObj)
+            this.nftObj.metadata.media = this.getDeployedPictureMeta.hashBlob
           } catch(err) {
             console.log(err)
             if (err instanceof AppError) {
@@ -206,7 +235,7 @@ export default {
             }
           ]
 
-          const bundlesArrApproved = bundleArr.map((item) => {
+          this.bundlesArrApproved = bundleArr.map((item) => {
             const obj = {
               ...item.data,
               contract: item.contract === 'list' ? this.getContract.contractId : this.getEffectsContract.contractId,
@@ -216,18 +245,8 @@ export default {
             return obj
           })
 
-          // its calling bundle, because effect NFT combining with usual NFT
+          this.showApproveModal = true
 
-          await this.createNewBundleNFT({
-            token_id: `token-${Date.now()}`,
-            metadata: {
-              title: this.nftObj.metadata.title,
-              description: this.nftObj.metadata.description,
-              media: this.getDeployedPictureMeta,
-              copies: 1,
-            },
-            bundles: bundlesArrApproved,
-          })
         } catch(err) {
           if(err instanceof AppError) {
             alert(err.message)

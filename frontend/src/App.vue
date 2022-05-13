@@ -16,8 +16,6 @@
         v-if="isSignedIn"
       />
 
-      <effects-modal-template v-if="getEffectModalStatus" />
-
       <div class="container">
         <router-view />
       </div>
@@ -29,7 +27,6 @@
 <script>
 import HeadBar from '@/components/HeadBar/HeadBar.vue'
 import Spinner from "@/components/Spinner"
-import EffectsModalTemplate from "@/components/EffectsModalTemplate/EffectsModalTemplate.vue"
 import { mapActions, mapGetters } from "vuex"
 import StatusType from "@/mixins/StatusMixin"
 
@@ -39,7 +36,6 @@ export default {
   components: {
     HeadBar,
     Spinner,
-    EffectsModalTemplate,
   },
 
   mixins: [StatusType],

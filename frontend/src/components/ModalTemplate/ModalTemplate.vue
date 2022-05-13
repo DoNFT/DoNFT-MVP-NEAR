@@ -1,7 +1,7 @@
 <template>
   <div class="modal-template">
     <div class="modal-template__body">
-      <h3>Choose Effect</h3>
+      <h3>Result</h3>
 
       <div
         class="modal-template__body-close"
@@ -11,23 +11,19 @@
       </div>
 
       <div class="effect-confirm__inner">
-        <h3>NFT effects</h3>
+        <h4>Picture could not appear at first, approximately 1-3 minutes for upload</h4>
 
         <div
           class="effect-cards-box"
-          v-if="getEffects && getEffects.length"
+          v-if="tokenMeta"
         >
-          <effect-cards
-            @cardClicked="chooseEffect"
-            :show-id="false"
-            :cards="getEffects"
-            :choice="[getEffectChoice]"
-            content-type="video"
-          ></effect-cards>
+          <token-card
+            :metadata="tokenMeta"
+          />
           <button
             class="main-btn"
-            @click="submitEffect"
-          >Submit</button>
+            @click="submitResult"
+          >Submit Image</button>
         </div>
       </div>
     </div>
@@ -35,45 +31,26 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from "vuex"
-import EffectCards from "@/components/EffectCards/EffectCards.vue"
+import TokenCard from "@/components/TokenCard/TokenCard.vue"
 
 export default {
-  name: "EffectsModalTemplate",
+  name: "ModalTemplate",
+
+  props: {
+    tokenMeta: Object,
+  },
 
   components: {
-    EffectCards,
+    TokenCard,
   },
 
-  computed: {
-    ...mapGetters([
-      'getEffects',
-      'getEffectChoice',
-      'getDeployedPictureMeta',
-    ]),
-  },
 
   methods: {
-    ...mapActions([
-      'setEffectModal',
-      'setEffectChoice',
-      'setStyleResult',
-      'setDeployedPictureMeta',
-    ]),
     closeModal() {
-      this.setEffectModal(false)
+      this.$emit('close', false)
     },
-    async chooseEffect(id) {
-      if (this.getEffectChoice && id === this.getEffectChoice) {
-        this.setEffectChoice(null)
-      } else {
-        this.setEffectChoice(id)
-      }
-    },
-    async submitEffect() {
-      await this.setStyleResult('base64')
-      await this.setDeployedPictureMeta('base64')
-      this.setEffectModal(false)
+    async submitResult() {
+      this.$emit('submit', true)
     }
   },
 }
@@ -112,8 +89,8 @@ export default {
 .modal-template__body {
   position: relative;
   background: #fff;
-  width: 85vw;
-  height: 85vh;
+  width: 70vw;
+  height: 70vh;
   padding: 20px;
   border-radius: 4px;
   overflow-y: auto;
@@ -121,6 +98,14 @@ export default {
   
   .effect-confirm__inner {
     margin-left: 0;
+
+    h4 {
+      margin: 20px 0;
+      background: #2d0949;
+      padding: 12px;
+      border-radius: 4px;
+      color: #fff;
+    }
 
     h3 {
       margin-top: 20px;

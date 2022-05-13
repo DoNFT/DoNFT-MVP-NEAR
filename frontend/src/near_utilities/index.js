@@ -41,9 +41,9 @@ export async function createUsualNFT(token_id, metadata, receiver_id, contract) 
     }, attachedGas, '100000000000000000000000')
 }
 
-export async function createBundleNFT(token_id, metadata, bundles, contract) {
+export function createBundleNFT(token_id, metadata, bundles, contract) {
   console.log(contract, 'contract')
-  await contract
+  contract
     .nft_bundle({
       token_id,
       metadata,

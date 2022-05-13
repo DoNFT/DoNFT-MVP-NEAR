@@ -30,14 +30,15 @@ export default {
   watch: {
     getStatus: {
       handler(value) {
-        console.log(value, 'VALUE getStatus')
-        this.$notify({
-          group: 'foo',
-          type: value < 5 ? 'info' : 'success',
-          title: 'Status:',
-          text: this.statusText,
-          duration: 5000,
-        })
+        if (value !== -1) {
+          this.$notify({
+            group: 'foo',
+            type: value < 5 ? 'info' : 'success',
+            title: 'Status:',
+            text: this.statusText,
+            duration: 5000,
+          })
+        }
       },
     },
   },

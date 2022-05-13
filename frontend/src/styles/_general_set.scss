@@ -288,6 +288,10 @@ select::-ms-expand {
 
 .effect-cards-box {
   margin-bottom: 50px;
+
+	.modal-template & {
+		margin-bottom: 0;
+	}
 }
 
 

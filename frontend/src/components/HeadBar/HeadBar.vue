@@ -14,7 +14,7 @@
         class="link"
         target="_blank"
         :href="`https://explorer.testnet.near.org/accounts/${getAccountId}`"
-      >Wallet.near</a>
+      >{{getAccountId}}</a>
       <button class="main-btn main-btn--exit" @click="logout">Sign out</button>
     </div>
   </div>

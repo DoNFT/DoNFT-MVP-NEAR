@@ -226,14 +226,9 @@ const store = new Vuex.Store({
         throw SystemErrors.MINT_NFT
       }
     },
-    async createNewBundleNFT ({getters, dispatch},  { token_id, metadata, bundles }) {
-      try {
-        dispatch('setStatus', StatusType.Minting)
-        await createBundleNFT(token_id, metadata, bundles, getters.getBundleContract)
-      } catch(err) {
-        console.log(err)
-        throw SystemErrors.BUNDLE_NFTS
-      }
+    createNewBundleNFT ({getters, dispatch},  { token_id, metadata, bundles }) {
+      dispatch('setStatus', StatusType.Minting)
+      createBundleNFT(token_id, metadata, bundles, getters.getBundleContract)
     },
     async triggerUnbundleNFT ({getters, dispatch},  { token_id }) {
       try {

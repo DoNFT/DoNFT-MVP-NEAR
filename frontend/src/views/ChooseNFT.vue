@@ -329,6 +329,10 @@ export default {
   height: 200px;
   object-fit: cover;
 
+  .modal-template__body & {
+    min-height: 600px;
+  }
+
   .form-nft__detail-page & {
     width: 300px;
     height: 300px;

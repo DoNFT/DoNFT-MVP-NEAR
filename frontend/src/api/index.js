@@ -50,7 +50,6 @@ export async function applyNFTsEffect (effectData) {
 
   try {
     result = await api.post('/effects/applyEffect', effectData, {responseType: 'blob'})
-    console.log(result, 'result')
   } catch(err) {
     console.log(err)
     throw SystemErrors.NFT_EFFECT_CONFIRM
@@ -65,5 +64,5 @@ export async function applyNFTsEffect (effectData) {
   }
   console.log(cid, 'CID APPLY NFT EFFECT')
 
-  return cid ? cid : null
+  return cid ? { cid, hashBlob: bundleImageTempURL } : null
 }
