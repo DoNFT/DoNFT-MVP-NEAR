@@ -141,6 +141,14 @@ export default {
       opacity: 1;
     }
   }
+  
+  .modal-template__body & {
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 0 auto;
+  }
 }
 
 .nft-cards__info {

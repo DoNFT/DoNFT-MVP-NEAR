@@ -347,7 +347,8 @@ export default {
   object-fit: cover;
 
   .modal-template__body & {
-    min-height: 600px;
+    min-height: 500px;
+    margin: 30px 0;
   }
 
   .form-nft__detail-page & {
