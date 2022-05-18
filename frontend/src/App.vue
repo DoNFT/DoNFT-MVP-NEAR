@@ -6,6 +6,10 @@
       v-if="getStatus !== StatusType.ChoosingParameters"
     />
 
+    <notifications
+      group="deploy"
+    />
+
     <div v-if="getContractLoading" class="loading-container loading-container--app">
       <spinner :size="92" color="#000" />
     </div>
