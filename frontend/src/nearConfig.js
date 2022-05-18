@@ -41,10 +41,12 @@ export async function initContract(store) {
 
   let acc = []
 
+  console.log(nfts_contract, 'nfts_contract')
   if (store.getters.getAccountId) {
     acc = await near.account(store.getters.getAccountId)
     NFTsContracts = await getTokens(store.getters.getAccountId, 50)
 
+    console.log(NFTsContracts, 'NFTsContracts')
     const balance = await acc.getAccountBalance()
     const amountInNEAR = utils.format.formatNearAmount(balance.total)
     store.dispatch('setNearBalance', amountInNEAR)
@@ -52,13 +54,14 @@ export async function initContract(store) {
   }
 
   await Promise.all(NFTsContracts.map(async (contract, key) => {
-    let request = null
+    let request = []
 
     try {
       request = await acc.viewFunction(contract, 'nft_tokens_for_owner', { account_id: store.getters.getAccountId, limit: 30 })
     } catch(err) {
-      throw SystemErrors.GET_NEAR_NFTS
+      console.log(err, 'err')
     }
+    console.log(request, 'request')
 
     let obj = {}
 

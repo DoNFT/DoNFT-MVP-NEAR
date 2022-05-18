@@ -11,7 +11,7 @@
 
     <div
       class="upload-region-component__info"
-      v-if="!imgSource"
+      v-if="showPlaceholder"
     >
       <icon name="upload" :size="48" class="upload-icon" />
 
@@ -21,9 +21,18 @@
     </div>
 
     <img
+      v-if="!isFile"
       class="upload-region-component__img"
       :src="imageSrc || imgSource"
     >
+
+    <div
+      v-if="fileName"
+      class="upload-region-component__file"
+    >
+      <p>File: {{fileName}}</p>
+      <span>loaded</span>
+    </div>
 
     <input
       :id="id"
@@ -41,12 +50,30 @@ export default {
   props: {
     withEffects: Boolean,
     imageSrc: String,
+    isFile: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
       dragOver: false,
       id: `id-${Date.now()}`,
       imgSource: null,
+      fileName: null,
+    }
+  },
+  computed: {
+    showPlaceholder() {
+      if (this.isFile && !this.fileName) {
+        return true
+      }
+
+      if (!this.isFile && !this.imgSource) {
+        return true
+      }
+
+      return false
     }
   },
   methods: {
@@ -56,20 +83,32 @@ export default {
       'getIPFSimage',
     ]),
     onFileSelected(event) {
-      this.dragOver = false
-      const img = event.target.files ? event.target.files[0] : null
-      this.$refs.inputFile.value = null
-      this.updateImage(img)
+      if (!this.isFile) {
+        this.dragOver = false
+        const img = event.target.files ? event.target.files[0] : null
+        this.$refs.inputFile.value = null
+        this.updateImage(img)
 
-      if (this.withEffects) {
-        this.setEffectModal(true)
+        if (this.withEffects) {
+          this.setEffectModal(true)
+        }
+        return
       }
+      
+        
+      const file = event.target.files ? event.target.files[0] : null
+      this.$refs.inputFile.value = null
+      this.fileName = file.name
+      this.$emit('selected', file)
+
+      console.log(event, 'EVEMT')
     },
     buttonClick() {
       document.getElementById(this.id).click()
     },
     updateImage(img) {
       const reader = new FileReader()
+      console.log(img, 'img')
 
       reader.onload = (event) => {
         this.imgSource = event.target.result
@@ -171,5 +210,18 @@ export default {
   object-fit: cover;
   left: 0;
   right: 0;
+}
+
+.upload-region-component__file {
+  text-align: center;
+  width: 100%;
+
+  span {
+    background: #5ce9bc;
+    padding: 5px 10px;
+    color: #000;
+    font-weight: 700;
+    margin-top: 10px;
+  }
 }
 </style>

@@ -57,6 +57,16 @@ body {
 	padding-top: 100px;
 }
 
+.page--deploy {
+	flex-direction: column;
+	align-items: center;
+	padding-top: 200px;
+}
+
+.deploy__textarea {
+	min-height: 300px;
+}
+
 main {
 	margin: 0 auto;
 	width: 80%;
@@ -136,6 +146,10 @@ button, input {
 
 .main-btn--no-effect {
 	margin-top: 20px;
+}
+
+.main-btn--deploy {
+	margin-top: 30px;
 }
 
 .main-btn--exit {
@@ -303,6 +317,11 @@ select::-ms-expand {
 	font-size: 18px;
 	font-weight: 700;
 	margin-bottom: 7px;
+
+	.page--deploy & {
+		display: block;
+		margin-top: 20px;
+	}
 }
 
 .form-nft-send__inputs {

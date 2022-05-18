@@ -8,12 +8,13 @@ import BundleNFT from "@/views/BundleNFT"
 import AddEffect from "@/views/AddEffect"
 import AddEffectConfirm from "@/views/AddEffectConfirm"
 import NFTDetails from "@/views/NFTDetails"
+import DeployContract from "@/views/DeployContract"
+
 import store from "@/store"
 import { StatusType } from "@/utilities"
 
 import { providers } from "near-api-js"
 import { initContract } from "@/nearConfig"
-import { AppError } from "@/utilities"
 
 const provider = new providers.JsonRpcProvider(
   "https://rpc.testnet.near.org"
@@ -166,6 +167,12 @@ let routes = [
     component: SendNFT,
     meta: { title: 'Do[NFT]', requiresAuth: true }
   },
+  {
+    path: '/deploy',
+    name: 'DeployContract',
+    component: DeployContract,
+    meta: { title: 'Do[NFT]', requiresAuth: true }
+  },
 ]
 
 const router = new Router({
@@ -189,25 +196,16 @@ router.beforeEach(async (to, _from, next) => {
 
   if (!store.getters.getCurrentWallet) {
     console.log('---CONTRACT INIT---')
-    try {
-      await initContract(store)
-        .then(() => {
-          const user = store.getters.getCurrentWallet.isSignedIn()
-          if (!user) {
-            router.push('/login')
-          }
-          store.commit('SET_CURRENT_CONTRACT_LOADING', false)
-        })
-    } catch(err) {
-      if(err instanceof AppError) {
-        alert(err.message)
-      }
-      else {
-        console.log(err)
-        alert("Undefined error")
-      }
-  
-    }
+    await initContract(store)
+      .then(() => {
+        const user = store.getters.getCurrentWallet.isSignedIn()
+        console.log(user, '---CONTRACT INIT then 1---')
+        if (!user) {
+          router.push('/login')
+        }
+        console.log('---CONTRACT INIT then 2---')
+        store.commit('SET_CURRENT_CONTRACT_LOADING', false)
+      })
   }
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
   let user = null
