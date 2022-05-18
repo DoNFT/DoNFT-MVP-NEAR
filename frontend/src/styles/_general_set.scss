@@ -113,6 +113,7 @@ button, input {
 	max-width: 250px;
 	text-align: center;
 
+
 	span {
 		color: #efefef;
 	}
@@ -151,6 +152,27 @@ button, input {
 .main-btn--deploy {
 	margin-top: 30px;
 }
+
+.main-btn--reverse {
+	background-color: rgba(92, 233, 188, 1);
+	color: #000;
+	margin-left: 20px;
+
+	&:hover {
+		color: #fff;
+		background-color: rgba(58, 31, 79, 1);
+
+		span {
+			color: #fff;
+		}
+	}
+
+	&:focus {
+		color: #fff;
+		background-color: rgba(58, 31, 79, 1);
+	}
+}
+
 
 .main-btn--exit {
 	background-color: rgba(92, 233, 188, 1);
@@ -221,6 +243,12 @@ li {
 
 .home-text__inner__subtext {
 	font-size: 24px;
+}
+
+.home-text__inner__btn {
+	display: flex;
+	justify-content: space-between;
+	width: 100%;
 }
 
 .form-nft {
@@ -366,6 +394,10 @@ select::-ms-expand {
 	}
 }
 
+.link--reverse {
+	color: #2d0949;
+}
+
 .h1--effects {
 	margin-top: 40px;
 }
@@ -396,10 +428,6 @@ select::-ms-expand {
 
 .effect-confirm__selected {
   width: 40%;
-
-	.nft-cards__approve {
-		max-width: 100%;
-	}
 
 	.main-btn {
 		min-width: auto;

@@ -32,6 +32,7 @@ export default {
       'getAccountId',
       'getCurrentWalletBalance',
       'getCurrentWallet',
+      'getNearAccount',
     ]),
     accBalance() {
       return Number(this.getCurrentWalletBalance).toFixed(2)
@@ -40,6 +41,13 @@ export default {
 
   methods: {
     logout() {
+      // deleting full access key
+      // or later it will break logic
+      if (sessionStorage.getItem('near_access_key')) {
+        const key = sessionStorage.getItem('near_access_key')
+        this.getNearAccount.deleteKey(key)
+        sessionStorage.removeItem('near_access_key')
+      }
       logout(this.getCurrentWallet)
     },
   },

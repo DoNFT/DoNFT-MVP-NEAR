@@ -1,47 +1,63 @@
 <template>
   <div class="page page--deploy">
     <h1>Deploy</h1>
-    <div class="form-ntf__inputs">
-      <span class="form-nft-send__inputs-title">Contract Wasm file</span>
-      <uploader
-        @selected="setUploadedImg"
-        :is-file="true"
-      />
+    <template v-if="!isFullAccess">
+      <div
+        class="form-ntf__inputs"
+      >
+        <span class="form-nft-send__inputs-title">Account name</span>
+        <input
+          type="text"
+          placeholder="Contract name"
+          class="input form-nft__input"
+          v-model="accountForLogin"
+        >
+        <button
+          class="main-btn main-btn--deploy"
+          type="submit"
+          @click.prevent="loginFullAccess"
+        >Login with full access</button>
+      </div>
+    </template>
+    <template v-else>
+      <div
+        class="form-ntf__inputs"
+      >
+        <span class="form-nft-send__inputs-title">Contract Wasm file</span>
+        <uploader
+          @selected="setUploadedImg"
+          :is-file="true"
+        />
     
-      <span class="form-nft-send__inputs-title">Contract name</span>
-      <input
-        type="text"
-        placeholder="Contract name"
-        class="input form-nft__input"
-        v-model="contractName"
-      >
-      <span class="form-nft-send__inputs-title">Contract Near amount</span>
-      <input
-        type="number"
-        placeholder="Contract Near"
-        class="input form-nft__input"
-        v-model="contractNear"
-      >
-      <span class="form-nft-send__inputs-title">Account private key for deploy</span>
-      <input
-        type="text"
-        placeholder="Account private key"
-        class="input form-nft__input"
-        v-model="accountKey"
-      >
-      <button
-        class="main-btn main-btn--deploy"
-        type="submit"
-        @click.prevent="deploySubmit"
-      >Deploy contract</button>
-    </div>
+        <span class="form-nft-send__inputs-title">Contract name</span>
+        <input
+          type="text"
+          placeholder="Contract name"
+          class="input form-nft__input"
+          v-model="contractName"
+        >
+        <span class="form-nft-send__inputs-title">Contract Near amount</span>
+        <input
+          type="number"
+          placeholder="Contract Near"
+          class="input form-nft__input"
+          v-model="contractNear"
+        >
+        <button
+          class="main-btn main-btn--deploy"
+          type="submit"
+          @click.prevent="deploySubmit"
+        >Deploy contract</button>
+      </div>
+    </template>
   </div>
 </template>
 
 <script>
 import { mapGetters } from "vuex"
 import Uploader from '@/components/Uploader/Uploader'
-import { KeyPair, connect, keyStores, utils } from 'near-api-js'
+import { KeyPair, utils } from 'near-api-js'
+import { loginFullAccess } from "@/nearConfig"
 
 export default {
   name: "DeployContract",
@@ -53,9 +69,10 @@ export default {
   data() {
     return {
       contractVal: null,
-      contractName: 'nft-list7.near_testing.testnet',
+      contractName: 'nft-list12.near_testing.testnet',
       contractNear: 4,
-      accountKey: '',
+      accountForLogin: 'near_testing.testnet',
+      isFullAccess: false,
     }
   },
 
@@ -67,38 +84,28 @@ export default {
     ]),
   },
 
+  mounted(){
+    this.accountForLogin = this.getContract.account.accountId
+    this.contractName = `nft-list12.${this.getContract.account.accountId}`
+
+    if (sessionStorage.getItem('near_access_key')) {
+      this.isFullAccess = true
+    }
+  },
+  //ed25519%3AYwTYzyRtYXDNSPi1aueKVeFUDMxcVkmrh3mFMBBBZ8J
   methods: {
+    loginFullAccess() {
+      console.log('loginFullAccess')
+      this.getCurrentWallet.signOut()
+      loginFullAccess(this.getCurrentWallet, this.accountForLogin)
+    },
     async deploySubmit() {
       try {
-        console.log(this.getNearAccount, 'getNearAccount')
-        const ACCOUNT_ID = "near_testing.testnet"
         const amountInYocto = utils.format.parseNearAmount(this.contractNear.toString())
-        const credentials = JSON.parse(process.env.VUE_APP_NFT_CONTRACT_KEY)
-        console.log(credentials, 'credentials')
-        console.log(amountInYocto, 'amountInYocto')
         const keyPair = KeyPair.fromRandom("ed25519")
-        console.log(keyPair.publicKey.data.toString(), 'keyPair')
+        console.log(keyPair, 'keyPair')
 
-        let result = null
-        const keyStore = new keyStores.InMemoryKeyStore()
-        keyStore.setKey('testnet', ACCOUNT_ID, KeyPair.fromString(this.accountKey))
-        console.log(keyStore, 'keyStore')
-
-        const config = {
-          keyStore,
-          networkId: "testnet",
-          nodeUrl: "https://rpc.testnet.near.org",
-        }
-        const near = await connect(config)
-        const account = await near.account(ACCOUNT_ID)
-
-
-        if (this.contractName === process.env.VUE_APP_NFTS_CONTRACT) {
-          result = await account.deployContract(this.contractVal)
-          return
-        }
-
-        result = await account.createAndDeployContract(
+        const result = await this.getNearAccount.createAndDeployContract(
           this.contractName,
           keyPair.publicKey,
           this.contractVal,
@@ -113,7 +120,7 @@ export default {
             group: 'deploy',
             type: 'success',
             title: 'Contract deployed:',
-            text: `<a target="_blank" href="https://explorer.testnet.near.org/accounts/${result.accountId}">link to contract</a>`,
+            text: `<a class="link link--reverse" target="_blank" href="https://explorer.testnet.near.org/accounts/${result.accountId}">link to contract</a>`,
             duration: 10000,
           })
         }

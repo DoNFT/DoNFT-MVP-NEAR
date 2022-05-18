@@ -4,9 +4,9 @@
       <h1>Welcome to DoNFT demo on Near</h1>
       <p class="home-text__inner__subtext">Use power of neural network algorithms to create new unique combinations of digital art</p>
       <p class="home-text__inner__subtext">Go ahead and click the button below to try it out:</p>
-      <p style="text-align:center; margin-top:2.5em">
+      <div class="home-text__inner__btn">
         <button class="main-btn" @click="login">Sign in</button>
-      </p>
+      </div>
     </div>
     <img src="@/assets/home_img.jpg" style="height: 30%;  border-radius:20%;" >
   </div>
@@ -26,6 +26,7 @@ export default {
   },
 
   mounted() {
+    console.log(this.getCurrentWallet, 'wallet')
     if (this.getCurrentWallet.isSignedIn()) {
       this.$router.push({name: 'ChooseNFT'})
     }

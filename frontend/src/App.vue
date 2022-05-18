@@ -51,6 +51,7 @@ export default {
       'getContract',
       'getEffectModalStatus',
       'getStatus',
+      'getNearAccount'
     ]),
     // checking for wallet and contract, until they loaded
     isSignedIn() {
@@ -62,7 +63,7 @@ export default {
     },
   },
 
-  beforeMount() {
+  async beforeMount() {
     this.setIpfs()
     document.title = "nft-example.near_testing.testnet"
   },

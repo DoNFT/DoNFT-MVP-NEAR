@@ -169,7 +169,7 @@ export default {
   color: #fff;
   padding: 5px 8px;
   border-radius: 4px;
-  max-width: 205px;
+  max-width: 250px;
   cursor: text;
 }
 

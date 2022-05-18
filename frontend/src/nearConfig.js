@@ -15,6 +15,7 @@ export async function initContract(store) {
   // Initializing Wallet based Account. It can work with NEAR testnet wallet that
   // is hosted at https://wallet.testnet.near.org
   const walletConnection = new WalletConnection(near)
+  console.log(walletConnection, 'walletConnection')
   store.dispatch('setNearWalletConnection', walletConnection)
   store.dispatch('setAccountId', walletConnection.getAccountId())
 
@@ -147,5 +148,11 @@ export function logout(getCurrentWallet) {
 }
 
 export function login(getCurrentWallet) {
-  getCurrentWallet.requestSignIn(nfts_contract.contractName)
+  getCurrentWallet.requestSignIn()
 }
+
+export function loginFullAccess(getCurrentWallet, fullAccessAcc) {
+  console.log(getCurrentWallet, fullAccessAcc, 'loginFullAccess')
+  getCurrentWallet.requestSignIn(fullAccessAcc)
+}
+

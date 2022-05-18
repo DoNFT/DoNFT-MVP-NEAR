@@ -44,11 +44,19 @@ async function getTransactionForUser(to, next) {
     next()
   }
 
+  // all routers, which gonna be redirected to chooseNFT in case of successful transaction
   if (!isApproveCalled && tx_hash && ['ChooseNFT', 'BundleNFT', 'NFTDetails', 'CreateNFT', 'AddEffectConfirm', 'SendNFT'].includes(to.name)) {
     passResult(tx_hash, account_id, to.name)
     isRedirected = true
     next({ name: 'ChooseNFT' })
   } else {
+    // setting  FULL access key in storage, to understand
+    // is current user got FULL access or restricted
+    if (["DeployContract"].includes(to.name) && 'public_key' in router.currentRoute.query) {
+      sessionStorage.setItem("near_access_key", router.currentRoute.query.public_key)
+      next()
+    }
+
     if (!["AddEffect", "AddEffectConfirm"].includes(to.name)) {
       next({ name: to.name })
     }
@@ -192,7 +200,7 @@ router.afterEach(async (to, from) => {
 // in this case, loader is showing, and we are awaiting near config resolve
 
 // checking for auth require, depend on it, going to next route
-router.beforeEach(async (to, _from, next) => {
+router.beforeEach(async (to, from, next) => {
 
   if (!store.getters.getCurrentWallet) {
     console.log('---CONTRACT INIT---')
@@ -212,6 +220,23 @@ router.beforeEach(async (to, _from, next) => {
 
   if (store.getters.getCurrentWallet) {
     user = store.getters.getCurrentWallet.isSignedIn()
+  }
+
+  // todo: need to pay more attention on keys management
+  // current problem in Deploy page, where we give full access to user
+  // it should be removed once its used, cause logic while full access different
+  // near do not redirect to near wallet
+  console.log(to, 'to')
+  console.log(from, 'FROM')
+  if (from.name === 'DeployContract' && !('public_key' in router.currentRoute.query) && store.getters.getContract) {
+    const localKey = `near-api-js:keystore:${store.getters.getContract.account.accountId}:testnet`
+    
+    if (localStorage.getItem(localKey)) {
+      const key = sessionStorage.getItem('near_access_key')
+      store.getters.getNearAccount.deleteKey(key)
+      sessionStorage.removeItem('near_access_key')
+      localStorage.removeItem(localKey)
+    }
   }
 
   if (store.getters.getContract && requiresAuth && !user) {

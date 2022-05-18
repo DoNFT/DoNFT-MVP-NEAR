@@ -88,7 +88,7 @@ async function pushImageToIpfs(ipfsInstance, objectURL) {
   console.log(imageIPFS, 'CIT uploadtoIPFS')
   let executedCID = CID_RE.exec(imageIPFS)?.[0]
   // currently saving only href on ipfs
-  cidV1 = `https://ipfs.io/ipfs/${executedCID}`
+  cidV1 = `https://ipfs.io/ipfs/${executedCID}/file`
 
   return cidV1
 }
@@ -122,8 +122,8 @@ export async function getImageForTokenByURI(ipfsInstance, imageAddress) {
     let cid = CID_RE.exec(imageAddress)?.[0]
     let localImageURL = null
 
-    if (ipfsAddres.endsWith("/blob")) {
-      localImageURL = await getImageFromIpfs(ipfsInstance, `${cid}/blob`)
+    if (ipfsAddres.endsWith("/file")) {
+      localImageURL = await getImageFromIpfs(ipfsInstance, `${cid}/file`)
     } else {
       localImageURL = await getImageFromIpfs(ipfsInstance, cid)
     }
