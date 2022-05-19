@@ -90,7 +90,7 @@ export default {
   position: relative;
   background: #fff;
   width: 70vw;
-  height: 70vh;
+  height: 55vh;
   padding: 20px;
   border-radius: 4px;
   overflow-y: auto;

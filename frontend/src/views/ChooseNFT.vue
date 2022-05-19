@@ -344,10 +344,10 @@ export default {
   display: block;
   width: 100%;
   height: 200px;
-  object-fit: cover;
+  object-fit: contain;
 
   .modal-template__body & {
-    min-height: 500px;
+    height: 350px;
     margin: 30px 0;
   }
 
