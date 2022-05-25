@@ -2,7 +2,6 @@
   <div class="page page--deploy">
     <h1>EDITOR</h1>
     <div class="editor-box">
-      <div id="jsoneditor_code" class="jsoneditor" />
       <div id="jsoneditor" class="jsoneditor" />
     </div>
   </div>
@@ -38,15 +37,11 @@ export default {
   computed: {
     ...mapGetters([
       'getCurrentWallet',
+      'getAllNFTs',
     ]),
   },
 
   methods: {
-    onChangeCode() {
-      const jsonParsed = this.jsoneditor2.get()
-      console.log(jsonParsed, 'onChangeCode')
-      this.jsoneditor.set(jsonParsed)
-    },
     onChangeJSON(json) {
       console.log(json, 'onChangeJSON')
       this.json2 = json
@@ -66,7 +61,7 @@ export default {
   },
 
   mounted() {
-    console.log(this.getCurrentWallet, 'wallet')
+    console.log(this.getAllNFTs, 'getAllNFTs')
 
     const options = {
       mode: 'tree',
@@ -75,16 +70,7 @@ export default {
     const container = document.getElementById("jsoneditor")
 
     this.jsoneditor = new JSONEditor(container, options)
-    this.jsoneditor.set(this.json)
-
-    const options2 = {
-      mode: 'code',
-      onChange: this.onChangeCode,
-    }
-    const container2 = document.getElementById("jsoneditor_code")
-
-    this.jsoneditor2 = new JSONEditor(container2, options2)
-    this.jsoneditor.updateText(this.json)
+    this.jsoneditor.set(this.getAllNFTs)
   },
 
   // methods: {
@@ -104,6 +90,10 @@ export default {
     border: thin solid #5ce9bc;
     height: 70vh;
     background: #fff;
+
+    * {
+      box-sizing: unset;
+    }
 }
 .jsoneditor-menu {
     background-color: #2d0949;
