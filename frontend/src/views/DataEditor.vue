@@ -3,12 +3,14 @@
     <h1>EDITOR</h1>
     <div class="editor-box">
       <div id="jsoneditor" class="jsoneditor" />
+      <div id="jsoneditorHidden" class="jsoneditor--hidden" />
     </div>
   </div>
 </template>
 
 <script>
 import { mapGetters } from "vuex"
+import _ from "lodash"
 
 import JSONEditor from 'jsoneditor'
 import 'jsoneditor/dist/jsoneditor.css'
@@ -18,19 +20,10 @@ export default {
 
   data() {
     return {
-      jsonObj: {},
-      json: {
-        'array': [1, 2, 3],
-        'boolean': true,
-      },
+      jsonOnInit: {},
       jsoneditor: null,
       jsoneditor2: null,
-      json2: {
-        "array": [1, 2, 3],
-        "boolean": true,
-        "null": null,
-        "number": 123
-      }
+      jsonOnChange: {}
     }
   },
 
@@ -44,7 +37,16 @@ export default {
   methods: {
     onChangeJSON(json) {
       console.log(json, 'onChangeJSON')
-      this.json2 = json
+      this.jsonOnChange = json
+    },
+    onClassName({ path }) {
+      console.log(path, 'PATH')
+      const leftValue = _.get(this.jsonOnInit, path)
+      const rightValue = _.get(this.jsonOnChange, path)
+
+      return _.isEqual(leftValue, rightValue)
+        ? 'the_same_element'
+        : 'different_element'
     },
     onTextareaChange(e) {
       console.log(typeof this.json2, 'CHANGE')
@@ -61,16 +63,27 @@ export default {
   },
 
   mounted() {
+    this.jsonOnInit = this.getAllNFTs
+    this.jsonOnChange = this.getAllNFTs
     console.log(this.getAllNFTs, 'getAllNFTs')
 
     const options = {
       mode: 'tree',
-      onChangeJSON: this.onChangeJSON
+      onChangeJSON: this.onChangeJSON,
+      onClassName: this.onClassName,
     }
     const container = document.getElementById("jsoneditor")
 
     this.jsoneditor = new JSONEditor(container, options)
     this.jsoneditor.set(this.getAllNFTs)
+
+    const optionsOnInit = {
+      mode: 'tree',
+    }
+    const containerOnInit = document.getElementById("jsoneditorHidden")
+
+    this.jsoneditorOnInit = new JSONEditor(containerOnInit, optionsOnInit)
+    this.jsoneditorOnInit.set(this.getAllNFTs)
   },
 
   // methods: {
@@ -86,6 +99,11 @@ export default {
   display: flex;
   width: 100%;
 }
+
+.jsoneditor--hidden {
+  display: none;
+}
+
 .jsoneditor {
     border: thin solid #5ce9bc;
     height: 70vh;
@@ -105,5 +123,13 @@ div.jsoneditor-tree {
 
 div.jsoneditor-field, div.jsoneditor-value, div.jsoneditor td, div.jsoneditor th, div.jsoneditor textarea, pre.jsoneditor-preview, .jsoneditor-schema-error, .jsoneditor-popover {
   font-family: 'Roboto mono'
+}
+
+#jsoneditor .different_element {
+  background-color: #d1ff9d;
+}
+#jsoneditor .different_element div.jsoneditor-field,
+#jsoneditor .different_element div.jsoneditor-value {
+  color: #000;
 }
 </style>
