@@ -9,7 +9,6 @@ import AddEffect from "@/views/AddEffect"
 import AddEffectConfirm from "@/views/AddEffectConfirm"
 import NFTDetails from "@/views/NFTDetails"
 import DeployContract from "@/views/DeployContract"
-import DataEditor from "@/views/DataEditor"
 
 import store from "@/store"
 import { StatusType } from "@/utilities"
@@ -180,12 +179,6 @@ let routes = [
     path: '/deploy',
     name: 'DeployContract',
     component: DeployContract,
-    meta: { title: 'Do[NFT]', requiresAuth: true }
-  },
-  {
-    path: '/editor',
-    name: 'DataEditor',
-    component: DataEditor,
     meta: { title: 'Do[NFT]', requiresAuth: true }
   },
 ]
