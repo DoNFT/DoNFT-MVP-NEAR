@@ -108,17 +108,13 @@ export default {
     border: thin solid #5ce9bc;
     height: 70vh;
     background: #fff;
-
-    * {
-      box-sizing: unset;
-    }
 }
 .jsoneditor-menu {
     background-color: #2d0949;
 }
 
 div.jsoneditor-tree {
-  padding: 15px 15px 15px 0;
+  padding: 15px 0 0 0;
 }
 
 div.jsoneditor-field, div.jsoneditor-value, div.jsoneditor td, div.jsoneditor th, div.jsoneditor textarea, pre.jsoneditor-preview, .jsoneditor-schema-error, .jsoneditor-popover {
