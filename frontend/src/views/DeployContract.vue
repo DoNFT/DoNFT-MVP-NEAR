@@ -25,7 +25,7 @@
       >
         <span class="form-nft-send__inputs-title">Contract Wasm file</span>
         <uploader
-          @selected="setUploadedImg"
+          @selected="setUploadFile"
           :is-file="true"
         />
     
@@ -137,7 +137,7 @@ export default {
         })
       }
     },
-    setUploadedImg(e) {
+    setUploadFile(e) {
       const fr = new FileReader()
       fr.onload = () => {
         const data = new Uint8Array(fr.result)

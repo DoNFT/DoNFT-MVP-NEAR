@@ -137,6 +137,11 @@ export default {
   padding: 0 28px;
   transition: border-color .3s, box-shadow .3s;
 
+  .form-nft--editor & {
+    height: auto;
+    width: 450px;
+  }
+
   &:hover {
     border-color: rgba(45, 9, 73, 1);
     box-shadow: 0 5px 8px rgba(0, 0, 0, .3);

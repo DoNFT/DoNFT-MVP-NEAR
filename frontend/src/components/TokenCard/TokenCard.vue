@@ -37,9 +37,10 @@ export default {
     isBundle: Boolean,
     isApprovedContract: String,
   },
+
   data() {
     return {
-      urlData: null
+      urlData: null,
     }
   },
 
@@ -67,7 +68,6 @@ export default {
     if (this.getIpfs) {
       this.loadContent()
     }
-
     // validation for bundle NFT page
     if (this.isApprovedContract) {
       if (this.metadata.approved_account_ids && this.isApprovedContract in this.metadata.approved_account_ids) {
@@ -86,6 +86,16 @@ export default {
         }
       },
     },
+    // when using 1 component on page, component data may update (editor page)
+    // and in this case data updating, although blob image not
+    metadata: {
+      deep: true,
+      handler(value) {
+        if (value) {
+          this.loadContent()
+        }
+      },
+    },
   },
 
   methods: {
@@ -96,6 +106,7 @@ export default {
     async loadContent () {
       if (this.metadata) {
         let url = null
+        this.urlData = null
 
         // this one for showing blob image from applyEffect
         // when effect and nft were merged
@@ -106,6 +117,7 @@ export default {
 
         if (!this.urlData || this.isBundle) {
           url = await this.setTokenImage(this.metadata)
+          console.log(url, '----URL')
         }
 
         this.urlData = url ? url : null
