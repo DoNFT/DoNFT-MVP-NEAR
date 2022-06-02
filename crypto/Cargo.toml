@@ -1,0 +1,6 @@
+[workspace]
+
+members = [
+	"donft-bundle",
+	"donft-collection-factory",
+]

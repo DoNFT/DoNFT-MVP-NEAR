@@ -20,7 +20,7 @@ pub struct Payout {
     pub payout: HashMap<AccountId, U128>,
 } 
 
-#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone)]
+#[derive(BorshDeserialize, BorshSerialize, Debug, Serialize, Deserialize, Clone)]
 #[serde(crate = "near_sdk::serde")]
 pub struct NFTContractMetadata {
     pub spec: String,              // required, essentially a version like "nft-1.0.0"
@@ -86,9 +86,30 @@ pub trait NonFungibleTokenMetadata {
     fn nft_metadata(&self) -> NFTContractMetadata;
 }
 
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[cfg_attr(feature = "wasm", derive(BorshDeserialize, BorshSerialize))]
+pub struct CollectionInitArgs {
+    pub metadata: NFTContractMetadata,
+    pub owner_id: AccountId,
+}
+
 #[near_bindgen]
 impl NonFungibleTokenMetadata for Contract {
     fn nft_metadata(&self) -> NFTContractMetadata {
         self.metadata.get().unwrap()
+    }
+}
+
+impl Default for NFTContractMetadata {
+    fn default() -> Self {
+        Self {
+            spec: "".to_string(),
+            name: "".to_string(),
+            symbol: "".to_string(),
+            icon: None,
+            base_uri: None,
+            reference: None,
+            reference_hash: None,
+        }
     }
 }

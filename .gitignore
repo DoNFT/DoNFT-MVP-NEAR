@@ -1,8 +1,12 @@
 
-crypto/near/target/*
+crypto/donft-bundle/target/*
 
-crypto/near/out/*
+crypto/donft-bundle/out/*
 
-crypto/near/res/*
+crypto/donft-bundle/res/*
 
-crypto/near/.env
+crypto/donft-bundle/.env
+
+crypto/donft-collection-factory/target/*
+
+crypto/target/*
