@@ -1,25 +1,6 @@
 <template>
   <div class="page page--deploy">
-    <h1>Deploy</h1>
-    <template v-if="!isFullAccess">
-      <div
-        class="form-ntf__inputs"
-      >
-        <span class="form-nft-send__inputs-title">Account name</span>
-        <input
-          type="text"
-          placeholder="Contract name"
-          class="input form-nft__input"
-          v-model="accountForLogin"
-        >
-        <button
-          class="main-btn main-btn--deploy"
-          type="submit"
-          @click.prevent="loginFullAccess"
-        >Login with full access</button>
-      </div>
-    </template>
-    <template v-else>
+    <template>
       <div
         class="form-ntf__inputs"
       >
@@ -56,7 +37,6 @@
 <script>
 import { mapGetters } from "vuex"
 import Uploader from '@/components/Uploader/Uploader'
-import { KeyPair, utils } from 'near-api-js'
 import { loginFullAccess } from "@/nearConfig"
 
 export default {
@@ -81,10 +61,12 @@ export default {
       'getNearAccount',
       'getCurrentWallet',
       'getContract',
+      'getFactoryContract',
     ]),
   },
 
   mounted(){
+    console.log(this.getNearAccount, 'getNearAccount')
     this.accountForLogin = this.getContract.account.accountId
     this.contractName = `nft-list12.${this.getContract.account.accountId}`
 
@@ -101,31 +83,58 @@ export default {
     },
     async deploySubmit() {
       try {
-        const amountInYocto = utils.format.parseNearAmount(this.contractNear.toString())
-        const keyPair = KeyPair.fromRandom("ed25519")
-        console.log(keyPair, 'keyPair')
+        // const amountInYocto = utils.format.parseNearAmount(this.contractNear.toString())
+        // const keyPair = KeyPair.fromRandom("ed25519")
+        // console.log(keyPair, 'keyPair')
 
-        const result = await this.getNearAccount.createAndDeployContract(
-          this.contractName,
-          keyPair.publicKey,
-          this.contractVal,
-          amountInYocto,
-        )
+        // const result = await this.getNearAccount.createAndDeployContract(
+        //   this.contractName,
+        //   keyPair.publicKey,
+        //   this.contractVal,
+        //   amountInYocto,
+        // )
 
-        const isReady = await result.ready
-        console.log(isReady, 'isReady')
+        // const isReady = await result.ready
+        // console.log(isReady, 'isReady')
 
-        if (result) {
-          this.$notify({
-            group: 'deploy',
-            type: 'success',
-            title: 'Contract deployed:',
-            text: `<a class="link link--reverse" target="_blank" href="https://explorer.testnet.near.org/accounts/${result.accountId}">link to contract</a>`,
-            duration: 10000,
+        // if (result) {
+        //   this.$notify({
+        //     group: 'deploy',
+        //     type: 'success',
+        //     title: 'Contract deployed:',
+        //     text: `<a class="link link--reverse" target="_blank" href="https://explorer.testnet.near.org/accounts/${result.accountId}">link to contract</a>`,
+        //     duration: 10000,
+        //   })
+        // }
+        console.log(this.getFactoryContract, 'this.getFactoryContract')
+
+        const result = await this.getFactoryContract
+          .get_stores_collection({
+            from_index: 0,
+            limit: 50,
           })
-        }
-        console.log(result)
-        console.log(result, 'result')
+        const result2 = await this.getFactoryContract
+          .get_store_by_owner({
+            account_id: 'near_testy.testnet',
+          })
+        console.log(result, 'this.result')
+        console.log(result2, 'this.result2')
+
+
+
+        // this.getFactoryContract
+        //   .create_store({
+        //     owner_id: "near_testy.testnet",
+        //     metadata: {
+        //       spec: "nft-1.0.0",
+        //       name: "subfactory5",
+        //       symbol: "test2",
+        //       icon: "data:image/x-icon;base64,AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAJCT/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQAAEQAAAAEAEAEAEAAAAQAQAQAQAAAAEREREQAAAAAAEAAAAAAAAAAQAAAAAAAAABEQAAEQAAAAEAEAEAEAAAAQAQAQAQAAAAEREREQAAAAAAAAEAAAAAAAAAAQAAAAAAAAERAAAAAAAAEAEAAAAAAAAQAQAAAAAAAAEQAADnnwAA228AANtvAADgHwAA+/8AAPv/AAD48wAA+20AAPttAAD8AwAA/+8AAP/vAAD/jwAA/28AAP9vAAD/nwAA",
+        //       base_uri: "https://arweave.net",
+        //       reference: null,
+        //       reference_hash: null
+        //     },
+        //   }, '300000000000000', '6500000000000000000000000')
       } catch(err) {
         console.log(err.message, 'err2')
         this.$notify({

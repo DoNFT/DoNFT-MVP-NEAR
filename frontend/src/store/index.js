@@ -46,6 +46,7 @@ const store = new Vuex.Store({
     contract: null,
     bundle_contract: null,
     effects_contract: null,
+    collection_factory: null,
     mainContracts: [
       process.env.VUE_APP_NFTS_CONTRACT,
       process.env.VUE_APP_NFTS_EFFECTS_CONTRACT,
@@ -118,6 +119,9 @@ const store = new Vuex.Store({
     },
     SET_CURRENT_EFFECTS_CONTRACT (state, payload) {
       state.effects_contract = payload
+    },
+    SET_CURRENT_COLLECTION_FACTORY (state, payload) {
+      state.collection_factory = payload
     },
     SET_NFT_COUNTER (state, payload) {
       state.NFTsTotal += payload
@@ -313,6 +317,7 @@ const store = new Vuex.Store({
     getContract: state => state.contract,
     getBundleContract: state => state.bundle_contract,
     getEffectsContract: state => state.effects_contract,
+    getFactoryContract: state => state.collection_factory,
     getMainContracts: state => state.mainContracts,
   },
 })

@@ -10,3 +10,5 @@ crypto/donft-bundle/.env
 crypto/donft-collection-factory/target/*
 
 crypto/target/*
+crypto/testing/node_modules
+crypto/neardev

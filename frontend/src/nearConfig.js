@@ -5,6 +5,7 @@ import { SystemErrors } from "@/utilities"
 const nfts_contract = getConfig({ env: process.env.VUE_APP_NETWORK, contract: process.env.VUE_APP_NFTS_CONTRACT })
 const bundle_contract = getConfig({ env: process.env.VUE_APP_NETWORK, contract: process.env.VUE_APP_BUNDLE_CONTRACT })
 const nfts_effects_contract = getConfig({ env: process.env.VUE_APP_NETWORK, contract: process.env.VUE_APP_NFTS_EFFECTS_CONTRACT })
+const collection_factory = getConfig({ env: process.env.VUE_APP_NETWORK, contract: process.env.VUE_APP_COLLECTION_FACTORY })
 
 // Initialize contract & set global variables
 export async function initContract(store) {
@@ -20,6 +21,7 @@ export async function initContract(store) {
   store.dispatch('setAccountId', walletConnection.getAccountId())
 
   const domain = `${nfts_contract.helperUrl}/account/${store.getters.getAccountId}/likelyNFTs`
+  const domain2 = `${nfts_contract.helperUrl}/publicKey/ed25519:H9woB3QiwyujZbKciojnjjR3zeWgw3Wa31N8861Bo5Ry/accounts`
   
   const headers = new Headers({
     'max-age': '300'
@@ -31,6 +33,7 @@ export async function initContract(store) {
     let tokens = []
     try {
       tokens = await fetch(url, { headers }).then((res) => res.json())
+      tokens = await fetch(domain2, { headers }).then((res) => res.json())
     } catch(err) {
       console.log(err)
       throw SystemErrors.GET_NEAR_NFTS
@@ -94,7 +97,7 @@ export async function initContract(store) {
   // Initializing our contract APIs by contract name and configuration
   const cotractSettings = await new Contract(walletConnection.account(), nfts_contract.contractName, {
     // View methods are read only. They don't modify the state, but usually return some value.
-    viewMethods: ['nft_total_supply', 'nft_tokens_for_owner'],
+    viewMethods: ['nft_total_supply', 'nft_tokens_for_owner', 'nft_tokens'],
     // Change methods can modify the state. But you don't receive the returned value when called.
     changeMethods: ['nft_mint', 'nft_transfer', 'nft_approve', 'nft_bundle', 'nft_unbundle'],
   })
@@ -111,7 +114,7 @@ export async function initContract(store) {
     changeMethods: ['nft_mint', 'nft_bundle', 'nft_unbundle', 'nft_approve', 'nft_transfer'],
   })
   store.dispatch('setCurrentBundleContract', cotractBundleSettings)
-
+  
   // near NFT EFFECTS contract
   // --------------------
   // near NFT EFFECTS contract
@@ -123,6 +126,22 @@ export async function initContract(store) {
     changeMethods: ['nft_mint', 'nft_bundle', 'nft_unbundle', 'nft_approve', 'nft_transfer'],
   })
   store.dispatch('setCurrentEffectsContract', cotractEffectsSettings)
+
+  // near COLLECTION FACTORY contract
+  // --------------------
+  // near COLLECTION FACTORY contract
+  const near_collection_factory = await connect(Object.assign({ deps: { keyStore: new keyStores.BrowserLocalStorageKeyStore() } }, collection_factory))
+  const collectionFactory = new WalletConnection(near_collection_factory)
+
+  // Initializing our contract APIs by contract name and configuration
+  const contractCollectionFactory = await new Contract(collectionFactory.account(), collection_factory.contractName, {
+    changeMethods: ['create_store'],
+    viewMethods: ['get_stores_collection', 'get_store_by_owner'],
+  })
+  const acc2 = await near_collection_factory.account(collectionFactory.getAccountId())
+  console.log(acc2, 'acc2 ----contractCollectionFactory')
+  console.log(await acc2.getAccountDetails(), 'acc2 ----contractCollectionFactory')
+  store.commit('SET_CURRENT_COLLECTION_FACTORY', contractCollectionFactory)
 }
 
 // for ALL other extra Contracts, its need to use Change methods
