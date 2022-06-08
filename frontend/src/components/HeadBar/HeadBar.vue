@@ -27,6 +27,11 @@ import { logout } from "@/nearConfig"
 export default {
   name: "HeadBar",
 
+  data() {
+    return {
+      activeHeaderContract: null,
+    }
+  },
   computed: {
     ...mapGetters([
       'getAccountId',

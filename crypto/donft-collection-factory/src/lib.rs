@@ -21,7 +21,7 @@ use donft_bundle::{
     CollectionInitArgs,
 };
 
-use donft_bundle::near_sdk::collections::{LookupMap, UnorderedSet};
+use donft_bundle::near_sdk::collections::{LookupMap, UnorderedSet, LookupSet};
 use donft_bundle::factory_interfaces::factory_self;
 use donft_bundle::serde_json;
 use donft_bundle::serde::{Serialize, Deserialize};
@@ -125,6 +125,7 @@ impl Default for DonftCollectionFactory {
 pub struct DonftCollectionFactory {
     /// The `Store`s this `Factory` has produced.
     pub stores: LookupMap<AccountId, UnorderedSet<String>>,
+    pub stores_without_owner: LookupSet<String>,
     /// Fee taken by Mintbase for `Store` deployment.
     pub mintbase_fee: Balance,
     /// The owner may update the `mintbase_fee`.
@@ -250,6 +251,15 @@ impl DonftCollectionFactory {
         );
     }
 
+    /// If a `Store` with `store_id` has been produced by this `Factory`, return `true`.
+    pub fn check_contains_store(
+        &self,
+        store_id: String,
+    ) -> bool {
+        self.stores_without_owner.contains(&store_id)
+    }
+
+
     #[private]
     pub fn on_create(
         &mut self,
@@ -265,6 +275,7 @@ impl DonftCollectionFactory {
             env::log_str("on_create is_promise_success");
             // pay out self and update contract state
             self.internal_add_store_to_owner(&owner_id, &metadata.name);
+            self.stores_without_owner.insert(&metadata.name);
 
             Promise::new(self.owner_id.to_string().parse().unwrap())
                 .transfer(attached_deposit - self.store_cost);
@@ -281,6 +292,7 @@ impl DonftCollectionFactory {
         let storage_price_per_byte = YOCTO_PER_BYTE; // 10^19
         Self {
             stores: LookupMap::new(StoreKey::TokensPerOwner.try_to_vec().unwrap()),
+            stores_without_owner: LookupSet::new(b"t".to_vec()),
             mintbase_fee: 0, // 0 by default
             owner_id: env::predecessor_account_id(),
             storage_price_per_byte,

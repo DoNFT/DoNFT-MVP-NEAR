@@ -21,7 +21,6 @@ export async function initContract(store) {
   store.dispatch('setAccountId', walletConnection.getAccountId())
 
   const domain = `${nfts_contract.helperUrl}/account/${store.getters.getAccountId}/likelyNFTs`
-  const domain2 = `${nfts_contract.helperUrl}/publicKey/ed25519:H9woB3QiwyujZbKciojnjjR3zeWgw3Wa31N8861Bo5Ry/accounts`
   
   const headers = new Headers({
     'max-age': '300'
@@ -33,7 +32,6 @@ export async function initContract(store) {
     let tokens = []
     try {
       tokens = await fetch(url, { headers }).then((res) => res.json())
-      tokens = await fetch(domain2, { headers }).then((res) => res.json())
     } catch(err) {
       console.log(err)
       throw SystemErrors.GET_NEAR_NFTS
@@ -136,12 +134,17 @@ export async function initContract(store) {
   // Initializing our contract APIs by contract name and configuration
   const contractCollectionFactory = await new Contract(collectionFactory.account(), collection_factory.contractName, {
     changeMethods: ['create_store'],
-    viewMethods: ['get_stores_collection', 'get_store_by_owner'],
+    viewMethods: ['get_stores_collection', 'check_contains_store'],
   })
-  const acc2 = await near_collection_factory.account(collectionFactory.getAccountId())
-  console.log(acc2, 'acc2 ----contractCollectionFactory')
-  console.log(await acc2.getAccountDetails(), 'acc2 ----contractCollectionFactory')
-  store.commit('SET_CURRENT_COLLECTION_FACTORY', contractCollectionFactory)
+  store.commit('SET_COLLECTION_FACTORY_CONTRACT', contractCollectionFactory)
+
+  if (collectionFactory.getAccountId()) {
+    const collections = await contractCollectionFactory
+      .get_stores_collection({
+        account_id: collectionFactory.getAccountId(),
+      })
+    store.commit('SET_USER_COLLECTIONS', collections)
+  }
 }
 
 // for ALL other extra Contracts, its need to use Change methods

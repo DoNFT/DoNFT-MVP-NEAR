@@ -65,7 +65,6 @@ export default {
 
   async beforeMount() {
     this.setIpfs()
-    document.title = "nft-example.near_testing.testnet"
   },
 
   methods: {

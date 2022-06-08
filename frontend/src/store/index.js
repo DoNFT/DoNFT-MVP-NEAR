@@ -46,7 +46,9 @@ const store = new Vuex.Store({
     contract: null,
     bundle_contract: null,
     effects_contract: null,
-    collection_factory: null,
+    factory_contract: null,
+    activeContract: 'nft-list.near_testing.testnet',
+    user_stores_collection: [],
     mainContracts: [
       process.env.VUE_APP_NFTS_CONTRACT,
       process.env.VUE_APP_NFTS_EFFECTS_CONTRACT,
@@ -120,8 +122,11 @@ const store = new Vuex.Store({
     SET_CURRENT_EFFECTS_CONTRACT (state, payload) {
       state.effects_contract = payload
     },
-    SET_CURRENT_COLLECTION_FACTORY (state, payload) {
-      state.collection_factory = payload
+    SET_COLLECTION_FACTORY_CONTRACT (state, payload) {
+      state.factory_contract = payload
+    },
+    SET_USER_COLLECTIONS (state, payload) {
+      state.user_stores_collection = payload
     },
     SET_NFT_COUNTER (state, payload) {
       state.NFTsTotal += payload
@@ -134,6 +139,9 @@ const store = new Vuex.Store({
     },
     SET_NEAR_ACCOUNT (state, payload) {
       state.nearAccount = payload
+    },
+    SET_ACTIVE_CONTRACT (state, payload) {
+      state.activeContract = payload
     },
   },
   actions: {
@@ -222,8 +230,7 @@ const store = new Vuex.Store({
     async createNewUsualNFT ({getters, dispatch},  { token_id, metadata, contract_id }) {
       try {
         dispatch('setStatus', StatusType.Minting)
-        let contractData = checkForContract(getters, contract_id)
-        console.log(contractData, 'contractData')
+        let contractData = await checkForContract(getters, contract_id)
         await createUsualNFT(token_id, metadata, getters.getAccountId, contractData)
       } catch(err) {
         console.log(err)
@@ -246,14 +253,14 @@ const store = new Vuex.Store({
       }
     },
     async setNFTApproveId ({getters, dispatch}, { approve_id, token_id, minting_contract_id }) {
-      let contractData = checkForContract(getters, minting_contract_id)
+      let contractData = await checkForContract(getters, minting_contract_id)
 
       dispatch('setStatus', StatusType.Approving)
       await approveNFT(approve_id, token_id, contractData)
     },
     async sendNFTByToken ({getters, dispatch}, { receiver, token_data, minting_contract_id }) {
       dispatch('setStatus', StatusType.Approving)
-      let contractData = checkForContract(getters, minting_contract_id)
+      let contractData = await checkForContract(getters, minting_contract_id)
 
       await sendNFT(receiver, token_data, contractData)
     },
@@ -317,8 +324,17 @@ const store = new Vuex.Store({
     getContract: state => state.contract,
     getBundleContract: state => state.bundle_contract,
     getEffectsContract: state => state.effects_contract,
-    getFactoryContract: state => state.collection_factory,
+    getFactoryContract: state => state.factory_contract,
     getMainContracts: state => state.mainContracts,
+    getActiveContract: state => state.activeContract,
+    getUserStores: state => {
+      if (state.user_stores_collection && state.user_stores_collection.length) {
+        return state.user_stores_collection
+          .map((item) => item.store_owner_id === state.account_id ? `${item.store_id}.${process.env.VUE_APP_COLLECTION_FACTORY}` : null).filter(Boolean)
+      }
+
+      return []
+    },
   },
 })
 

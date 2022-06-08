@@ -18,13 +18,13 @@
       <form class="form-nft">
         <uploader @selected="setUploadedImg"/>
         <div class="form-ntf__inputs">
-          <span class="form-nft-send__inputs-title">Contract</span>
-          <input
-            type="text"
-            placeholder="NFT Contract"
-            class="input form-nft__input"
-            v-model="nftObj.contract_id"
-          >
+          <span class="form-nft-send__inputs-title">Choose collection</span>
+          <div class="select-wrap select-wrap--header">
+            <select-component
+              :model-value="nftObj.contract_id"
+              @change="changeContract"
+            />
+          </div>
           <span class="form-nft-send__inputs-title">Title</span>
           <input
             type="text"
@@ -50,12 +50,13 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from "vuex"
+import { mapGetters, mapActions, mapMutations } from "vuex"
 import Spinner from "@/components/Spinner"
 import NavBar from '@/components/NavBar/NavBar'
 import Uploader from '@/components/Uploader/Uploader'
 import StatusType from "@/mixins/StatusMixin"
 import { AppError } from "@/utilities"
+import SelectComponent from '@/components/UI/contractSelect/Index.vue'
 
 export default {
   name: "CreateNFT",
@@ -64,6 +65,7 @@ export default {
     Spinner,
     NavBar,
     Uploader,
+    SelectComponent
   },
 
   data() {
@@ -76,7 +78,7 @@ export default {
         },
         receiver_id: '',
         token_id: [],
-        contract_id: 'nft-list.near_testing.testnet',
+        contract_id: '',
       },
       savedGreeting: "",
       newGreeting: "",
@@ -110,6 +112,16 @@ export default {
     },
   },
 
+  mounted() {
+    if (this.getUserStores && this.getUserStores.length) {
+      this.SET_ACTIVE_CONTRACT(this.getUserStores[this.getUserStores.length - 1])
+    } else {
+      this.SET_ACTIVE_CONTRACT(process.env.VUE_APP_NFTS_CONTRACT)
+    }
+
+    this.nftObj.contract_id = this.getActiveContract
+  },
+
   computed: {
     ...mapGetters([
       'getDeployedPictureMeta',
@@ -118,6 +130,9 @@ export default {
       'getContract',
       'getBundleContract',
       'getEffectsContract',
+      'getMainContracts',
+      'getUserStores',
+      'getActiveContract',
     ]),
     contractsArr() {
       return [
@@ -134,7 +149,7 @@ export default {
           getter: 'getEffectsContract',
         }
       ]
-    }
+    },
   },
 
   methods: {
@@ -144,6 +159,13 @@ export default {
       'setDeployedPictureMeta',
       'passNFT',
     ]),
+    ...mapMutations([
+      'SET_ACTIVE_CONTRACT',
+    ]),
+    changeContract(address) {
+      console.log(address)
+      this.SET_ACTIVE_CONTRACT(address)
+    },
     setUploadedImg(src) {
       this.nftObj.metadata.media = src 
       this.passNFT(this.nftObj.metadata)

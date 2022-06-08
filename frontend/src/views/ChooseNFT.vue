@@ -165,6 +165,11 @@ export default {
           name: 'DataEditor',
           params: null,
         },
+        {
+          text: 'Deploy store',
+          name: 'DeployContract',
+          params: null,
+        },
       ]
     }
   },
