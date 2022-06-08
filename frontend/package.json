@@ -12,6 +12,8 @@
     "axios": "^0.26.0",
     "ipfs-core": "^0.12.0",
     "js-untar": "^2.0.0",
+    "jsoneditor": "^9.7.4",
+    "lodash": "^4.17.21",
     "near-api-js": "~0.43.1",
     "nft.storage": "^6.2.0",
     "vue": "~2.6.11",

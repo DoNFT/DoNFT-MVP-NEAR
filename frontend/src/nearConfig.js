@@ -5,6 +5,7 @@ import { SystemErrors } from "@/utilities"
 const nfts_contract = getConfig({ env: process.env.VUE_APP_NETWORK, contract: process.env.VUE_APP_NFTS_CONTRACT })
 const bundle_contract = getConfig({ env: process.env.VUE_APP_NETWORK, contract: process.env.VUE_APP_BUNDLE_CONTRACT })
 const nfts_effects_contract = getConfig({ env: process.env.VUE_APP_NETWORK, contract: process.env.VUE_APP_NFTS_EFFECTS_CONTRACT })
+const collection_factory = getConfig({ env: process.env.VUE_APP_NETWORK, contract: process.env.VUE_APP_COLLECTION_FACTORY })
 
 // Initialize contract & set global variables
 export async function initContract(store) {
@@ -94,7 +95,7 @@ export async function initContract(store) {
   // Initializing our contract APIs by contract name and configuration
   const cotractSettings = await new Contract(walletConnection.account(), nfts_contract.contractName, {
     // View methods are read only. They don't modify the state, but usually return some value.
-    viewMethods: ['nft_total_supply', 'nft_tokens_for_owner'],
+    viewMethods: ['nft_total_supply', 'nft_tokens_for_owner', 'nft_tokens'],
     // Change methods can modify the state. But you don't receive the returned value when called.
     changeMethods: ['nft_mint', 'nft_transfer', 'nft_approve', 'nft_bundle', 'nft_unbundle'],
   })
@@ -111,7 +112,7 @@ export async function initContract(store) {
     changeMethods: ['nft_mint', 'nft_bundle', 'nft_unbundle', 'nft_approve', 'nft_transfer'],
   })
   store.dispatch('setCurrentBundleContract', cotractBundleSettings)
-
+  
   // near NFT EFFECTS contract
   // --------------------
   // near NFT EFFECTS contract
@@ -123,6 +124,27 @@ export async function initContract(store) {
     changeMethods: ['nft_mint', 'nft_bundle', 'nft_unbundle', 'nft_approve', 'nft_transfer'],
   })
   store.dispatch('setCurrentEffectsContract', cotractEffectsSettings)
+
+  // near COLLECTION FACTORY contract
+  // --------------------
+  // near COLLECTION FACTORY contract
+  const near_collection_factory = await connect(Object.assign({ deps: { keyStore: new keyStores.BrowserLocalStorageKeyStore() } }, collection_factory))
+  const collectionFactory = new WalletConnection(near_collection_factory)
+
+  // Initializing our contract APIs by contract name and configuration
+  const contractCollectionFactory = await new Contract(collectionFactory.account(), collection_factory.contractName, {
+    changeMethods: ['create_store'],
+    viewMethods: ['get_stores_collection', 'check_contains_store'],
+  })
+  store.commit('SET_COLLECTION_FACTORY_CONTRACT', contractCollectionFactory)
+
+  if (collectionFactory.getAccountId()) {
+    const collections = await contractCollectionFactory
+      .get_stores_collection({
+        account_id: collectionFactory.getAccountId(),
+      })
+    store.commit('SET_USER_COLLECTIONS', collections)
+  }
 }
 
 // for ALL other extra Contracts, its need to use Change methods

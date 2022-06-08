@@ -160,6 +160,16 @@ export default {
             id: this.nftObj && this.nftObj.token_id.length === 1 ? this.nftObj.token_id[0] : null
           },
         },
+        {
+          text: 'Editor',
+          name: 'DataEditor',
+          params: null,
+        },
+        {
+          text: 'Deploy store',
+          name: 'DeployContract',
+          params: null,
+        },
       ]
     }
   },

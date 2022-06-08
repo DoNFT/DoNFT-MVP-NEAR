@@ -1,11 +1,26 @@
 use std::collections::HashMap;
-use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
+use near_sdk::{
+    env,
+    near_bindgen,
+    AccountId,
+    Balance,
+    CryptoHash,
+    PanicOnDefault,
+    Promise,
+    PromiseOrValue,
+    ext_contract
+};
+
+pub use near_sdk::{
+    self,
+    serde,
+    serde_json,
+};
+
 use near_sdk::collections::{LazyOption, LookupMap, UnorderedMap, UnorderedSet};
+use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::json_types::{Base64VecU8, U128};
 use near_sdk::serde::{Deserialize, Serialize};
-use near_sdk::{
-    env, near_bindgen, AccountId, Balance, CryptoHash, PanicOnDefault, Promise, PromiseOrValue
-};
 
 use crate::internal::*;
 pub use crate::metadata::*;
@@ -17,21 +32,46 @@ pub use crate::royalty::*;
 pub use crate::events::*;
 pub use crate::unbundle::*;
 
-mod internal;
-mod approval; 
-mod bundle;
-mod enumeration; 
-mod metadata; 
-mod mint; 
-mod nft_core; 
-mod royalty; 
-mod events;
-mod unbundle;
+pub mod internal;
+pub mod approval; 
+pub mod bundle;
+pub mod enumeration; 
+pub mod metadata; 
+pub mod mint; 
+pub mod nft_core; 
+pub mod royalty; 
+pub mod events;
+pub mod unbundle;
 
 /// This spec can be treated like a version of the standard.
 pub const NFT_METADATA_SPEC: &str = "1.0.0";
 /// This is the name of the NFT standard we're using
 pub const NFT_STANDARD_NAME: &str = "nep171";
+
+/// Interfaces that we need the factory to be aware of
+#[cfg(feature = "factory-wasm")]
+#[allow(clippy::too_many_arguments)]
+pub mod factory_interfaces {
+    use near_sdk::json_types::U128;
+    use near_sdk::{
+        self,
+        ext_contract,
+    };
+
+    use crate::metadata::NFTContractMetadata;
+
+    #[ext_contract(factory_self)]
+    pub trait OnCreateCallback {
+        fn on_create(
+            &mut self,
+            store_creator_id: AccountId,
+            metadata: NFTContractMetadata,
+            owner_id: AccountId,
+            store_account_id: AccountId,
+            attached_deposit: U128,
+        );
+    }
+}
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
@@ -75,7 +115,7 @@ impl Contract {
     #[init]
     pub fn new_default_meta(owner_id: AccountId) -> Self {
         //calls the other function "new: with some default metadata and the owner_id passed in 
-        Self::new(
+        Self::new_meta(
             owner_id,
             NFTContractMetadata {
                 spec: "nft-1.0.1".to_string(),
@@ -95,7 +135,7 @@ impl Contract {
         the owner_id. 
     */
     #[init]
-    pub fn new(owner_id: AccountId, metadata: NFTContractMetadata) -> Self {
+    pub fn new_meta(owner_id: AccountId, metadata: NFTContractMetadata) -> Self {
         //create a variable of type Self with all the fields initialized. 
         let this = Self {
             //Storage keys are simply the prefixes used for the collections. This helps avoid data collision
@@ -115,4 +155,5 @@ impl Contract {
         //return the Contract object
         this
     }
+
 }

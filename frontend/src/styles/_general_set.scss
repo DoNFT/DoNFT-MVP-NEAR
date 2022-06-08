@@ -174,10 +174,28 @@ button, input {
 }
 
 
+.main-btn--inverse {
+	background-color: rgba(92, 233, 188, 1);
+	color: #000;
+
+	&:hover {
+		color: #fff;
+		background-color: rgba(58, 31, 79, 1);
+
+		span {
+			color: #fff;
+		}
+	}
+
+	&:focus {
+		background-color: rgba(58, 31, 79, 1);
+		color: #fff;
+	}
+}
+
 .main-btn--exit {
 	background-color: rgba(92, 233, 188, 1);
 	color: #000;
-	margin-left: 20px;
 
 	&:hover {
 		color: #fff;
@@ -251,6 +269,21 @@ li {
 	width: 100%;
 }
 
+.contracts-wrap {
+	min-height: 50vh;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.contracts-wrap__select {
+	margin-bottom: 60px;
+
+	h2 {
+		margin-bottom: 30px;
+	}
+}
+
 .form-nft {
   display: flex;
   margin: 20px 0;
@@ -258,6 +291,10 @@ li {
 
 .form-ntf__inputs {
 	margin: 0 10px;
+}
+
+.form-ntf__inputs--deploy {
+	margin: 0;
 }
 
 .form-nft__input {
@@ -275,51 +312,6 @@ li {
 
 .form-nft__input:last-child {
   margin-bottom: 0;
-}
-
-select {
-  /* Reset Select */
-  appearance: none;
-  outline: 0;
-  border: 0;
-  box-shadow: none;
-  /* Personalize */
-  flex: 1;
-  padding: 0 10px;
-	font-size: 20px;
-  color: #000;
-  background-color: #fff;
-  background-image: none;
-  cursor: pointer;
-}
-/* Remove IE arrow */
-select::-ms-expand {
-  display: none;
-}
-/* Custom Select wrapper */
-.select-wrap {
-  position: relative;
-  display: flex;
-  width: 100%;
-  height: 36px;
-  overflow: hidden;
-	margin-bottom: 10px;
-}
-/* Arrow */
-.select-wrap::after {
-  content: '\25BC';
-  position: absolute;
-  top: 50%;
-  right: 5px;
-	transform: translateY(-50%);
-  background-color: #fff;
-  transition: .25s all ease;
-  pointer-events: none;
-}
-/* Transition */
-.select-wrap:hover::after {
-  color: #5ce9bc;
-	transform: translateY(-50%) rotate(180deg);
 }
 
 .effect-cards-box__no-effect {
@@ -347,14 +339,10 @@ select::-ms-expand {
 }
 
 .form-nft-send__inputs-title {
+	display: block;
 	font-size: 18px;
 	font-weight: 700;
 	margin-bottom: 7px;
-
-	.page--deploy & {
-		display: block;
-		margin-top: 20px;
-	}
 }
 
 .form-nft-send__inputs {
@@ -396,6 +384,10 @@ select::-ms-expand {
 
 	&:hover {
 		text-decoration: underline;
+	}
+
+	.headbar & {
+		margin-right: 20px;
 	}
 }
 
@@ -452,4 +444,8 @@ select::-ms-expand {
 		width: 33%;
 		margin-top: 0;
 	}
+}
+
+.select-wrap {
+  margin-bottom: 10px;
 }

@@ -10,12 +10,15 @@
         <icon name="cross" :size="32" class="cross-icon" />
       </div>
 
-      <div class="effect-confirm__inner">
+      <div
+        class="effect-confirm__inner"
+        v-if="tokenMeta"
+      >
         <h4>Picture could not appear at first, approximately 1-3 minutes for upload</h4>
 
         <div
           class="effect-cards-box"
-          v-if="tokenMeta"
+          
         >
           <token-card
             :metadata="tokenMeta"
