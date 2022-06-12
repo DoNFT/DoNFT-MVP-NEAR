@@ -77,10 +77,25 @@ export async function createAccounts(root) {
 export async function deployFactory(root) {
   return root.createAndDeploy(
     "factory", // subaccount name
-    "../../../out/donft_collection_factory.wasm", // path to wasm
+    "../../../out/donft_collection_factory.wasm",
     { method: "new", args: {} }
   );
 }
+
+/** deploys the main bundle Contract to a subaccount `bundle` of `root` */
+export async function deployBundle(root) {
+  return root.createAndDeploy(
+    "bundle", // subaccount name
+    "../../../out/donft_bundle.wasm",
+    {
+      method: "new_default_meta",
+      args: {
+        owner_id: root.accountId
+      }
+    }
+  );
+}
+
 
 /**
  * deploys the store to a subaccount `name` of `factory`, setting the store
@@ -107,15 +122,23 @@ export async function deployStore({
   return factory.getFullAccount(`${name}.${factory.accountId}`);
 }
 
-/** A workspace with the factory deployed by root, no store deployed */
-export const STORE_WORKSPACE = ava.Workspace.init(async ({ root }) => {
+/** A workspace with the factory deployed by root*/
+export const COLLECTION_WORKSPACE = ava.Workspace.init(async ({ root }) => {
   const [alice, bob, carol, dave] = await createAccounts(root);
 
   const factory = await deployFactory(root);
   const store = await deployStore({ factory, owner: alice, name: "alice_store" });
 
-  console.log(factory, 'FACTORY')
-  console.log(store, 'store')
-
   return { alice, bob, carol, dave, factory, store };
+});
+
+/** A workspace with the bundle deployed by root */
+export const BUNDLE_WORKSPACE = ava.Workspace.init(async ({ root }) => {
+  const [alice, bob, carol, dave] = await createAccounts(root);
+
+  const bundle = await deployBundle(root);
+
+  console.log(bundle, 'bundle')
+
+  return { alice, bob, carol, dave, bundle };
 });

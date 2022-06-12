@@ -15,6 +15,7 @@ use donft_bundle::near_sdk::{
 
 use donft_bundle::{
     NFTContractMetadata,
+    gas,
 };
 
 use donft_bundle::{
@@ -33,39 +34,6 @@ pub const YOCTO_PER_BYTE: Balance = 10_000_000_000_000_000_000;
 /// The argument for non-payable cross contract calls.
 /// ref: https://github.com/near/core-contracts/blob/master/staking-pool/src/lib.rs#L26
 pub const NO_DEPOSIT: Balance = 0;
-
-pub mod gas {
-    use donft_bundle::near_sdk::Gas;
-
-    const fn tgas(n: u64) -> Gas {
-        Gas(n * 10u64.pow(12))
-    }
-
-    /// Gas requirements for resolving a payout struct.
-    pub const PAYOUT_RESOLVE: Gas = tgas(30);
-
-    /// Gas requirements for transferring an NFT and obtaining the payout.
-    pub const NFT_TRANSFER_PAYOUT: Gas = tgas(15);
-
-    /// Gas requirements for creating a store.
-    pub const CREATE_STORE: Gas = tgas(65 + 5);
-
-    /// Gas requirements for
-    pub const ON_CREATE_CALLBACK: Gas = tgas(10);
-
-    /// Gas requirements for
-    pub const NFT_BATCH_APPROVE: Gas = tgas(100);
-
-    // ref: https://github.com/near-apps/nft-market/blob/main/contracts/nft-simple/src/nft_core.rs
-    /// Gas requirements for resolving a `nft_transfer_call` XCC
-    pub const RESOLVE_TRANSFER: Gas = tgas(10);
-
-    /// Gas requirements for `nft_transfer_call`
-    pub const NFT_TRANSFER_CALL: Gas = tgas(35);
-
-    /// Gas requirements for `nft_transfer_call`
-    pub const NFT_ON_APPROVE: Gas = tgas(25);
-}
 
 pub mod storage_bytes {
     use donft_bundle::near_sdk::StorageUsage;

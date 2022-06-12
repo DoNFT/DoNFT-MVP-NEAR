@@ -20,7 +20,7 @@ export async function initContract(store) {
   store.dispatch('setNearWalletConnection', walletConnection)
   store.dispatch('setAccountId', walletConnection.getAccountId())
 
-  const domain = `${nfts_contract.helperUrl}/account/${store.getters.getAccountId}/likelyNFTs`
+  const domain = `https://testnet-api.kitwallet.app/account/${store.getters.getAccountId}/likelyNFTs`
   
   const headers = new Headers({
     'max-age': '300'
@@ -97,7 +97,7 @@ export async function initContract(store) {
     // View methods are read only. They don't modify the state, but usually return some value.
     viewMethods: ['nft_total_supply', 'nft_tokens_for_owner', 'nft_tokens'],
     // Change methods can modify the state. But you don't receive the returned value when called.
-    changeMethods: ['nft_mint', 'nft_transfer', 'nft_approve', 'nft_bundle', 'nft_unbundle'],
+    changeMethods: ['nft_mint', 'nft_transfer', 'nft_approve', 'nft_bundle', 'nft_unbundle', 'multiple_nft_approve'],
   })
   store.dispatch('setCurrentContract', cotractSettings)
 

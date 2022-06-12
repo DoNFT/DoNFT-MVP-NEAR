@@ -2,17 +2,17 @@ import {
   DEPLOY_STORE_RENT,
   DEPLOY_STORE_GAS,
   failPromiseRejection,
-  STORE_WORKSPACE,
+  COLLECTION_WORKSPACE,
   deployFactory,
 } from "./test_utils/workspaces";
 
 
-STORE_WORKSPACE.test(
+COLLECTION_WORKSPACE.test(
   "core",
   async (test, { root, factory, alice, bob, store }) => {
-    console.log(root, 'ROOT')
     // store creation
     // const deployedFactory = await deployFactory({ root })
+    console.log(factory, 'factory 2')
     await bob
       .call(
         factory,
@@ -73,8 +73,6 @@ STORE_WORKSPACE.test(
       )
       .catch(failPromiseRejection(test, "creating store"));
 
-    console.log(stores_list1, 'stores_list')
-
     const stores_list2 = await bob
       .call(
         factory,
@@ -84,8 +82,6 @@ STORE_WORKSPACE.test(
         },
       )
       .catch(failPromiseRejection(test, "creating store"));
-
-    console.log(stores_list2, 'stores_list2')
 
     // const deployedStore = await deployStore({ factory, owner: alice, name: 'alice_factory' })
   }

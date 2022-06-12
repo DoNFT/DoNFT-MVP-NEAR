@@ -48,6 +48,39 @@ pub const NFT_METADATA_SPEC: &str = "1.0.0";
 /// This is the name of the NFT standard we're using
 pub const NFT_STANDARD_NAME: &str = "nep171";
 
+pub mod gas {
+    use near_sdk::Gas;
+
+    const fn tgas(n: u64) -> Gas {
+        Gas(n * 10u64.pow(12))
+    }
+
+    /// Gas requirements for resolving a payout struct.
+    pub const PAYOUT_RESOLVE: Gas = tgas(30);
+
+    /// Gas requirements for transferring an NFT and obtaining the payout.
+    pub const NFT_TRANSFER_PAYOUT: Gas = tgas(15);
+
+    /// Gas requirements for creating a store.
+    pub const CREATE_STORE: Gas = tgas(65 + 5);
+
+    /// Gas requirements for
+    pub const ON_CREATE_CALLBACK: Gas = tgas(10);
+
+    /// Gas requirements for
+    pub const NFT_BATCH_APPROVE: Gas = tgas(100);
+
+    // ref: https://github.com/near-apps/nft-market/blob/main/contracts/nft-simple/src/nft_core.rs
+    /// Gas requirements for resolving a `nft_transfer_call` XCC
+    pub const RESOLVE_TRANSFER: Gas = tgas(10);
+
+    /// Gas requirements for `nft_transfer_call`
+    pub const NFT_TRANSFER_CALL: Gas = tgas(35);
+
+    /// Gas requirements for `nft_transfer_call`
+    pub const NFT_ON_APPROVE: Gas = tgas(25);
+}
+
 /// Interfaces that we need the factory to be aware of
 #[cfg(feature = "factory-wasm")]
 #[allow(clippy::too_many_arguments)]

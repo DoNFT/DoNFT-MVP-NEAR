@@ -152,6 +152,7 @@ export default {
     },
   },
 
+  
   methods: {
     ...mapActions([
       'createNewUsualNFT',
@@ -164,6 +165,7 @@ export default {
     ]),
     changeContract(address) {
       console.log(address)
+      this.nftObj.contract_id = address
       this.SET_ACTIVE_CONTRACT(address)
     },
     setUploadedImg(src) {

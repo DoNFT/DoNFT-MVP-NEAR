@@ -17,6 +17,7 @@
       <h1>{{ statusText }}</h1>
     </div>
     <main v-else>
+      <button @click="approve">approve</button>
       <h1>Choose NFT and apply effect</h1>
       <div class="nft-cards">
         <div
@@ -124,6 +125,7 @@ export default {
       'getStatus',
       'getIpfs',
       'getNFTlimit',
+      'getContract'
     ]),
     getFilteredNFTsByContract() {
       let newArr = [].concat(this.getNFTsByContract).sort((a, b) => a.id - b.id)
@@ -183,6 +185,14 @@ export default {
       'setDeployedPictureMeta',
       'createNewUsualNFT',
     ]),
+    async approve() {
+      // 
+      await this.getContract
+        .multiple_nft_approve({
+          token_ids: ["token-1655022749029", "token-1655022796703"],
+          account_id: 'nft-example6.pe4en.testnet',
+        }, '300000000000000', '100000000000000000000000')
+    },
     async getBase64FromUrl(url) {
       const data = await fetch(url)
       const blob = await data.blob()

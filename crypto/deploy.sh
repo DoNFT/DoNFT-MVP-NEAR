@@ -6,6 +6,6 @@ set -e && RUSTFLAGS='-C link-arg=-s' cargo build --target wasm32-unknown-unknown
 near login
 
 near create-account $NFT_CONTRACT_ID --masterAccount $MAIN_ACCOUNT --initialBalance 10
-near deploy --accountId $NFT_CONTRACT_ID --wasmFile out/main.wasm
+near deploy --accountId $NFT_CONTRACT_ID --wasmFile out/donft_bundle.wasm
 near call $NFT_CONTRACT_ID new_default_meta '{"owner_id": "'$NFT_CONTRACT_ID'"}'  --accountId $NFT_CONTRACT_ID 
 near view $NFT_CONTRACT_ID nft_metadata

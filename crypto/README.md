@@ -12,5 +12,11 @@ npm run build
 
 ## Deploy smart contract
 
-Set up .env 
+Set up .env
+
+###
+NFT_CONTRACT_ID=approve_bundle2.near_testy.testnet
+MAIN_ACCOUNT=near_testy.testnet
+###
+
 npm run deploy --env=.env

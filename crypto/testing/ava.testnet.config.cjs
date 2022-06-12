@@ -8,3 +8,7 @@ module.exports.files.push(
   // '!__tests__/example-file-name*',
   // '!__tests__/another-example-file-name*',
 );
+
+module.exports.environmentVariables = {
+  TESTNET_MASTER_ACCOUNT_ID: 'near_testy.testnet',
+};

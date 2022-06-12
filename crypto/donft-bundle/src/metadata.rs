@@ -2,7 +2,7 @@ use crate::*;
 
 pub type TokenId = String;
 
-#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone)]
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone, Debug)]
 #[serde(crate = "near_sdk::serde")]
 pub struct Bundle {
     //owner of the token
@@ -49,7 +49,7 @@ pub struct TokenMetadata {
     pub reference_hash: Option<Base64VecU8>, // Base64-encoded sha256 hash of JSON from reference field. Required if `reference` is included.
 }
 
-#[derive(BorshDeserialize, BorshSerialize)]
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Debug)]
 pub struct Token {
     //owner of the token
     pub owner_id: AccountId,
@@ -79,6 +79,15 @@ pub struct JsonToken {
     pub royalty: HashMap<AccountId, u32>,
     //set of tokens bundeled in this token
     pub bundles: Vec<Bundle>, 
+}
+
+//The Json token is what will be returned from view calls. 
+#[derive(Serialize, Deserialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct ApproveToken {
+    pub token_id: TokenId,
+    pub account_id: AccountId,
+    pub message_field: Option<String>,
 }
 
 pub trait NonFungibleTokenMetadata {
