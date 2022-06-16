@@ -109,7 +109,7 @@ export async function initContract(store) {
 
   // Initializing our contract APIs by contract name and configuration
   const cotractBundleSettings = await new Contract(walletBundleConnection.account(), bundle_contract.contractName, {
-    changeMethods: ['nft_mint', 'nft_bundle', 'nft_unbundle', 'nft_approve', 'nft_transfer'],
+    changeMethods: ['nft_mint', 'nft_bundle', 'nft_unbundle', 'nft_approve', 'nft_transfer', 'nft_bundle_with_approve'],
   })
   store.dispatch('setCurrentBundleContract', cotractBundleSettings)
   
@@ -157,7 +157,7 @@ export async function initNewContract(mintingContract) {
   const nearNewWallet = new WalletConnection(nearConnectInstance)
   console.log(nearNewWallet, 'nearNewWallet')
   const nearNewContractSettings = new Contract(nearNewWallet.account(), contractConfig.contractName, {
-    changeMethods: ['nft_mint', 'nft_bundle', 'nft_unbundle', 'nft_approve', 'nft_transfer'],
+    changeMethods: ['nft_mint', 'nft_bundle', 'nft_unbundle', 'nft_approve', 'nft_transfer', 'nft_tokens_for_owner'],
   })
   console.log(nearNewContractSettings, 'nearNewContractSettings')
   return nearNewContractSettings

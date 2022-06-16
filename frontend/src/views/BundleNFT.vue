@@ -53,7 +53,6 @@
           <button
             class="main-btn"
             type="submit"
-            :disabled="checkBundleForApprove"
             @click.prevent="bundleNFTs"
           >Bundle NFTs!</button>
         </div>
@@ -63,7 +62,7 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from "vuex"
+import { mapGetters, mapActions, mapMutations } from "vuex"
 import Spinner from "@/components/Spinner"
 import NavBar from '@/components/NavBar/NavBar'
 import Uploader from '@/components/Uploader/Uploader'
@@ -115,6 +114,10 @@ export default {
     }
   },
 
+  mounted() {
+    this.fetchOwnerNFTs({ account: 'near_testy.testnet', nftContract: process.env.VUE_APP_NFTS_CONTRACT })
+  },
+
   computed: {
     ...mapGetters([
       'getNftsAreLoading',
@@ -164,9 +167,14 @@ export default {
   methods: {
     ...mapActions([
       'createNewBundleNFT',
+      'createNewBundleWithApprove',
       'setResult',
       'setDeployedPictureMeta',
       'passNFT',
+      'fetchOwnerNFTs',
+    ]),
+    ...mapMutations([
+      'CREATE_NEW_BUNDLE_WITH_APPROVE',
     ]),
     setUploadedImg(src) {
       this.nftObj.metadata.media = src 
@@ -207,23 +215,40 @@ export default {
         const bundlesArrApproved = bundleArr.map((item) => {
           const obj = {
             ...item,
-            approval_id: item.approved_account_ids[this.getBundleContract.contractId],
+            approval_id: item.approved_account_ids[this.getBundleContract.contractId] || 0,
           }
 
           return obj
         })
         console.log(this.getDeployedPictureMeta, 'this.getDeployedPictureMeta')
 
-        await this.createNewBundleNFT({
-          token_id: `token-${Date.now()}`,
-          metadata: {
-            title: this.nftObj.metadata.title,
-            description: this.nftObj.metadata.description,
-            media: this.getDeployedPictureMeta,
-            copies: 1,
-          },
-          bundles: bundlesArrApproved,
-        })
+        if (this.checkBundleForApprove) {
+          this.CREATE_NEW_BUNDLE_WITH_APPROVE({
+            tokens_for_approve: this.nftArray,
+            account_for_approve: process.env.VUE_APP_BUNDLE_CONTRACT,
+            contract_of_tokens: this.getNFTsData[0].contract,
+            token_id: `token-${Date.now()}`,
+            metadata: {
+              title: this.nftObj.metadata.title,
+              description: this.nftObj.metadata.description,
+              media: this.getDeployedPictureMeta,
+              copies: 1,
+            },
+            bundles: bundlesArrApproved,
+          })
+        } else {
+          this.createNewBundleNFT({
+            token_id: `token-${Date.now()}`,
+            metadata: {
+              title: this.nftObj.metadata.title,
+              description: this.nftObj.metadata.description,
+              media: this.getDeployedPictureMeta,
+              copies: 1,
+            },
+            bundles: bundlesArrApproved,
+          })
+        }
+
       } catch(err) {
         if(err instanceof AppError) {
           alert(err.message)

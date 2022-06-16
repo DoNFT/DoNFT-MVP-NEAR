@@ -6,6 +6,8 @@ import {
   approveNFT,
   createUsualNFT,
   createBundleNFT,
+  getOwnerNFTs,
+  bundleWithApprove,
   unbundleNFT,
   sendNFT,
   getImageForTokenByURI,
@@ -88,6 +90,9 @@ const store = new Vuex.Store({
     },
     setNFTArray (state, payload) {
       state.arrayNFTs = payload
+    },
+    CREATE_NEW_BUNDLE_WITH_APPROVE(state, { tokens_for_approve, account_for_approve, contract_of_tokens, token_id, metadata, bundles }) {
+      bundleWithApprove(tokens_for_approve, account_for_approve, contract_of_tokens, token_id, metadata, bundles, state.bundle_contract)
     },
     SET_CURRENT_CONTRACT_NFT (state, payload) {
       // this one for main page rendering, contract separated data
@@ -263,6 +268,11 @@ const store = new Vuex.Store({
       let contractData = await checkForContract(getters, minting_contract_id)
 
       await sendNFT(receiver, token_data, contractData)
+    },
+    async fetchOwnerNFTs({ getters }, { account, nftContract }) {
+      console.log(account, nftContract, 'fetchOwnerNFTs')
+      let contractData = await checkForContract(getters, nftContract)
+      getOwnerNFTs(account, contractData)
     },
     pushNFTbyContract ({commit}, NFTS) {
       commit('SET_CURRENT_CONTRACT_NFT', NFTS)

@@ -3,9 +3,11 @@ use near_sdk::{ext_contract, Gas};
 
 const GAS_FOR_RESOLVE_TRANSFER: Gas = Gas(10_000_000_000_000);
 const GAS_FOR_NFT_TRANSFER_CALL: Gas = Gas(25_000_000_000_000 + GAS_FOR_RESOLVE_TRANSFER.0);
-const MIN_GAS_FOR_NFT_TRANSFER_CALL: Gas = Gas(100_000_000_000_000);
-const NO_DEPOSIT: Balance = 0;
 const DEPOSIT: Balance = 1;
+
+const fn tgas(n: u64) -> Gas {
+    Gas(n * 10u64.pow(12))
+}
 
 #[ext_contract(ext_nft)]
 trait NFT {
@@ -17,11 +19,24 @@ trait NFT {
         approval_id: u64,
         memo: Option<String>,
     );
+
+    fn multiple_nft_approve(&mut self, token_ids: Vec<String>, account_id: AccountId) -> Vec<u64>;
+}
+
+// define methods we'll use as callbacks on our contract
+#[ext_contract(ext_self)]
+pub trait MyContract {
+    fn my_callback(
+        &self,
+        token_id: TokenId,
+        metadata: TokenMetadata,
+        bundles: Vec<Bundle>,
+        perpetual_royalties: Option<HashMap<AccountId, u32>>,
+    );
 }
 
 #[near_bindgen]
 impl Contract {
-    #[payable]
     pub fn nft_bundle(
         &mut self,
         token_id: TokenId,
@@ -111,5 +126,91 @@ impl Contract {
 
         //refund any excess storage if the user attached too much. Panic if they didn't attach enough to cover the required.
         refund_deposit(required_storage_in_bytes);
+    }
+
+    #[payable]
+    pub fn nft_bundle_with_approve(
+        &mut self,
+        tokens_for_approve: Vec<String>,
+        account_for_approve: AccountId,
+        contract_of_tokens: AccountId,
+        token_id: TokenId,
+        metadata: TokenMetadata,
+        bundles: Vec<Bundle>,
+        //we add an optional parameter for perpetual royalties
+        perpetual_royalties: Option<HashMap<AccountId, u32>>,
+    ) {
+        //measure the initial storage being used on the contract
+        let initial_storage_usage = env::storage_usage();
+
+        // Storage 80 bytes for some common components:
+        // - a single royalty
+        // - a single approval
+        // - an entry in the `tokens_per_account` map
+        // - an entry in the `composables` map
+
+        let storage_stake = 80 * tokens_for_approve.len() as u128;
+        env::log_str(&format!("storage_usage 2: {}", initial_storage_usage));
+
+        let storage_for_approve: Gas = tgas(30);
+        env::log_str(&format!("storage_for_approve: {:?}", storage_for_approve));
+
+        // first approve tokens, to be able bundle them later
+        ext_nft::multiple_nft_approve(
+            tokens_for_approve,
+            account_for_approve.clone(),
+            contract_of_tokens.clone(),
+            env::attached_deposit() - storage_stake, // yocto NEAR to attach, for approving tokens
+            storage_for_approve // gas to attach
+        )
+        .then(ext_self::my_callback(
+            token_id,
+            metadata,
+            bundles,
+            perpetual_royalties,
+            env::current_account_id(),
+            0, // yocto NEAR to attach
+            GAS_FOR_NFT_TRANSFER_CALL // gas to attach
+        ));
+
+        // bundle it
+        //calculate the required storage which was the used - initial
+        let required_storage_in_bytes = env::storage_usage() - initial_storage_usage;
+
+        //refund any excess storage if the user attached too much. Panic if they didn't attach enough to cover the required.
+        refund_deposit(required_storage_in_bytes);
+    }
+
+    pub fn my_callback(
+        mut self,
+        token_id: TokenId,
+        metadata: TokenMetadata,
+        mut bundles: Vec<Bundle>,
+        perpetual_royalties: Option<HashMap<AccountId, u32>>,
+    ) {
+        assert_eq!(
+            env::promise_results_count(),
+            1,
+            "This is a callback method"
+        );
+
+        // handle the result from the cross contract call this method is a callback for
+        match env::promise_result(0) {
+            PromiseResult::NotReady => unreachable!(),
+            PromiseResult::Failed => panic!("failed promise"),
+            PromiseResult::Successful(result) => {
+                env::log_str(&format!("result promise 1: {:?}", result));
+                let approved_ids = near_sdk::serde_json::from_slice::<Vec<u64>>(&result).unwrap();
+
+                env::log_str(&format!("bundles 1: {:?}", bundles));
+                for i in 0..approved_ids.len() {
+                    bundles[i].approval_id = approved_ids[i]
+                };
+
+                env::log_str(&format!("bundles 2: {:?}", bundles));
+                env::log_str(&format!("result promise 3: {:?}", approved_ids));
+                self.nft_bundle(token_id, metadata, bundles, perpetual_royalties);
+            },
+        }
     }
 }

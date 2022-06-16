@@ -19,10 +19,11 @@ import { uploadtoIPFS} from "@/api"
 // if not found, init new Contract, for using change method
 export async function checkForContract(getters, minting_contract_id) {
   let findMainContract = null
+  console.log(getters, 'getters.getMainContracts')
   
-  findMainContract = getters.getMainContracts.find((item) => item === minting_contract_id)
+  findMainContract = getters.getMainContracts ? getters.getMainContracts.find((item) => item === minting_contract_id) : []
   
-  if (findMainContract) {
+  if (findMainContract && findMainContract.length) {
     return [getters.getBundleContract, getters.getContract, getters.getEffectsContract].find((item) => item.contractId === findMainContract)
   }
 
@@ -41,6 +42,13 @@ export async function createUsualNFT(token_id, metadata, receiver_id, contract) 
     }, attachedGas, '100000000000000000000000')
 }
 
+export async function getOwnerNFTs(accountId, contract) {
+  await contract
+    .nft_tokens_for_owner({
+      account_id: accountId
+    }).then((res) => console.log(res, 'TOKENS getOwnerNFTs'))
+}
+
 export function createBundleNFT(token_id, metadata, bundles, contract) {
   console.log(contract, 'contract')
   contract
@@ -49,6 +57,19 @@ export function createBundleNFT(token_id, metadata, bundles, contract) {
       metadata,
       bundles,
     }, attachedGas, '100000000000000000000000')
+}
+
+export function bundleWithApprove(tokens_for_approve, account_for_approve, contract_of_tokens, token_id, metadata, bundles, contract) {
+  console.log(contract, 'contract')
+  contract
+    .nft_bundle_with_approve({
+      tokens_for_approve,
+      account_for_approve,
+      contract_of_tokens,
+      token_id,
+      metadata,
+      bundles,
+    }, '3000000000000', '100000000000000000000000')
 }
 
 // for creating new NFTs BY inputs FORM

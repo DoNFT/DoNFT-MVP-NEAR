@@ -16,15 +16,15 @@ pub trait NonFungibleTokenCore {
         approval_id: Option<u64>,
     ) -> bool;
 
-    //check if the passed in account has access to approve ALL TOKENS in Vec
-    fn multiple_nft_approve(&mut self, token_ids: Vec<String>, account_id: AccountId, msg: Option<String>) -> Option<Promise>;
-    fn approve_internal(&mut self, token_idu64: String, account_id: &AccountId) -> u64;
-
     //revoke a specific account from transferring the token on your behalf
     fn nft_revoke(&mut self, token_id: TokenId, account_id: AccountId);
 
     //revoke all accounts from transferring the token on your behalf
     fn nft_revoke_all(&mut self, token_id: TokenId);
+
+    fn nft_approve_for_multiple(&mut self, token_id: String, account_id: &AccountId) -> u64;
+
+    fn multiple_nft_approve(&mut self, token_ids: Vec<String>, account_id: AccountId) -> Vec<u64>;
 }
 
 #[ext_contract(ext_non_fungible_approval_receiver)]
@@ -75,7 +75,7 @@ macro_rules! assert_storage_deposit {
 #[near_bindgen]
 impl NonFungibleTokenCore for Contract {
     /// Called from nft_approve and nft_batch_approve.
-    fn approve_internal(
+    fn nft_approve_for_multiple(
         &mut self,
         token_id: String,
         account_id: &AccountId,
@@ -83,6 +83,14 @@ impl NonFungibleTokenCore for Contract {
         let mut token = self.tokens_by_id
             .get(&token_id)
             .unwrap_or_else(|| panic!("token: {} doesn't exist", token_id));
+
+        //make sure that the person calling the function is the owner of the token
+        // assert_eq!(
+        //     &env::predecessor_account_id(),
+        //     &token.owner_id,
+        //     "Predecessor must be the token owner."
+        // );
+
         // assert_token_unloaned!(token);
         // assert_token_owned_by_predecessor!(token);
         env::log_str(&format!("approve_internal ID: {}", account_id));
@@ -97,7 +105,7 @@ impl NonFungibleTokenCore for Contract {
         self.tokens_by_id.insert(&token_id, &token);
         env::log_str(&format!("token after insert: {:?}", token));
 
-        token.next_approval_id
+        approval_id
     }
 
     #[payable]
@@ -105,8 +113,9 @@ impl NonFungibleTokenCore for Contract {
         &mut self,
         token_ids: Vec<String>,
         account_id: AccountId,
-        msg: Option<String>,
-    ) -> Option<Promise> {
+    ) -> Vec<u64> {
+        let initial_storage_usage = env::storage_usage();
+
         env::log_str("multiple_nft_approve 1");
         let tlen = token_ids.len() as u128;
         assert!(tlen > 0);
@@ -118,31 +127,20 @@ impl NonFungibleTokenCore for Contract {
         // assert!(
         //     env::attached_deposit() > store_approval_storage,
         //     "deposit less than: {}",
-        //     store_approval_storage
+        //     store_approval_storage 
         // );
         env::log_str("multiple_nft_approve 2");
         let approval_ids: Vec<u64> = token_ids
             .iter()
             // validates owner and loanedы
-            .map(|token_id| self.approve_internal(token_id.into(), &account_id))
+            .map(|token_id| self.nft_approve_for_multiple(token_id.into(), &account_id))
             .collect();
 
-        if let Some(msg) = msg {
-            ext_non_fungible_approval_receiver::nft_on_batch_approve(
-                token_ids,
-                approval_ids,
-                env::predecessor_account_id(),
-                msg,
-                account_id,
-                env::attached_deposit() - storage_stake,
-                gas::NFT_BATCH_APPROVE,
-            )
-            .into()
-        } else {
-            None
-        }
+        let required_storage_in_bytes = env::storage_usage() - initial_storage_usage;
+        refund_deposit(required_storage_in_bytes);
+        
+        approval_ids
     }
-
     //allow a specific account ID to approve a token on your behalf
     #[payable]
     fn nft_approve(&mut self, token_id: TokenId, account_id: AccountId, msg: Option<String>) {
