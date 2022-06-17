@@ -69,7 +69,7 @@ export function bundleWithApprove(tokens_for_approve, account_for_approve, contr
       token_id,
       metadata,
       bundles,
-    }, '3000000000000', '100000000000000000000000')
+    }, attachedGas, '100000000000000000000000')
 }
 
 // for creating new NFTs BY inputs FORM

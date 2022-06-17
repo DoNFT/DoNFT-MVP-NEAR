@@ -4,6 +4,7 @@ use near_sdk::{ext_contract, Gas};
 const GAS_FOR_RESOLVE_TRANSFER: Gas = Gas(10_000_000_000_000);
 const GAS_FOR_NFT_TRANSFER_CALL: Gas = Gas(25_000_000_000_000 + GAS_FOR_RESOLVE_TRANSFER.0);
 const DEPOSIT: Balance = 1;
+pub const GAS_RESERVED_FOR_CURRENT_CALL: Gas = Gas(80_000_000_000_000);
 
 const fn tgas(n: u64) -> Gas {
     Gas(n * 10u64.pow(12))
@@ -45,9 +46,11 @@ impl Contract {
         //we add an optional parameter for perpetual royalties
         perpetual_royalties: Option<HashMap<AccountId, u32>>,
     ) {
-        let caller_id = env::predecessor_account_id();
+        env::log_str(&format!("nft_bundle: {:?}", bundles));
+        let caller_id = env::current_account_id();
         //measure the initial storage being used on the contract
-        let initial_storage_usage = env::storage_usage();
+        // let initial_storage_usage = env::storage_usage();
+        env::log_str(&format!("caller_id: {:?}", caller_id));
 
         // create a royalty map to store in the token
         let mut royalty = HashMap::new();
@@ -100,6 +103,9 @@ impl Contract {
 
         //call the internal method for adding the token to the owner
         self.internal_add_token_to_owner(&token.owner_id, &token_id);
+        env::log_str(&format!("self.tokens_per_owner: {:?}", self.tokens_per_owner));
+        env::log_str(&format!("self.token_metadata_by_id: {:?}", self.token_metadata_by_id));
+        env::log_str(&format!("self.tokens_by_id: {:?}", self.tokens_by_id));
 
         // Construct the mint log as per the events standard.
         let nft_mint_log: EventLog = EventLog {
@@ -122,10 +128,10 @@ impl Contract {
         env::log_str(&nft_mint_log.to_string());
 
         //calculate the required storage which was the used - initial
-        let required_storage_in_bytes = env::storage_usage() - initial_storage_usage;
+        // let required_storage_in_bytes = env::storage_usage() - initial_storage_usage;
 
         //refund any excess storage if the user attached too much. Panic if they didn't attach enough to cover the required.
-        refund_deposit(required_storage_in_bytes);
+        // refund_deposit(required_storage_in_bytes);
     }
 
     #[payable]
@@ -152,28 +158,37 @@ impl Contract {
         let storage_stake = 80 * tokens_for_approve.len() as u128;
         env::log_str(&format!("storage_usage 2: {}", initial_storage_usage));
 
-        let storage_for_approve: Gas = tgas(30);
+        let storage_for_approve: Gas = tgas(60);
         env::log_str(&format!("storage_for_approve: {:?}", storage_for_approve));
-
-        // first approve tokens, to be able bundle them later
-        ext_nft::multiple_nft_approve(
+        let gas_before_call = env::used_gas();
+        env::log_str(&format!("gas_before_call: {:?}", gas_before_call));
+        let call = ext_nft::multiple_nft_approve(
             tokens_for_approve,
             account_for_approve.clone(),
             contract_of_tokens.clone(),
-            env::attached_deposit() - storage_stake, // yocto NEAR to attach, for approving tokens
+            env::attached_deposit(), // yocto NEAR to attach, for approving tokens
             storage_for_approve // gas to attach
-        )
-        .then(ext_self::my_callback(
+        );
+        let gas_before_callback = env::used_gas();
+        env::log_str(&format!("gas_before_callback: {:?}", gas_before_callback));
+        let REMAINING_GAS: Gas = env::prepaid_gas()
+        - env::used_gas()
+        - storage_for_approve
+        - GAS_RESERVED_FOR_CURRENT_CALL;
+        let callback = ext_self::my_callback(
             token_id,
             metadata,
             bundles,
             perpetual_royalties,
             env::current_account_id(),
-            0, // yocto NEAR to attach
-            GAS_FOR_NFT_TRANSFER_CALL // gas to attach
-        ));
+            5, // yocto NEAR to attach
+            REMAINING_GAS // gas to attach
+        );
+        env::log_str(&format!("REMAINING_GAS: {:?}", REMAINING_GAS));
+        let gas_after_callback = env::used_gas();
+        env::log_str(&format!("gas_after_callback: {:?}", gas_after_callback));
+        call.then(callback);
 
-        // bundle it
         //calculate the required storage which was the used - initial
         let required_storage_in_bytes = env::storage_usage() - initial_storage_usage;
 
