@@ -64,6 +64,7 @@ export async function initContract(store) {
       console.log(err, 'err')
     }
     console.log(request, 'request')
+    console.log(contract, 'contract')
 
     let obj = {}
 
@@ -110,6 +111,7 @@ export async function initContract(store) {
   // Initializing our contract APIs by contract name and configuration
   const cotractBundleSettings = await new Contract(walletBundleConnection.account(), bundle_contract.contractName, {
     changeMethods: ['nft_mint', 'nft_bundle', 'nft_unbundle', 'nft_approve', 'nft_transfer', 'nft_bundle_with_approve'],
+    viewMethods: ['nft_tokens']
   })
   store.dispatch('setCurrentBundleContract', cotractBundleSettings)
   

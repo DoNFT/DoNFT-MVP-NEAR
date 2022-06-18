@@ -27,27 +27,31 @@ trait NFT {
 // define methods we'll use as callbacks on our contract
 #[ext_contract(ext_self)]
 pub trait MyContract {
-    fn my_callback(
+    fn bundle_on_approve_callback(
         &self,
         token_id: TokenId,
         metadata: TokenMetadata,
         bundles: Vec<Bundle>,
+        owner_id: AccountId,
         perpetual_royalties: Option<HashMap<AccountId, u32>>,
     );
 }
 
 #[near_bindgen]
 impl Contract {
+    // #[payable]
     pub fn nft_bundle(
         &mut self,
         token_id: TokenId,
         metadata: TokenMetadata,
         bundles: Vec<Bundle>,
+        owner_id: AccountId,
         //we add an optional parameter for perpetual royalties
         perpetual_royalties: Option<HashMap<AccountId, u32>>,
     ) {
+        // let initial_storage_usage = env::storage_usage();
         env::log_str(&format!("nft_bundle: {:?}", bundles));
-        let caller_id = env::current_account_id();
+        let caller_id = owner_id;
         //measure the initial storage being used on the contract
         // let initial_storage_usage = env::storage_usage();
         env::log_str(&format!("caller_id: {:?}", caller_id));
@@ -143,6 +147,7 @@ impl Contract {
         token_id: TokenId,
         metadata: TokenMetadata,
         bundles: Vec<Bundle>,
+        owner_id: AccountId,
         //we add an optional parameter for perpetual royalties
         perpetual_royalties: Option<HashMap<AccountId, u32>>,
     ) {
@@ -158,7 +163,7 @@ impl Contract {
         let storage_stake = 80 * tokens_for_approve.len() as u128;
         env::log_str(&format!("storage_usage 2: {}", initial_storage_usage));
 
-        let storage_for_approve: Gas = tgas(60);
+        let storage_for_approve: Gas = tgas(80);
         env::log_str(&format!("storage_for_approve: {:?}", storage_for_approve));
         let gas_before_call = env::used_gas();
         env::log_str(&format!("gas_before_call: {:?}", gas_before_call));
@@ -175,10 +180,11 @@ impl Contract {
         - env::used_gas()
         - storage_for_approve
         - GAS_RESERVED_FOR_CURRENT_CALL;
-        let callback = ext_self::my_callback(
+        let callback = ext_self::bundle_on_approve_callback(
             token_id,
             metadata,
             bundles,
+            owner_id,
             perpetual_royalties,
             env::current_account_id(),
             5, // yocto NEAR to attach
@@ -196,11 +202,12 @@ impl Contract {
         refund_deposit(required_storage_in_bytes);
     }
 
-    pub fn my_callback(
+    pub fn bundle_on_approve_callback(
         mut self,
         token_id: TokenId,
         metadata: TokenMetadata,
         mut bundles: Vec<Bundle>,
+        owner_id: AccountId,
         perpetual_royalties: Option<HashMap<AccountId, u32>>,
     ) {
         assert_eq!(
@@ -224,7 +231,7 @@ impl Contract {
 
                 env::log_str(&format!("bundles 2: {:?}", bundles));
                 env::log_str(&format!("result promise 3: {:?}", approved_ids));
-                self.nft_bundle(token_id, metadata, bundles, perpetual_royalties);
+                self.nft_bundle(token_id, metadata, bundles, owner_id, perpetual_royalties);
             },
         }
     }

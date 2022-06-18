@@ -115,7 +115,7 @@ export default {
   },
 
   mounted() {
-    this.fetchOwnerNFTs({ account: 'near_testy.testnet', nftContract: process.env.VUE_APP_NFTS_CONTRACT })
+    this.fetchOwnerNFTs({ account: 'near_testy2.testnet', nftContract: process.env.VUE_APP_NFTS_CONTRACT })
   },
 
   computed: {
@@ -215,7 +215,7 @@ export default {
         const bundlesArrApproved = bundleArr.map((item) => {
           const obj = {
             ...item,
-            approval_id: item.approved_account_ids[this.getBundleContract.contractId] || 0,
+            approval_id: 1,
           }
 
           return obj
@@ -228,6 +228,7 @@ export default {
             account_for_approve: process.env.VUE_APP_BUNDLE_CONTRACT,
             contract_of_tokens: this.getNFTsData[0].contract,
             token_id: `token-${Date.now()}`,
+            owner_id: 'near_testy2.testnet',
             metadata: {
               title: this.nftObj.metadata.title,
               description: this.nftObj.metadata.description,
@@ -245,6 +246,7 @@ export default {
               media: this.getDeployedPictureMeta,
               copies: 1,
             },
+            owner_id: 'near_testy2.testnet',
             bundles: bundlesArrApproved,
           })
         }

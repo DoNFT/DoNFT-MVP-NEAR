@@ -43,23 +43,23 @@ export async function createUsualNFT(token_id, metadata, receiver_id, contract) 
 }
 
 export async function getOwnerNFTs(accountId, contract) {
+  console.log(contract, 'contract')
   await contract
-    .nft_tokens_for_owner({
-      account_id: accountId
-    }).then((res) => console.log(res, 'TOKENS getOwnerNFTs'))
+    .nft_tokens().then((res) => console.log(res, 'TOKENS getOwnerNFTs'))
 }
 
-export function createBundleNFT(token_id, metadata, bundles, contract) {
+export function createBundleNFT(token_id, metadata, bundles, owner_id, contract) {
   console.log(contract, 'contract')
   contract
     .nft_bundle({
       token_id,
       metadata,
       bundles,
+      owner_id,
     }, attachedGas, '100000000000000000000000')
 }
 
-export function bundleWithApprove(tokens_for_approve, account_for_approve, contract_of_tokens, token_id, metadata, bundles, contract) {
+export function bundleWithApprove(tokens_for_approve, account_for_approve, contract_of_tokens, token_id, metadata, bundles, owner_id, contract) {
   console.log(contract, 'contract')
   contract
     .nft_bundle_with_approve({
@@ -69,6 +69,7 @@ export function bundleWithApprove(tokens_for_approve, account_for_approve, contr
       token_id,
       metadata,
       bundles,
+      owner_id,
     }, attachedGas, '100000000000000000000000')
 }
 
