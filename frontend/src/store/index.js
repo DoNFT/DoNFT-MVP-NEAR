@@ -272,6 +272,7 @@ const store = new Vuex.Store({
     async fetchOwnerNFTs({ getters }, { account, nftContract }) {
       console.log(account, nftContract, 'fetchOwnerNFTs')
       let contractData = await checkForContract(getters, nftContract)
+      console.log(contractData, 'contractData')
       getOwnerNFTs(account, contractData)
     },
     pushNFTbyContract ({commit}, NFTS) {

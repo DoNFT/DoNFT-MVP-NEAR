@@ -39,7 +39,7 @@ pub trait MyContract {
 
 #[near_bindgen]
 impl Contract {
-    // #[payable]
+    #[payable]
     pub fn nft_bundle(
         &mut self,
         token_id: TokenId,
@@ -49,7 +49,7 @@ impl Contract {
         //we add an optional parameter for perpetual royalties
         perpetual_royalties: Option<HashMap<AccountId, u32>>,
     ) {
-        // let initial_storage_usage = env::storage_usage();
+        let initial_storage_usage = env::storage_usage();
         env::log_str(&format!("nft_bundle: {:?}", bundles));
         let caller_id = owner_id;
         //measure the initial storage being used on the contract
@@ -132,10 +132,10 @@ impl Contract {
         env::log_str(&nft_mint_log.to_string());
 
         //calculate the required storage which was the used - initial
-        // let required_storage_in_bytes = env::storage_usage() - initial_storage_usage;
+        let required_storage_in_bytes = env::storage_usage() - initial_storage_usage;
 
         //refund any excess storage if the user attached too much. Panic if they didn't attach enough to cover the required.
-        // refund_deposit(required_storage_in_bytes);
+        refund_deposit(required_storage_in_bytes);
     }
 
     #[payable]
@@ -187,7 +187,7 @@ impl Contract {
             owner_id,
             perpetual_royalties,
             env::current_account_id(),
-            5, // yocto NEAR to attach
+            env::attached_deposit() - storage_stake, // yocto NEAR to attach
             REMAINING_GAS // gas to attach
         );
         env::log_str(&format!("REMAINING_GAS: {:?}", REMAINING_GAS));
