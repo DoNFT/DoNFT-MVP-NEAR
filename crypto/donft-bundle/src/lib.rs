@@ -8,7 +8,7 @@ use near_sdk::{
     PanicOnDefault,
     Promise,
     PromiseOrValue,
-    ext_contract
+    ext_contract,
 };
 
 pub use near_sdk::{

@@ -19,12 +19,6 @@ impl Contract {
         let caller_id = env::predecessor_account_id();
         //get the token object if there is some token object
         if let Some(token) = self.tokens_by_id.get(&token_id) {
-            if token.owner_id != caller_id {
-                //we refund the owner for releasing the storage used up by the approved account IDs
-                //refund_approved_account_ids(owner_id, &approved_account_ids);
-                // The token is not owner by the receiver anymore. Can't return it.
-            }
-            
             let mut range_iterator = token.bundles.iter();
             while let Some(bundle) = range_iterator.next() {
                 ext_nft::nft_transfer(

@@ -2,17 +2,6 @@ use crate::*;
 
 pub type TokenId = String;
 
-#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone, Debug)]
-#[serde(crate = "near_sdk::serde")]
-pub struct Bundle {
-    //owner of the token
-    pub contract: AccountId,
-    //list of approved account IDs that have access to transfer the token. This maps an account ID to an approval ID
-    pub token_id: TokenId,
-    //the next approval ID to give out. 
-    pub approval_id: u64,
-}
-
 //defines the payout type we'll be returning as a part of the royalty standards.
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
@@ -32,7 +21,7 @@ pub struct NFTContractMetadata {
     pub reference_hash: Option<Base64VecU8>, // Base64-encoded sha256 hash of JSON from reference field. Required if `reference` is included.
 }
 
-#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Debug)]
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Debug, Clone)]
 #[serde(crate = "near_sdk::serde")]
 pub struct TokenMetadata {
     pub title: Option<String>, // ex. "Arch Nemesis: Mail Carrier" or "Parcel #5055"
@@ -49,7 +38,18 @@ pub struct TokenMetadata {
     pub reference_hash: Option<Base64VecU8>, // Base64-encoded sha256 hash of JSON from reference field. Required if `reference` is included.
 }
 
-#[derive(BorshDeserialize, BorshSerialize, Serialize, Debug)]
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone, Debug)]
+#[serde(crate = "near_sdk::serde")]
+pub struct Bundle {
+    //owner of the token
+    pub contract: AccountId,
+    //list of approved account IDs that have access to transfer the token. This maps an account ID to an approval ID
+    pub token_id: TokenId,
+    //the next approval ID to give out. 
+    pub approval_id: u64,
+}
+
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Debug, Clone)]
 pub struct Token {
     //owner of the token
     pub owner_id: AccountId,
@@ -64,7 +64,7 @@ pub struct Token {
 }
 
 //The Json token is what will be returned from view calls. 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 #[serde(crate = "near_sdk::serde")]
 pub struct JsonToken {
     //token ID

@@ -317,6 +317,7 @@ export default {
 .nft-cards__contract-inner {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .nft-cards__contract__item {
@@ -329,6 +330,10 @@ export default {
 
   &:last-child {
     margin-right: 0;
+  }
+
+  .bundle-item & {
+    width: 32%;
   }
 }
 
@@ -344,7 +349,7 @@ export default {
 }
 
 .nft-cards__contract__item.chosen-card {
-  box-shadow: -2px -2px 12px 11px rgba(127, 251, 255, 0.7);
+  box-shadow: 0px 0px 5px 6px rgba(127, 251, 255, 0.7);
   transform: scale(0.9);
   .nft-cards__info {
     opacity: 1;
@@ -365,6 +370,10 @@ export default {
   .form-nft__detail-page & {
     width: 300px;
     height: 300px;
+  }
+
+  .bundle-item & {
+    margin-bottom: 0;
   }
 }
 

@@ -28,7 +28,7 @@ trait NFT {
 #[ext_contract(ext_self)]
 pub trait MyContract {
     fn bundle_on_approve_callback(
-        &self,
+        &mut self,
         token_id: TokenId,
         metadata: TokenMetadata,
         bundles: Vec<Bundle>,
@@ -40,6 +40,72 @@ pub trait MyContract {
 #[near_bindgen]
 impl Contract {
     #[payable]
+    pub fn remove_token_from_bundle(
+        &mut self,
+        bundle_token_id: TokenId,
+        remove_token_data: Bundle,
+    ) -> Option<Token> {
+        if let Some(mut token_data) = self.tokens_by_id.get(&bundle_token_id) {
+            //we'll get the metadata for that token
+            token_data.bundles.retain(|x| x.token_id != remove_token_data.token_id);
+
+            ext_nft::nft_transfer(
+                env::predecessor_account_id(),
+                remove_token_data.token_id.clone(),
+                remove_token_data.approval_id.clone(),
+                None,
+                remove_token_data.contract.clone(), // contract account id
+                DEPOSIT, // yocto NEAR to attach
+                GAS_FOR_NFT_TRANSFER_CALL // gas to attach
+            );
+
+            Some(token_data)
+        } else { //if there wasn't a token ID in the tokens_by_id collection, we return None
+            None
+        }
+    }
+
+    #[payable]
+    pub fn add_token_to_bundle(
+        &mut self,
+        token_id: TokenId,
+        metadata: TokenMetadata,
+        receiver_id: AccountId,
+        bundle_token_id: TokenId,
+        //we add an optional parameter for perpetual royalties
+        perpetual_royalties: Option<HashMap<AccountId, u32>>,
+    ) -> Option<Token> {
+        if let Some(mut token_data) = self.tokens_by_id.get(&bundle_token_id) {
+            //specify the token struct that contains the owner ID 
+            let token_for_bundle = Bundle {
+                contract: env::current_account_id(),
+                //list of approved account IDs that have access to transfer the token. This maps an account ID to an approval ID
+                token_id: token_id.clone(),
+                //the next approval ID to give out. 
+                approval_id: 0,
+            };
+            // ext_nft::nft_transfer(
+            //     env::current_account_id(),
+            //     bundle.token_id.clone(),
+            //     bundle.approval_id.clone(),
+            //     None,
+            //     bundle.contract.clone(), // contract account id
+            //     DEPOSIT, // yocto NEAR to attach
+            //     GAS_FOR_NFT_TRANSFER_CALL // gas to attach
+            // );
+            env::log_str(&format!("token_data 1: {:?}", token_data.clone()));
+
+            token_data.bundles.push(token_for_bundle);
+            env::log_str(&format!("token_data 2: {:?}", token_data.clone()));
+
+            Some(token_data)
+        } else { //if there wasn't a token ID in the tokens_by_id collection, we return None
+            None
+        }
+
+    }
+
+    #[payable]
     pub fn nft_bundle(
         &mut self,
         token_id: TokenId,
@@ -49,12 +115,7 @@ impl Contract {
         //we add an optional parameter for perpetual royalties
         perpetual_royalties: Option<HashMap<AccountId, u32>>,
     ) {
-        let initial_storage_usage = env::storage_usage();
-        env::log_str(&format!("nft_bundle: {:?}", bundles));
         let caller_id = owner_id;
-        //measure the initial storage being used on the contract
-        // let initial_storage_usage = env::storage_usage();
-        env::log_str(&format!("caller_id: {:?}", caller_id));
 
         // create a royalty map to store in the token
         let mut royalty = HashMap::new();
@@ -107,9 +168,6 @@ impl Contract {
 
         //call the internal method for adding the token to the owner
         self.internal_add_token_to_owner(&token.owner_id, &token_id);
-        env::log_str(&format!("self.tokens_per_owner: {:?}", self.tokens_per_owner));
-        env::log_str(&format!("self.token_metadata_by_id: {:?}", self.token_metadata_by_id));
-        env::log_str(&format!("self.tokens_by_id: {:?}", self.tokens_by_id));
 
         // Construct the mint log as per the events standard.
         let nft_mint_log: EventLog = EventLog {
@@ -130,12 +188,6 @@ impl Contract {
 
         // Log the serialized json.
         env::log_str(&nft_mint_log.to_string());
-
-        //calculate the required storage which was the used - initial
-        let required_storage_in_bytes = env::storage_usage() - initial_storage_usage;
-
-        //refund any excess storage if the user attached too much. Panic if they didn't attach enough to cover the required.
-        refund_deposit(required_storage_in_bytes);
     }
 
     #[payable]
@@ -151,49 +203,38 @@ impl Contract {
         //we add an optional parameter for perpetual royalties
         perpetual_royalties: Option<HashMap<AccountId, u32>>,
     ) {
-        //measure the initial storage being used on the contract
         let initial_storage_usage = env::storage_usage();
-
         // Storage 80 bytes for some common components:
         // - a single royalty
         // - a single approval
         // - an entry in the `tokens_per_account` map
         // - an entry in the `composables` map
-
         let storage_stake = 80 * tokens_for_approve.len() as u128;
-        env::log_str(&format!("storage_usage 2: {}", initial_storage_usage));
 
         let storage_for_approve: Gas = tgas(80);
-        env::log_str(&format!("storage_for_approve: {:?}", storage_for_approve));
-        let gas_before_call = env::used_gas();
-        env::log_str(&format!("gas_before_call: {:?}", gas_before_call));
-        let call = ext_nft::multiple_nft_approve(
+
+        ext_nft::multiple_nft_approve(
             tokens_for_approve,
             account_for_approve.clone(),
             contract_of_tokens.clone(),
             env::attached_deposit(), // yocto NEAR to attach, for approving tokens
             storage_for_approve // gas to attach
+        )
+        .then(
+            ext_self::bundle_on_approve_callback(
+                token_id,
+                metadata,
+                bundles,
+                owner_id,
+                perpetual_royalties,
+                env::current_account_id(),
+                0, // yocto NEAR to attach
+                env::prepaid_gas()
+                - env::used_gas()
+                - storage_for_approve
+                - GAS_RESERVED_FOR_CURRENT_CALL // gas to attach
+            )
         );
-        let gas_before_callback = env::used_gas();
-        env::log_str(&format!("gas_before_callback: {:?}", gas_before_callback));
-        let REMAINING_GAS: Gas = env::prepaid_gas()
-        - env::used_gas()
-        - storage_for_approve
-        - GAS_RESERVED_FOR_CURRENT_CALL;
-        let callback = ext_self::bundle_on_approve_callback(
-            token_id,
-            metadata,
-            bundles,
-            owner_id,
-            perpetual_royalties,
-            env::current_account_id(),
-            env::attached_deposit() - storage_stake, // yocto NEAR to attach
-            REMAINING_GAS // gas to attach
-        );
-        env::log_str(&format!("REMAINING_GAS: {:?}", REMAINING_GAS));
-        let gas_after_callback = env::used_gas();
-        env::log_str(&format!("gas_after_callback: {:?}", gas_after_callback));
-        call.then(callback);
 
         //calculate the required storage which was the used - initial
         let required_storage_in_bytes = env::storage_usage() - initial_storage_usage;
@@ -202,8 +243,9 @@ impl Contract {
         refund_deposit(required_storage_in_bytes);
     }
 
+    #[private]
     pub fn bundle_on_approve_callback(
-        mut self,
+        &mut self,
         token_id: TokenId,
         metadata: TokenMetadata,
         mut bundles: Vec<Bundle>,
@@ -221,16 +263,12 @@ impl Contract {
             PromiseResult::NotReady => unreachable!(),
             PromiseResult::Failed => panic!("failed promise"),
             PromiseResult::Successful(result) => {
-                env::log_str(&format!("result promise 1: {:?}", result));
                 let approved_ids = near_sdk::serde_json::from_slice::<Vec<u64>>(&result).unwrap();
 
-                env::log_str(&format!("bundles 1: {:?}", bundles));
                 for i in 0..approved_ids.len() {
                     bundles[i].approval_id = approved_ids[i]
                 };
 
-                env::log_str(&format!("bundles 2: {:?}", bundles));
-                env::log_str(&format!("result promise 3: {:?}", approved_ids));
                 self.nft_bundle(token_id, metadata, bundles, owner_id, perpetual_royalties);
             },
         }

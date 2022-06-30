@@ -4,6 +4,15 @@
       class="nft-cards__media"
       :src="urlData || placeholder()"
     >
+    <div v-if="isBundle">
+      <icon
+        name="trash"
+        :size="26"
+        class="delete-icon delete-icon--token"
+        @click.native="removeFromBundle"
+      />
+
+    </div>
     <p class="nft-cards__title">{{metadata.metadata.title}}</p>
     <template v-if="isApprovedContract && !isNFTApproved">
       <button
@@ -19,7 +28,7 @@
       class="nft-cards__info"
       :to="{ name: 'NFTDetails', params: { id: metadata.token_id }}"
     >
-      <icon name="pencil" :size="14" class="upload-icon" />
+      <icon name="pencil" :size="14" class="edit-icon" />
     </router-link>
   </div>
 </template>
@@ -103,6 +112,10 @@ export default {
       'setTokenImage',
       'setNFTApproveId',
     ]),
+    removeFromBundle() {
+      console.log('REMOVE')
+      this.$emit('remove-token', this.metadata)
+    },
     async loadContent () {
       if (this.metadata) {
         let url = null
@@ -160,6 +173,10 @@ export default {
     flex-direction: column;
     justify-content: center;
     margin: 0 auto;
+  }
+
+  .bundle-item & {
+    width: 100%;
   }
 }
 

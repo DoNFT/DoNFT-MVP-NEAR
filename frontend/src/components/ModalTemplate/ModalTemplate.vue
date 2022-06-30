@@ -1,7 +1,8 @@
 <template>
-  <div class="modal-template">
+  <div :class="['modal-template', { small: small }]">
     <div class="modal-template__body">
-      <h3>Result</h3>
+      
+      <slot name="header"/>
 
       <div
         class="modal-template__body-close"
@@ -9,6 +10,9 @@
       >
         <icon name="cross" :size="32" class="cross-icon" />
       </div>
+
+
+      <slot name="content"/>
 
       <div
         class="effect-confirm__inner"
@@ -41,6 +45,7 @@ export default {
 
   props: {
     tokenMeta: Object,
+    small: Boolean,
   },
 
   components: {
@@ -91,13 +96,20 @@ export default {
 
 .modal-template__body {
   position: relative;
-  background: #fff;
+  background: #fcf7ff;
   width: 70vw;
   height: 55vh;
   padding: 20px;
   border-radius: 4px;
   overflow-y: auto;
   border: 1px solid #2d0949;
+
+  .small & {
+    width: auto;
+    height: auto;
+    max-width: 50vw;
+    max-height: 50vh;
+  }
   
   .effect-confirm__inner {
     margin-left: 0;

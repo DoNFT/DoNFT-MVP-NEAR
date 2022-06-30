@@ -74,7 +74,11 @@
       :token-meta="nftObj"
       @submit="bundleImageApproved"
       @close="closeModal"
-    />
+    >
+      <template #header>
+        <h3>Result</h3>
+      </template>
+    </modal-template>
   </div>
 </template>
 

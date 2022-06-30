@@ -42,10 +42,35 @@ export async function createUsualNFT(token_id, metadata, receiver_id, contract) 
     }, attachedGas, '100000000000000000000000')
 }
 
+export async function removeTokenFromBundle(contract, remove_token_data, bundle_token_id) {
+  console.log(contract, remove_token_data, 'contract')
+  await contract
+    .remove_token_from_bundle({
+      remove_token_data,
+      bundle_token_id,
+    }, attachedGas, '1')
+}
+
+export async function addTokenToBundle(contract, token_id, metadata, bundle_token_id, receiver_id) {
+  console.log(contract, token_id, 'contract')
+  await contract
+    .add_token_to_bundle({
+      token_id,
+      metadata,
+      receiver_id,
+      bundle_token_id,
+    }, attachedGas, '100000000000000000000000')
+}
+
+// will be removed later, currently only for debugging
 export async function getOwnerNFTs(accountId, contract) {
   console.log(contract, 'contract')
   await contract
     .nft_tokens().then((res) => console.log(res, 'TOKENS getOwnerNFTs'))
+  await contract
+    .nft_total_supply().then((res) => console.log(res, 'TOKENS nft_total_supply'))
+  await contract
+    .nft_tokens_for_owner({ account_id: accountId }).then((res) => console.log(res, 'TOKENS nft_supply_for_owner'))
 }
 
 export function createBundleNFT(token_id, metadata, bundles, owner_id, contract) {

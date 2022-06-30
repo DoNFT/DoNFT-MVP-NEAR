@@ -52,6 +52,7 @@ impl Contract {
 
         //call the internal method for adding the token to the owner
         self.internal_add_token_to_owner(&token.owner_id, &token_id);
+        env::log_str(&format!("self.tokens_per_owner: {:?}", self.tokens_per_owner));
 
         // Construct the mint log as per the events standard.
         let nft_mint_log: EventLog = EventLog {
