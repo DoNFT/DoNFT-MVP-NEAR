@@ -49,7 +49,7 @@ pub struct Bundle {
     pub approval_id: u64,
 }
 
-#[derive(BorshDeserialize, BorshSerialize, Serialize, Debug, Clone)]
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Debug, Clone)]
 pub struct Token {
     //owner of the token
     pub owner_id: AccountId,

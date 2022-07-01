@@ -85,9 +85,9 @@
               <h5>Token ID: <br> {{ item.token_id }}</h5>
               <token-card
                 class="bundle-data__token"
-                :is-modal="true"
                 :metadata="item"
-                @submit="createNFTforBundle"
+                :is-adding="true"
+                @submit-token="createNFTforBundle"
               />
             </div>
           </div>
@@ -106,7 +106,7 @@
               class="bundle-data__token"
               :is-bundle="true"
               :metadata="item"
-              @remove-token="removeBundleToken"
+              @submit-token="removeBundleToken"
             />
           </div>
           <div
@@ -179,7 +179,6 @@ export default {
       'getAccountId',
       'getBundleContract',
       'getNFTsByContract',
-      'getDeployedPictureMeta',
     ]),
     bundleNFTsComputedData() {
       return this.bundleNFTsData
@@ -268,34 +267,24 @@ export default {
       'getNFTByToken',
       'addNFTtoBundle',
       'triggerUnbundleNFT',
-      'passNFT',
-      'setResult',
-      'setDeployedPictureMeta'
     ]),
     ...mapMutations([
       'REMOVE_TOKEN_FROM_BUNDLE',
       'ADD_TOKEN_TO_BUNDLE',
     ]),
-    async createNFTforBundle() {
+    async createNFTforBundle(token_to_add_data) {
       console.log('cre')
+      const contract_of_mint = this.getAllNFTs.find((item) => item.token_id === token_to_add_data.token_id)
 
       if (!this.nftObjForBundle.metadata.title) {
         alert('Title field is emptyy')
       } else {
         try {
-          await this.setResult('base64')
-          await this.setDeployedPictureMeta('base64')
           console.log(this.getDeployedPictureMeta, 'this.getDeployedPictureMeta')
 
           this.ADD_TOKEN_TO_BUNDLE({
-            token_id: `token-${Date.now()}`,
-            metadata: {
-              title: this.nftObjForBundle.metadata.title,
-              description: this.nftObjForBundle.metadata.description,
-              media: this.getDeployedPictureMeta,
-              copies: 1,
-            },
-            contract_id: this.NFTComputedData.contract,
+            token_to_add_data,
+            contract_of_mint: contract_of_mint ? contract_of_mint.contract : null,
             bundle_token_id: this.NFTComputedData.token_id,
           })
         } catch(err) {
@@ -311,10 +300,6 @@ export default {
     removeBundleToken(remove_token_data) {
       const bundle_token_data = this.NFTComputedData.bundles.find((item) => item.token_id === remove_token_data.token_id)
       this.REMOVE_TOKEN_FROM_BUNDLE({ remove_token_data: bundle_token_data, bundle_id: this.NFTComputedData.token_id })
-    },
-    setUploadedImg(src) {
-      this.nftObjForBundle.metadata.media = src 
-      this.passNFT(this.nftObjForBundle.metadata)
     },
     // requesting metadata of bundles NFT. to render them
     // todo: bundle contract could contain infinite number of nft,

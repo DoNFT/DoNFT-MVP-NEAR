@@ -4,15 +4,25 @@
       class="nft-cards__media"
       :src="urlData || placeholder()"
     >
+
     <div v-if="isBundle">
       <icon
         name="trash"
         :size="26"
         class="delete-icon delete-icon--token"
-        @click.native="removeFromBundle"
+        @click.native="submitToken"
       />
-
     </div>
+
+    <div v-if="isAdding">
+      <icon
+        name="plus"
+        :size="42"
+        class="add-icon add-icon--token"
+        @click.native="submitToken"
+      />
+    </div>
+
     <p class="nft-cards__title">{{metadata.metadata.title}}</p>
     <template v-if="isApprovedContract && !isNFTApproved">
       <button
@@ -44,6 +54,7 @@ export default {
     metadata: Object,
     editAvailable: Boolean,
     isBundle: Boolean,
+    isAdding: Boolean,
     isApprovedContract: String,
   },
 
@@ -112,9 +123,9 @@ export default {
       'setTokenImage',
       'setNFTApproveId',
     ]),
-    removeFromBundle() {
-      console.log('REMOVE')
-      this.$emit('remove-token', this.metadata)
+    submitToken() {
+      console.log('submitToken')
+      this.$emit('submit-token', this.metadata)
     },
     async loadContent () {
       if (this.metadata) {
