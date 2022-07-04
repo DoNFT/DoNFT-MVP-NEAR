@@ -78,19 +78,29 @@
             class="bundle-item"
           >
             <div
-              class="nft-cards__contract__item"
-              v-for="item in mergedTokens"
-              :key="item.token_id"
+              v-for="contractData in getNFTsByContract"
+              :key="contractData.id"
+              class="nft-cards__contract"
             >
-              <h5>Token ID: <br> {{ item.token_id }}</h5>
-              <token-card
-                class="bundle-data__token"
-                :metadata="item"
-                :is-adding="true"
-                @submit-token="createNFTforBundle"
-              />
+              <template v-if="contractData.NFTS && contractData.NFTS.length">
+                <h3>Contract: {{contractData.contractName}}</h3>
+                <div class="nft-cards__contract-inner">
+                  <div
+                    v-for="item in contractData.NFTS"
+                    :key="`nft--${item.token_id}`"
+                    class="nft-cards__contract__item"
+                  >
+                    <token-card
+                      :metadata="item"
+                      :is-adding="true"
+                      @submit-token="createNFTforBundle"
+                    />
+                  </div>
+                </div>
+              </template>
             </div>
           </div>
+
         </template>
       </modal-template>
 

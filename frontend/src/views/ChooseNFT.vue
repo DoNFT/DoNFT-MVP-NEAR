@@ -205,7 +205,7 @@ export default {
     // currently only for VUE_APP_NFTS_CONTRACT and VUE_APP_NFTS_EFFECTS_CONTRACT
     async generateRandomNFT(nftType) {
       try {
-        let contract_id = process.env.VUE_APP_NFTS_CONTRACT
+        let contract_id = process.env.VUE_APP_BUNDLE_CONTRACT
         let randomNumber = Math.floor(Math.random() * 5)
         let randomImage =  require(`@/assets/randomNFT/${randomNumber}.jpg`)
         let imageBase64 = null
@@ -318,6 +318,10 @@ export default {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+
+  .bundle-item & {
+    justify-content: space-between;
+  }
 }
 
 .nft-cards__contract__item {
@@ -333,7 +337,7 @@ export default {
   }
 
   .bundle-item & {
-    width: 32%;
+    width: 49%;
   }
 }
 
