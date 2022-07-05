@@ -189,6 +189,10 @@ export default {
   .bundle-item & {
     width: 100%;
   }
+
+  .form-nft--editor & {
+    width: 48%;
+  }
 }
 
 .nft-cards__info {

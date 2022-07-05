@@ -53,9 +53,18 @@ impl Contract {
         bundle_token_id: TokenId,
         remove_token_data: Bundle,
     ) -> Option<Token> {
+        let mut tokens_set = self
+            .tokens_by_id
+            .get(&bundle_token_id)
+            //if there is no set of tokens for the owner, we panic with the following message:
+            .expect("Token should be owned by the sender");
+
+        //we remove the the token_id from the set of tokens
         if let Some(mut token_data) = self.tokens_by_id.get(&bundle_token_id) {
-            //we'll get the metadata for that token
+            env::log_str(&format!("token_data 1: {:?}", token_data.clone()));
             token_data.bundles.retain(|x| x.token_id != remove_token_data.token_id);
+            env::log_str(&format!("token_data 2: {:?}", token_data.clone()));
+            self.tokens_by_id.insert(&bundle_token_id, &token_data.clone());
 
             ext_nft::nft_transfer(
                 env::predecessor_account_id(),

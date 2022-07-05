@@ -139,7 +139,7 @@ export default {
 
   .form-nft--editor & {
     height: auto;
-    width: 450px;
+    width: 48%;
   }
 
   &:hover {

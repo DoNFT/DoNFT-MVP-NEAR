@@ -142,7 +142,6 @@ import NavBar from '@/components/NavBar/NavBar'
 import TokenCard from '@/components/TokenCard/TokenCard'
 import StatusType from "@/mixins/StatusMixin"
 import ModalTemplate from '@/components/ModalTemplate/ModalTemplate'
-import { AppError } from "@/utilities"
 
 export default {
   name: "NFTDetails",
@@ -286,26 +285,11 @@ export default {
       console.log('cre')
       const contract_of_mint = this.getAllNFTs.find((item) => item.token_id === token_to_add_data.token_id)
 
-      if (!this.nftObjForBundle.metadata.title) {
-        alert('Title field is emptyy')
-      } else {
-        try {
-          console.log(this.getDeployedPictureMeta, 'this.getDeployedPictureMeta')
-
-          this.ADD_TOKEN_TO_BUNDLE({
-            token_to_add_data,
-            contract_of_mint: contract_of_mint ? contract_of_mint.contract : null,
-            bundle_token_id: this.NFTComputedData.token_id,
-          })
-        } catch(err) {
-          if(err instanceof AppError) {
-            alert(err.message)
-          } else {
-            console.log(err)
-            alert("Undefined error")
-          }
-        }
-      }
+      this.ADD_TOKEN_TO_BUNDLE({
+        token_to_add_data,
+        contract_of_mint: contract_of_mint ? contract_of_mint.contract : null,
+        bundle_token_id: this.NFTComputedData.token_id,
+      })
     },
     removeBundleToken(remove_token_data) {
       const bundle_token_data = this.NFTComputedData.bundles.find((item) => item.token_id === remove_token_data.token_id)
@@ -349,8 +333,8 @@ export default {
         minting_contract_id: this.NFTComputedData.contract,
       })
     },
-    async unbundleNFT() {
-      await this.triggerUnbundleNFT({ token_id: this.NFTComputedData.token_id, nft_data: this.NFTComputedData, bundles_data: this.bundleNFTsData})
+    unbundleNFT() {
+      this.triggerUnbundleNFT({ token_id: this.NFTComputedData.token_id, nft_data: this.NFTComputedData, bundles_data: this.bundleNFTsData})
     },
     changeFormat() {
       console.log('changeFormat')
