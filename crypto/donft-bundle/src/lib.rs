@@ -41,7 +41,6 @@ pub mod mint;
 pub mod nft_core; 
 pub mod royalty; 
 pub mod events;
-pub mod unbundle;
 
 /// This spec can be treated like a version of the standard.
 pub const NFT_METADATA_SPEC: &str = "1.0.0";
