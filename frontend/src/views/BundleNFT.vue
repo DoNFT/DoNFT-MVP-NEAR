@@ -214,7 +214,8 @@ export default {
 
         const bundlesArrApproved = bundleArr.map((item) => {
           const obj = {
-            ...item,
+            contract: item.contract,
+            token_id: item.token_id,
             approval_id: 1,
           }
 

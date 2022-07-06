@@ -8,11 +8,10 @@ import {
 
 
 COLLECTION_WORKSPACE.test(
-  "core",
+  "store_factory",
   async (test, { root, factory, alice, bob, store }) => {
     // store creation
     // const deployedFactory = await deployFactory({ root })
-    console.log(factory, 'factory 2')
     await bob
       .call(
         factory,

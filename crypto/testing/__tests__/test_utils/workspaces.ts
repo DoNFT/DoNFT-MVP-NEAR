@@ -137,8 +137,7 @@ export const BUNDLE_WORKSPACE = ava.Workspace.init(async ({ root }) => {
   const [alice, bob, carol, dave] = await createAccounts(root);
 
   const bundle = await deployBundle(root);
+  const bundle2 = await deployBundle(root);
 
-  console.log(bundle, 'bundle')
-
-  return { alice, bob, carol, dave, bundle };
+  return { alice, bob, carol, dave, bundle, bundle2 };
 });
