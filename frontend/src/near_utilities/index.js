@@ -51,12 +51,11 @@ export async function removeTokenFromBundle(contract, remove_token_data, bundle_
     }, attachedGas, '1')
 }
 
-export async function addTokenToBundle(contract, token_to_add_data, contract_of_mint, bundle_token_id) {
+export async function addTokenToBundle(contract, token_to_add_data, bundle_token_id) {
   console.log(contract, token_to_add_data, 'contract')
   await contract
     .add_token_to_bundle({
       token_to_add_data,
-      contract_of_mint,
       bundle_token_id,
     }, attachedGas, '100000000000000000000000')
 }

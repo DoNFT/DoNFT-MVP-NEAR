@@ -24,7 +24,7 @@
     </div>
 
     <p class="nft-cards__title">{{metadata.metadata.title}}</p>
-    <template v-if="isApprovedContract && !isNFTApproved">
+    <template v-if="!hideApprove && isApprovedContract && !isNFTApproved">
       <button
         class="main-btn"
         @click="approveNFTHandler"
@@ -55,6 +55,7 @@ export default {
     editAvailable: Boolean,
     isBundle: Boolean,
     isAdding: Boolean,
+    hideApprove: Boolean,
     isApprovedContract: String,
   },
 

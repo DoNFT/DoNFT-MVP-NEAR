@@ -15,6 +15,7 @@
             <token-card
               v-if="NFTComputedData && NFTComputedData.metadata"
               :metadata="NFTComputedData"
+              :hide-approve="true"
               :is-approved-contract="getBundleContract.contractId"
               @nft-approved-status="bundleStatusUpdate"
             />
@@ -26,6 +27,7 @@
           <token-card
             v-if="getEffect"
             :metadata="getEffect"
+            :hide-approve="true"
             :is-approved-contract="getBundleContract.contractId"
             @nft-approved-status="bundleStatusUpdate"
           />
@@ -50,7 +52,6 @@
             <div class="form-nft__bottom">
               <button
                 class="main-btn"
-                :disabled="checkBundleForApprove"
                 @click="handleMint"
               >Confirm</button>
             </div>
@@ -83,7 +84,7 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from "vuex"
+import { mapGetters, mapActions, mapMutations } from "vuex"
 import Spinner from "@/components/Spinner"
 import TokenCard from '@/components/TokenCard/TokenCard'
 import NavBar from '@/components/NavBar/NavBar'
@@ -115,6 +116,7 @@ export default {
       approvedNFTStatuses: [],
       bundlesArrApproved: null,
       showApproveModal: false,
+      contractWithTokens: [],
     }
   },
 
@@ -190,6 +192,9 @@ export default {
       'createNewBundleNFT',
       'setStatus',
     ]),
+    ...mapMutations([
+      'CREATE_NEW_BUNDLE_WITH_APPROVE',
+    ]),
     bundleStatusUpdate(data) {
       this.approvedNFTStatuses.push(data)
     },
@@ -198,7 +203,10 @@ export default {
       this.setStatus(StatusType.ChoosingParameters)
     },
     bundleImageApproved() {
-      this.createNewBundleNFT({
+      this.CREATE_NEW_BUNDLE_WITH_APPROVE({
+        tokens_for_approve: 2,
+        account_for_approve: process.env.VUE_APP_BUNDLE_CONTRACT,
+        contract_of_tokens: this.contractWithTokens,
         token_id: `token-${Date.now()}`,
         metadata: {
           title: this.nftObj.metadata.title,
@@ -208,6 +216,7 @@ export default {
         },
         bundles: this.bundlesArrApproved,
       })
+
     },
     // minting NFT with NEW effects
     async handleMint() {
@@ -255,10 +264,18 @@ export default {
 
           this.bundlesArrApproved = bundleArr.map((item) => {
             const obj = {
-              ...item.data,
               contract: item.contract === 'list' ? this.getContract.contractId : this.getEffectsContract.contractId,
-              approval_id: item.data.approved_account_ids[this.getBundleContract.contractId],
+              token_id: item.data.token_id,
+              approval_id: item.data.approved_account_ids[this.getBundleContract.contractId] || 0,
+              token_role: item.contract === 'list' ? 'original' : 'modifier',
             }
+
+            const tokensForContract = {
+              contract: obj.contract,
+              tokens: [obj.token_id]
+            }
+            
+            this.contractWithTokens.push(tokensForContract)
 
             return obj
           })

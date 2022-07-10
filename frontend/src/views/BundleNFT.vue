@@ -28,6 +28,7 @@
             :metadata="item"
             :edit-available="false"
             :is-approved-contract="getBundleContract.contractId"
+            :hide-approve="true"
             @nft-approved-status="bundleStatusUpdate"
           />
         </div>
@@ -216,7 +217,8 @@ export default {
           const obj = {
             contract: item.contract,
             token_id: item.token_id,
-            approval_id: 1,
+            approval_id: item.approved_account_ids[this.getBundleContract.contractId] || 0,
+            token_role: 'original',
           }
 
           return obj
@@ -226,9 +228,14 @@ export default {
 
         if (this.checkBundleForApprove) {
           this.CREATE_NEW_BUNDLE_WITH_APPROVE({
-            tokens_for_approve: this.nftArray,
+            tokens_for_approve: this.nftArray.length,
             account_for_approve: process.env.VUE_APP_BUNDLE_CONTRACT,
-            contract_of_tokens: this.getNFTsData[0].contract,
+            contract_of_tokens: [
+              {
+                contract: this.getNFTsData[0].contract,
+                tokens: this.nftArray,
+              }
+            ],
             token_id: `token-${Date.now()}`,
             metadata: {
               title: this.nftObj.metadata.title,

@@ -1,5 +1,5 @@
 use crate::*;
-use near_sdk::{ext_contract, Gas};
+use near_sdk::{ext_contract, Gas, PromiseError};
 
 const GAS_FOR_RESOLVE_TRANSFER: Gas = Gas(10_000_000_000_000);
 const GAS_FOR_NFT_TRANSFER_CALL: Gas = Gas(25_000_000_000_000 + GAS_FOR_RESOLVE_TRANSFER.0);
@@ -28,13 +28,40 @@ trait NFT {
 // define methods we'll use as callbacks on our contract
 #[ext_contract(ext_self)]
 pub trait CallbacksContract {
-    fn bundle_on_approve_callback(
+    fn bundle_on_approve_with_one_callback(
         &mut self,
         token_id: TokenId,
         metadata: TokenMetadata,
         bundles: Vec<Bundle>,
         owner_id: AccountId,
         perpetual_royalties: Option<HashMap<AccountId, u32>>,
+        contract_of_tokens: Vec<ContractWithTokens>,
+        #[callback_unwrap] a: Vec<u64>,
+    );
+
+    fn bundle_on_approve_with_two_callbacks(
+        &mut self,
+        token_id: TokenId,
+        metadata: TokenMetadata,
+        bundles: Vec<Bundle>,
+        owner_id: AccountId,
+        perpetual_royalties: Option<HashMap<AccountId, u32>>,
+        contract_of_tokens: Vec<ContractWithTokens>,
+        #[callback_unwrap] a: Vec<u64>,
+        #[callback_result] b: Result<Vec<u64>, PromiseError>,
+    );
+
+    fn bundle_on_approve_with_three_callbacks(
+        &mut self,
+        token_id: TokenId,
+        metadata: TokenMetadata,
+        bundles: Vec<Bundle>,
+        owner_id: AccountId,
+        perpetual_royalties: Option<HashMap<AccountId, u32>>,
+        contract_of_tokens: Vec<ContractWithTokens>,
+        #[callback_unwrap] a: Vec<u64>,
+        #[callback_result] b: Result<Vec<u64>, PromiseError>,
+        #[callback_result] c: Result<Vec<u64>, PromiseError>,
     );
 
     fn add_to_bundle_on_callback(
@@ -85,9 +112,8 @@ impl Contract {
     #[payable]
     pub fn add_token_to_bundle(
         &mut self,
-        token_to_add_data: JsonToken,
+        token_to_add_data: Bundle,
         // contract of minted token, which we gonna approve
-        contract_of_mint: AccountId,
         bundle_token_id: TokenId,
     ) -> Option<Token> {
         let storage_for_approve: Gas = tgas(80);
@@ -95,18 +121,19 @@ impl Contract {
         if let Some(mut bundle_token_data) = self.tokens_by_id.get(&bundle_token_id) {
             //specify the token struct that contains the owner ID 
             let approved_token_data = Bundle {
-                contract: contract_of_mint.clone(),
+                contract: token_to_add_data.contract.clone(),
                 //list of approved account IDs that have access to transfer the token. This maps an account ID to an approval ID
                 token_id: token_to_add_data.token_id.clone(),
                 //the next approval ID to give out. 
                 approval_id: 0,
+                token_role: token_to_add_data.token_role.clone(),
             };
 
             ext_nft::nft_approve(
                 token_to_add_data.token_id.clone(),
                 env::current_account_id(),
                 None,
-                contract_of_mint.clone(),
+                token_to_add_data.contract,
                 env::attached_deposit(), // yocto NEAR to attach, for approving tokens
                 storage_for_approve // gas to attach
             )
@@ -248,12 +275,14 @@ impl Contract {
         env::log_str(&nft_mint_log.to_string());
     }
 
+    // bundles Vec field order should be same as contracts in Vec field contract_of_tokens
+    // todo: remove influence of contracts order
     #[payable]
     pub fn nft_bundle_with_approve(
         &mut self,
-        tokens_for_approve: Vec<String>,
+        tokens_for_approve: u128,
         account_for_approve: AccountId,
-        contract_of_tokens: AccountId,
+        contract_of_tokens: Vec<ContractWithTokens>,
         token_id: TokenId,
         metadata: TokenMetadata,
         bundles: Vec<Bundle>,
@@ -267,33 +296,117 @@ impl Contract {
         // - a single approval
         // - an entry in the `tokens_per_account` map
         // - an entry in the `composables` map
-        let storage_stake = 80 * tokens_for_approve.len() as u128;
+        let storage_stake = 80 * tokens_for_approve;
 
         let storage_for_approve: Gas = tgas(80);
+        let storage_for_approve2: Gas = tgas(40);
+        let storage_for_approve3: Gas = tgas(20);
+        env::log_str(&format!("contract_of_tokens.len(): {:?}", contract_of_tokens.len()));
 
-        ext_nft::multiple_nft_approve(
-            tokens_for_approve,
-            account_for_approve.clone(),
-            contract_of_tokens.clone(),
-            env::attached_deposit(), // yocto NEAR to attach, for approving tokens
-            storage_for_approve // gas to attach
-        )
-        .then(
-            ext_self::bundle_on_approve_callback(
-                token_id,
-                metadata,
-                bundles,
-                owner_id,
-                perpetual_royalties,
-                env::current_account_id(),
-                0, // yocto NEAR to attach
-                env::prepaid_gas()
-                - env::used_gas()
-                - storage_for_approve
-                - GAS_RESERVED_FOR_CURRENT_CALL // gas to attach
+        if contract_of_tokens.len() == 1 {
+            ext_nft::multiple_nft_approve(
+                contract_of_tokens[0].tokens.clone(),
+                account_for_approve.clone(),
+                contract_of_tokens[0].contract.clone(), //contract account to make the call to
+                env::attached_deposit(), // yocto NEAR to attach, for approving tokens
+                storage_for_approve // gas to attach
             )
-        );
+            .then(
+                ext_self::bundle_on_approve_with_one_callback(
+                    token_id.clone(),
+                    metadata.clone(),
+                    bundles.clone(),
+                    owner_id.clone(),
+                    perpetual_royalties.clone(),
+                    contract_of_tokens.clone(),
+                    env::current_account_id(),
+                    0, // yocto NEAR to attach
+                    env::prepaid_gas()
+                    - env::used_gas()
+                    - storage_for_approve
+                    - GAS_RESERVED_FOR_CURRENT_CALL // gas to attach
+                )
+            );
+        } else {}
 
+        if contract_of_tokens.len() == 2 {
+            ext_nft::multiple_nft_approve(
+                contract_of_tokens[0].tokens.clone(),
+                account_for_approve.clone(),
+                contract_of_tokens[0].contract.clone(), //contract account to make the call to
+                env::attached_deposit() / 2, // yocto NEAR to attach, for approving tokens
+                storage_for_approve2 // gas to attach
+            )
+            .and(
+                ext_nft::multiple_nft_approve(
+                    contract_of_tokens[1].tokens.clone(),
+                    account_for_approve.clone(),
+                    contract_of_tokens[1].contract.clone(), //contract account to make the call to
+                    env::attached_deposit() / 2, // yocto NEAR to attach, for approving tokens
+                    storage_for_approve2 // gas to attach
+                )  
+            )
+            .then(
+                ext_self::bundle_on_approve_with_two_callbacks(
+                    token_id.clone(),
+                    metadata.clone(),
+                    bundles.clone(),
+                    owner_id.clone(),
+                    perpetual_royalties.clone(),
+                    contract_of_tokens.clone(),
+                    env::current_account_id(),
+                    0, // yocto NEAR to attach
+                    env::prepaid_gas()
+                    - env::used_gas()
+                    - storage_for_approve2
+                    - GAS_RESERVED_FOR_CURRENT_CALL // gas to attach
+                )
+            );
+        } else {}
+
+        if contract_of_tokens.len() == 3 {
+            ext_nft::multiple_nft_approve(
+                contract_of_tokens[0].tokens.clone(),
+                account_for_approve.clone(),
+                contract_of_tokens[0].contract.clone(), //contract account to make the call to
+                env::attached_deposit() / 3, // yocto NEAR to attach, for approving tokens
+                storage_for_approve3 // gas to attach
+            )
+            .and(
+                ext_nft::multiple_nft_approve(
+                    contract_of_tokens[1].tokens.clone(),
+                    account_for_approve.clone(),
+                    contract_of_tokens[1].contract.clone(), //contract account to make the call to
+                    env::attached_deposit() / 3, // yocto NEAR to attach, for approving tokens
+                    storage_for_approve3 // gas to attach
+                )  
+            )
+            .and(
+                ext_nft::multiple_nft_approve(
+                    contract_of_tokens[2].tokens.clone(),
+                    account_for_approve.clone(),
+                    contract_of_tokens[2].contract.clone(), //contract account to make the call to
+                    env::attached_deposit() / 3, // yocto NEAR to attach, for approving tokens
+                    storage_for_approve3 // gas to attach
+                )  
+            )
+            .then(
+                ext_self::bundle_on_approve_with_three_callbacks(
+                    token_id.clone(),
+                    metadata,
+                    bundles,
+                    owner_id,
+                    perpetual_royalties,
+                    contract_of_tokens,
+                    env::current_account_id(),
+                    0, // yocto NEAR to attach
+                    env::prepaid_gas()
+                    - env::used_gas()
+                    - storage_for_approve3
+                    - GAS_RESERVED_FOR_CURRENT_CALL // gas to attach
+                )
+            );
+        } else {}
         //calculate the required storage which was the used - initial
         let required_storage_in_bytes = env::storage_usage() - initial_storage_usage;
 
@@ -302,34 +415,110 @@ impl Contract {
     }
 
     #[private]
-    pub fn bundle_on_approve_callback(
+    pub fn bundle_on_approve_with_one_callback(
         &mut self,
         token_id: TokenId,
         metadata: TokenMetadata,
         mut bundles: Vec<Bundle>,
         owner_id: AccountId,
         perpetual_royalties: Option<HashMap<AccountId, u32>>,
+        contract_of_tokens: Vec<ContractWithTokens>,
+        #[callback_unwrap] first_call: Vec<u64>,
     ) {
-        assert_eq!(
-            env::promise_results_count(),
-            1,
-            "This is a callback method"
-        );
+        let mut approved_values = Vec::new();
+        env::log_str(&format!("first_call: {:?}", &first_call));
 
-        // handle the result from the cross contract call this method is a callback for
-        match env::promise_result(0) {
-            PromiseResult::NotReady => unreachable!(),
-            PromiseResult::Failed => panic!("failed promise"),
-            PromiseResult::Successful(result) => {
-                let approved_ids = near_sdk::serde_json::from_slice::<Vec<u64>>(&result).unwrap();
-
-                for i in 0..approved_ids.len() {
-                    bundles[i].approval_id = approved_ids[i]
-                };
-
-                self.nft_bundle(token_id, metadata, bundles, owner_id, perpetual_royalties);
-            },
+        for i in 0..first_call.len() {
+            approved_values.push(first_call[i].clone())
         }
+
+        env::log_str(&format!("approves_values: {:?}", &approved_values));
+        for i in 0..contract_of_tokens[0].tokens.len() {
+            bundles[i].approval_id = approved_values[i]
+        }
+
+        env::log_str(&format!("approves_values: {:?}", &approved_values));
+
+        self.nft_bundle(token_id, metadata, bundles, owner_id, perpetual_royalties);
+    }
+
+    #[private]
+    pub fn bundle_on_approve_with_two_callbacks(
+        &mut self,
+        token_id: TokenId,
+        metadata: TokenMetadata,
+        mut bundles: Vec<Bundle>,
+        owner_id: AccountId,
+        perpetual_royalties: Option<HashMap<AccountId, u32>>,
+        contract_of_tokens: Vec<ContractWithTokens>,
+        #[callback_unwrap] first_call: Vec<u64>,
+        #[callback_result] b: Result<Vec<u64>, PromiseError>,
+    ) {
+        let mut approved_values = Vec::new();
+        env::log_str(&format!("first_call: {:?}", &first_call));
+
+        for i in 0..first_call.len() {
+            approved_values.push(first_call[i].clone())
+        }
+
+        if b.is_ok() {
+            let b_value: Vec<u64> = b.unwrap();
+
+            for i in 0..b_value.len() {
+                approved_values.push(b_value[i].clone())
+            }
+        }
+
+        env::log_str(&format!("approves_values: {:?}", &approved_values));
+        for i in 0..contract_of_tokens.len() {
+            bundles[i].approval_id = approved_values[i]
+        }
+
+        self.nft_bundle(token_id, metadata, bundles, owner_id, perpetual_royalties);
+    }
+
+    #[private]
+    pub fn bundle_on_approve_with_three_callbacks(
+        &mut self,
+        token_id: TokenId,
+        metadata: TokenMetadata,
+        mut bundles: Vec<Bundle>,
+        owner_id: AccountId,
+        perpetual_royalties: Option<HashMap<AccountId, u32>>,
+        contract_of_tokens: Vec<ContractWithTokens>,
+        #[callback_unwrap] first_call: Vec<u64>,
+        #[callback_result] b: Result<Vec<u64>, PromiseError>,
+        #[callback_result] c: Result<Vec<u64>, PromiseError>,
+    ) {
+        let mut approved_values = Vec::new();
+        env::log_str(&format!("first_call: {:?}", &first_call));
+
+        for i in 0..first_call.len() {
+            approved_values.push(first_call[i].clone())
+        }
+
+        if b.is_ok() {
+            let b_value: Vec<u64> = b.unwrap();
+
+            for i in 0..b_value.len() {
+                approved_values.push(b_value[i].clone())
+            }
+        }
+
+        if c.is_ok() {
+            let c_value: Vec<u64> = c.unwrap();
+
+            for i in 0..c_value.len() {
+                approved_values.push(c_value[i].clone())
+            }
+        }
+
+        env::log_str(&format!("approves_values: {:?}", &approved_values));
+        for i in 0..contract_of_tokens.len() {
+            bundles[i].approval_id = approved_values[i]
+        }
+
+        self.nft_bundle(token_id, metadata, bundles, owner_id, perpetual_royalties);
     }
 
     #[private]

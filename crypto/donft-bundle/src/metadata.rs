@@ -7,7 +7,7 @@ pub type TokenId = String;
 #[serde(crate = "near_sdk::serde")]
 pub struct Payout {
     pub payout: HashMap<AccountId, U128>,
-} 
+}
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Serialize, Deserialize, Clone)]
 #[serde(crate = "near_sdk::serde")]
@@ -47,7 +47,16 @@ pub struct Bundle {
     pub token_id: TokenId,
     //the next approval ID to give out. 
     pub approval_id: u64,
+    pub token_role: Option<String>, 
 }
+
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone, Debug)]
+#[serde(crate = "near_sdk::serde")]
+pub struct ContractWithTokens {
+    pub contract: AccountId,
+    pub tokens: Vec<TokenId>,
+}
+
 
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Debug, Clone)]
 pub struct Token {
@@ -60,7 +69,7 @@ pub struct Token {
     //keep track of the royalty percentages for the token in a hash map
     pub royalty: HashMap<AccountId, u32>,
     //set of tokens bundeled in this token
-    pub bundles: Vec<Bundle>, 
+    pub bundles: Vec<Bundle>,
 }
 
 //The Json token is what will be returned from view calls. 

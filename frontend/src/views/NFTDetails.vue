@@ -286,8 +286,12 @@ export default {
       const contract_of_mint = this.getAllNFTs.find((item) => item.token_id === token_to_add_data.token_id)
 
       this.ADD_TOKEN_TO_BUNDLE({
-        token_to_add_data,
-        contract_of_mint: contract_of_mint ? contract_of_mint.contract : null,
+        token_to_add_data: {
+          contract: contract_of_mint ? contract_of_mint.contract : null,
+          token_id: token_to_add_data.token_id,
+          approval_id: token_to_add_data.approved_account_ids[this.getBundleContract.contractId] || 0,
+          token_role: 'original',
+        },
         bundle_token_id: this.NFTComputedData.token_id,
       })
     },

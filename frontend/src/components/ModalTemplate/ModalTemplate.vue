@@ -1,5 +1,9 @@
 <template>
   <div :class="['modal-template', { small: small }]">
+    <div
+      @click="closeModal"
+      class="modal-template_bg"
+    ></div>
     <div class="modal-template__body">
       
       <slot name="header"/>
@@ -94,15 +98,31 @@ export default {
   }
 }
 
+.modal-template_bg {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  transition: background-color .1s ease;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #ffffffab;
+  }
+}
+
 .modal-template__body {
   position: relative;
-  background: #fcf7ff;
+  background-color: #fcf7ff;
   width: 70vw;
   height: 55vh;
   padding: 20px;
   border-radius: 4px;
   overflow-y: auto;
   border: 1px solid #2d0949;
+  z-index: 2;
 
   .small & {
     width: auto;
