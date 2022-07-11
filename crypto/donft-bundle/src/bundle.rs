@@ -433,7 +433,7 @@ impl Contract {
         }
 
         env::log_str(&format!("approves_values: {:?}", &approved_values));
-        for i in 0..contract_of_tokens[0].tokens.len() {
+        for i in 0..approved_values.len() {
             bundles[i].approval_id = approved_values[i]
         }
 
@@ -470,7 +470,7 @@ impl Contract {
         }
 
         env::log_str(&format!("approves_values: {:?}", &approved_values));
-        for i in 0..contract_of_tokens.len() {
+        for i in 0..approved_values.len() {
             bundles[i].approval_id = approved_values[i]
         }
 
@@ -514,7 +514,7 @@ impl Contract {
         }
 
         env::log_str(&format!("approves_values: {:?}", &approved_values));
-        for i in 0..contract_of_tokens.len() {
+        for i in 0..approved_values.len() {
             bundles[i].approval_id = approved_values[i]
         }
 

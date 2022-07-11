@@ -102,6 +102,7 @@ export default {
       notificationVisible: false,
       approvedNFTStatuses: [],
       nftArray: [],
+      contractOfTokens: [],
     }
   },
 
@@ -210,7 +211,22 @@ export default {
         }
 
         const bundleArr = this.nftArray.map((token) => {
-          return this.getAllNFTs.find((item) => item.token_id === token)
+          const nftData = this.getAllNFTs.find((item) => item.token_id === token)
+          
+          const indexOfContract = this.contractOfTokens.map((item) => item.contract).indexOf(nftData.contract)
+          console.log(indexOfContract, 'contract')
+          console.log(this.contractOfTokens, 'this.contractOfTokens')
+
+          if (indexOfContract === -1) {
+            this.contractOfTokens.push({
+              contract: nftData.contract,
+              tokens: [nftData.token_id],
+            })
+          } else {
+            this.contractOfTokens[indexOfContract].tokens.push(nftData.token_id)
+          }
+          
+          return nftData
         }).filter(Boolean)
 
         const bundlesArrApproved = bundleArr.map((item) => {
@@ -230,12 +246,7 @@ export default {
           this.CREATE_NEW_BUNDLE_WITH_APPROVE({
             tokens_for_approve: this.nftArray.length,
             account_for_approve: process.env.VUE_APP_BUNDLE_CONTRACT,
-            contract_of_tokens: [
-              {
-                contract: this.getNFTsData[0].contract,
-                tokens: this.nftArray,
-              }
-            ],
+            contract_of_tokens: this.contractOfTokens,
             token_id: `token-${Date.now()}`,
             metadata: {
               title: this.nftObj.metadata.title,
