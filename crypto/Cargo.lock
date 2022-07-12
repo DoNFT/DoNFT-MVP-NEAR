@@ -305,6 +305,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "donft-effects"
+version = "0.1.0"
+dependencies = [
+ "donft-bundle",
+]
+
+[[package]]
 name = "easy-ext"
 version = "0.2.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"

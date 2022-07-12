@@ -3,4 +3,5 @@
 members = [
 	"donft-bundle",
 	"donft-collection-factory",
+	"donft-effects",
 ]
