@@ -6,6 +6,7 @@ const nfts_contract = getConfig({ env: process.env.VUE_APP_NETWORK, contract: pr
 const bundle_contract = getConfig({ env: process.env.VUE_APP_NETWORK, contract: process.env.VUE_APP_BUNDLE_CONTRACT })
 const nfts_effects_contract = getConfig({ env: process.env.VUE_APP_NETWORK, contract: process.env.VUE_APP_NFTS_EFFECTS_CONTRACT })
 const collection_factory = getConfig({ env: process.env.VUE_APP_NETWORK, contract: process.env.VUE_APP_COLLECTION_FACTORY })
+const effects_list = getConfig({ env: process.env.VUE_APP_NETWORK, contract: process.env.VUE_APP_EFFECTS_WATCHER_CONTRACT })
 
 // Initialize contract & set global variables
 export async function initContract(store) {
@@ -147,6 +148,19 @@ export async function initContract(store) {
       })
     store.commit('SET_USER_COLLECTIONS', collections)
   }
+
+  // near EFFECTS LIST contract
+  // --------------------
+  // near EFFECTS LIST contract
+  const near_effects_list = await connect(Object.assign({ deps: { keyStore: new keyStores.BrowserLocalStorageKeyStore() } }, effects_list))
+  const effectsConnection = new WalletConnection(near_effects_list)
+
+  // Initializing our contract APIs by contract name and configuration
+  const contractEffectsList = await new Contract(effectsConnection.account(), effects_list.contractName, {
+    changeMethods: ['add_effect_contract_to_list', 'remove_effect_contract_from_list'],
+    viewMethods: ['get_effects_list'],
+  })
+  store.commit('SET_EFFECTS_LIST_CONTRACT', contractEffectsList)
 }
 
 // for ALL other extra Contracts, its need to use Change methods

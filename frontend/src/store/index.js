@@ -14,6 +14,8 @@ import {
   checkForContract,
   removeTokenFromBundle,
   addTokenToBundle,
+  addNewEffectContract,
+  removeEffectContract,
 } from "@/near_utilities"
 
 import {StatusType, getIPFS} from "@/utilities"
@@ -48,6 +50,7 @@ const store = new Vuex.Store({
     droppedImage: null,
     nearAccount: null,
     contract: null,
+    effects_list_contract: null,
     bundle_contract: null,
     effects_contract: null,
     factory_contract: null,
@@ -57,6 +60,7 @@ const store = new Vuex.Store({
       process.env.VUE_APP_NFTS_CONTRACT,
       process.env.VUE_APP_NFTS_EFFECTS_CONTRACT,
       process.env.VUE_APP_BUNDLE_CONTRACT,
+      process.env.VUE_APP_EFFECTS_WATCHER_CONTRACT,
     ],
   },
   mutations: {
@@ -128,6 +132,10 @@ const store = new Vuex.Store({
     },
     SET_CURRENT_BALANCE (state, payload) {
       state.balance = payload
+    },
+    // contract with special methods for storing data about effects
+    SET_EFFECTS_LIST_CONTRACT(state, payload) {
+      state.effects_list_contract = payload
     },
     SET_CURRENT_BUNDLE_CONTRACT (state, payload) {
       state.bundle_contract = payload
@@ -240,6 +248,26 @@ const store = new Vuex.Store({
       }
       return url
     },
+    async removeFromList ({getters}, contract_id) {
+      try {
+        const contractData = await checkForContract(getters, process.env.VUE_APP_EFFECTS_WATCHER_CONTRACT)
+        console.log(contract_id, 'addEffectToList effect_data')
+        await removeEffectContract(contract_id, contractData)
+      } catch(err) {
+        console.log(err)
+        throw SystemErrors.MINT_NFT
+      }
+    },
+    async addEffectToList ({getters}, effect_data) {
+      try {
+        const contractData = await checkForContract(getters, process.env.VUE_APP_EFFECTS_WATCHER_CONTRACT)
+        console.log(effect_data, 'addEffectToList effect_data')
+        await addNewEffectContract(effect_data, contractData)
+      } catch(err) {
+        console.log(err)
+        throw SystemErrors.MINT_NFT
+      }
+    },
     async createNewUsualNFT ({getters, dispatch},  { token_id, metadata, contract_id }) {
       try {
         dispatch('setStatus', StatusType.Minting)
@@ -343,6 +371,7 @@ const store = new Vuex.Store({
     getContract: state => state.contract,
     getBundleContract: state => state.bundle_contract,
     getEffectsContract: state => state.effects_contract,
+    getEffectsListContract: state => state.effects_list_contract,
     getFactoryContract: state => state.factory_contract,
     getMainContracts: state => state.mainContracts,
     getActiveContract: state => state.activeContract,

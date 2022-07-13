@@ -343,6 +343,20 @@ li {
 	font-size: 18px;
 	font-weight: 700;
 	margin-bottom: 7px;
+
+	&.required {
+		position: relative;
+
+		&::after{
+			content: ' *';
+			color: red;
+			font-size: 20px;
+			line-height: 16px;
+			display: inline;
+			vertical-align: bottom;
+
+		}
+	}
 }
 
 .form-nft-send__inputs {

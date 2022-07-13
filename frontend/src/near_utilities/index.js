@@ -19,12 +19,13 @@ import { uploadtoIPFS} from "@/api"
 // if not found, init new Contract, for using change method
 export async function checkForContract(getters, minting_contract_id) {
   let findMainContract = null
-  console.log(getters, 'getters.getMainContracts')
+  console.log(getters, minting_contract_id, 'getters.getMainContracts')
   
   findMainContract = getters.getMainContracts ? getters.getMainContracts.find((item) => item === minting_contract_id) : []
+  console.log(findMainContract, 'getters.findMainContract')
   
   if (findMainContract && findMainContract.length) {
-    return [getters.getBundleContract, getters.getContract, getters.getEffectsContract].find((item) => item.contractId === findMainContract)
+    return [getters.getBundleContract, getters.getContract, getters.getEffectsContract, getters.getEffectsListContract].find((item) => item.contractId === findMainContract)
   }
 
   if (!findMainContract) {
@@ -32,7 +33,21 @@ export async function checkForContract(getters, minting_contract_id) {
   }
 }
 
-// for creating new NFTs BY inputs FORM
+
+export async function removeEffectContract(effect_info_address, contract) {
+  await contract
+    .remove_effect_contract_from_list({
+      effect_info_address,
+    }, attachedGas, '100000000000000000000000')
+}
+export async function addNewEffectContract(effect_data, contract) {
+  await contract
+    .add_effect_contract_to_list({
+      effect_data,
+    }, attachedGas, '100000000000000000000000')
+}
+
+// for creating new NFTs
 export async function createUsualNFT(token_id, metadata, receiver_id, contract) {
   await contract
     .nft_mint({

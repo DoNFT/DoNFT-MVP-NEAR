@@ -99,6 +99,21 @@ pub struct ApproveToken {
     pub message_field: Option<String>,
 }
 
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Debug, Clone)]
+#[serde(crate = "near_sdk::serde")]
+pub struct EffectInfo {
+    // owner of the token
+    pub owner_id: AccountId,
+    // modificators_contract
+    pub modificators_contract: Option<AccountId>,
+    // url of api, which gonna be used for modifying NFT by effect 
+    pub server_url: String,
+    // contract address of Effects
+    pub original_contract: AccountId,
+    // type of collection (Colour, Item, Character...)
+    pub collection_type: Option<String>,
+}
+
 pub trait NonFungibleTokenMetadata {
     //view call for returning the contract metadata
     fn nft_metadata(&self) -> NFTContractMetadata;

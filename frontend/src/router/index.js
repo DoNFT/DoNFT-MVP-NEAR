@@ -10,6 +10,7 @@ import AddEffectConfirm from "@/views/AddEffectConfirm"
 import NFTDetails from "@/views/NFTDetails"
 import DeployContract from "@/views/DeployContract"
 import DataEditor from "@/views/DataEditor"
+import AdminEffects from "@/views/admin/AdminEffects"
 
 import store from "@/store"
 import { StatusType } from "@/utilities"
@@ -112,6 +113,12 @@ let routes = [
     path: '/bundle_nft',
     name: 'BundleNFT',
     component: BundleNFT,
+    meta: { title: 'Do[NFT]', requiresAuth: true }
+  },
+  {
+    path: '/admin/effects',
+    name: 'AdminEffects',
+    component: AdminEffects,
     meta: { title: 'Do[NFT]', requiresAuth: true }
   },
   {

@@ -63,7 +63,7 @@ pub(crate) fn assert_at_least_one_yocto() {
 }
 
 //refund the initial deposit based on the amount of storage that was used up
-pub(crate) fn refund_deposit(storage_used: u64) {
+pub fn refund_deposit(storage_used: u64) {
     //get how much it would cost to store the information
     let required_cost = env::storage_byte_cost() * Balance::from(storage_used);
     //get the attached deposit

@@ -105,11 +105,11 @@ export default {
   top: 0;
   bottom: 0;
   z-index: 1;
-  transition: background-color .1s ease;
+  transition: background-color .3s linear;
   cursor: pointer;
 
   &:hover {
-    background-color: #ffffffab;
+    background-color: #fcf7ff6b;
   }
 }
 
