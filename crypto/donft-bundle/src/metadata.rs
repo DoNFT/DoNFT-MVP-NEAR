@@ -126,13 +126,6 @@ pub struct CollectionInitArgs {
     pub owner_id: AccountId,
 }
 
-#[near_bindgen]
-impl NonFungibleTokenMetadata for Contract {
-    fn nft_metadata(&self) -> NFTContractMetadata {
-        self.metadata.get().unwrap()
-    }
-}
-
 impl Default for NFTContractMetadata {
     fn default() -> Self {
         Self {

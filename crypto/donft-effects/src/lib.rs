@@ -85,7 +85,7 @@ impl DonftEffects {
         //create a variable of type Self with all the fields initialized.
         Self {
             owner_id: env::predecessor_account_id(),
-            effect_info: UnorderedSet::new(StorageEffectsKey::EffectDataKey.try_to_vec().unwrap(),),
+            effect_info: UnorderedSet::new(StorageEffectsKey::EffectDataKey.try_to_vec().unwrap()),
         }
     }
 

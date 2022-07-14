@@ -170,6 +170,11 @@ export default {
     line-height: 30px;
     cursor: pointer;
     padding-right: 40px;
+    transition: color .2s ease;
+
+    &:hover {
+      color: #1bdc9e;
+    }
   }
 
   &__toggle{
