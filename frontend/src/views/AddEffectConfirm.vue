@@ -58,26 +58,48 @@
           </div>
         </div>
       </div>
-      <div
-        v-if="[
-          StatusType.Applying,
-          StatusType.DeployingToIPFS,
-          StatusType.DeployedToIPFS,
-          StatusType.Minting
-        ].includes(getStatus)" class="loading-container"
-      >
-        <spinner :size="92" color="#000" />
-        <h2>{{ statusText }}</h2>
-      </div>
     </main>
+
     <modal-template
       v-if="showApproveModal"
-      :token-meta="nftObj"
-      @submit="bundleImageApproved"
+      :is-blocked="true"
       @close="closeModal"
     >
       <template #header>
-        <h3>Result</h3>
+        <h3>Status of transaction</h3>
+        <h3 v-if="nftObj"></h3>
+      </template>
+      <template #content>
+        <div
+          v-if="[
+            StatusType.Applying,
+            StatusType.Minting
+          ].includes(getStatus)" class="loading-container"
+        >
+          <spinner :size="92" color="#000" />
+          <h2>{{ statusText }}</h2>
+        </div>
+        <div v-else>
+          <div
+            class="effect-confirm__inner"
+            v-if="nftObj && nftObj.metadata.media"
+          >
+            <h4>Picture could not appear at first, approximately 1-3 minutes for upload</h4>
+
+            <div
+              class="effect-cards-box"
+          
+            >
+              <token-card
+                :metadata="nftObj"
+              />
+              <button
+                class="main-btn"
+                @click="bundleImageApproved"
+              >Submit</button>
+            </div>
+          </div>
+        </div>
       </template>
     </modal-template>
   </div>
@@ -216,7 +238,6 @@ export default {
         },
         bundles: this.bundlesArrApproved,
       })
-
     },
     // minting NFT with NEW effects
     async handleMint() {
@@ -224,6 +245,8 @@ export default {
         alert('Title field is empty')
       } else {
         try {
+          this.showApproveModal = true
+
           const effectObj = {
             original: {
               contract: this.getContract.contractId,
@@ -280,9 +303,8 @@ export default {
             return obj
           })
 
-          this.showApproveModal = true
-
         } catch(err) {
+          this.showApproveModal = false
           if(err instanceof AppError) {
             alert(err.message)
           } else {

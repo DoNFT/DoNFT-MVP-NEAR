@@ -1,19 +1,7 @@
 <template>
   <div class="page">
     <nav-bar :navigation="getNavigation"/>
-    <div
-      v-if="[
-        StatusType.Applying,
-        StatusType.DeployingToIPFS,
-        StatusType.DeployedToIPFS,
-        StatusType.Minting
-      ].includes(getStatus)"
-      class="loading-container"
-    >
-      <spinner :size="92" color="#000" />
-      <h1>{{ statusText }}</h1>
-    </div>
-    <main v-else>
+    <main>
       <h1>Create new NFT</h1>
       <form class="form-nft">
         <uploader @selected="setUploadedImg"/>
@@ -46,6 +34,29 @@
         </div>
       </form>
     </main>
+    <modal-template
+      v-if="showApproveModal"
+      :is-blocked="true"
+      @close="closeModal"
+    >
+      <template #header>
+        <h3>Status of transaction</h3>
+      </template>
+      <template #content>
+        <div
+          v-if="[
+            StatusType.Applying,
+            StatusType.DeployingToIPFS,
+            StatusType.DeployedToIPFS,
+            StatusType.Minting
+          ].includes(getStatus)"
+          class="loading-container"
+        >
+          <spinner :size="92" color="#000" />
+          <h1>{{ statusText }}</h1>
+        </div>
+      </template>
+    </modal-template>
   </div>
 </template>
 
@@ -56,7 +67,8 @@ import NavBar from '@/components/NavBar/NavBar'
 import Uploader from '@/components/Uploader/Uploader'
 import StatusType from "@/mixins/StatusMixin"
 import { AppError } from "@/utilities"
-import SelectComponent from '@/components/UI/contractSelect/Index.vue'
+import SelectComponent from '@/components/UI/contractSelect/Index'
+import ModalTemplate from "@/components/ModalTemplate/ModalTemplate"
 
 export default {
   name: "CreateNFT",
@@ -65,11 +77,13 @@ export default {
     Spinner,
     NavBar,
     Uploader,
-    SelectComponent
+    SelectComponent,
+    ModalTemplate
   },
 
   data() {
     return {
+      showApproveModal: false,
       nftObj: {
         metadata: {
           title: 'NFT token 2 title',
@@ -177,6 +191,7 @@ export default {
         alert('Title field is emptyy')
       } else {
         try {
+          this.showApproveModal = true
           await this.setResult('base64')
           await this.setDeployedPictureMeta('base64')
           console.log(this.getDeployedPictureMeta, 'this.getDeployedPictureMeta')
@@ -192,6 +207,7 @@ export default {
             contract_id: this.nftObj.contract_id
           })
         } catch(err) {
+          this.showApproveModal = false
           if(err instanceof AppError) {
             alert(err.message)
           } else {

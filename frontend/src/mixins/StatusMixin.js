@@ -15,6 +15,8 @@ export default {
         return "Redirecting to Approve NFT"
       case StatusType.Applying:
         return "Applying chosen effect..."
+      case StatusType.Unbundling:
+        return "Unbundling NFTs..."
       case StatusType.DeployingToIPFS:
         return "Uploading result to IPFS..."
       case StatusType.Minting:

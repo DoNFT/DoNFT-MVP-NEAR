@@ -5,18 +5,7 @@
       :show-generate-nft="true"
       @generate-random-nft="generateRandomNFT"
     />
-    <div
-      v-if="[
-        StatusType.Applying,
-        StatusType.DeployingToIPFS,
-        StatusType.DeployedToIPFS,
-        StatusType.Minting
-      ].includes(getStatus)" class="loading-container"
-    >
-      <spinner :size="92" color="#000" />
-      <h1>{{ statusText }}</h1>
-    </div>
-    <main v-else>
+    <main>
       <h1>Choose NFT and apply effect</h1>
       <div class="nft-cards">
         <div
@@ -49,11 +38,35 @@
         class="main-btn main-btn--choose"
       >Get more NFT</button>
     </main>
+
+    <modal-template
+      v-if="showApproveModal"
+      :is-blocked="true"
+      @close="closeModal"
+    >
+      <template #header>
+        <h3>Status of transaction</h3>
+      </template>
+      <template #content>
+        <div
+          v-if="[
+            StatusType.Applying,
+            StatusType.DeployingToIPFS,
+            StatusType.DeployedToIPFS,
+            StatusType.Minting
+          ].includes(getStatus)" class="loading-container"
+        >
+          <spinner :size="92" color="#000" />
+          <h1>{{ statusText }}</h1>
+        </div>
+      </template>
+    </modal-template>
   </div>
 </template>
 
 <script>
 import Spinner from "@/components/Spinner"
+import ModalTemplate from "@/components/ModalTemplate/ModalTemplate"
 import TokenCard from '@/components/TokenCard/TokenCard'
 import { mapGetters, mapActions } from "vuex"
 import NavBar from '@/components/NavBar/NavBar'
@@ -67,10 +80,12 @@ export default {
     Spinner,
     NavBar,
     TokenCard,
+    ModalTemplate,
   },
 
   data() {
     return {
+      showApproveModal: false,
       nftObj: {
         metadata: {
           title: 'NFT token 2 title',
@@ -209,6 +224,7 @@ export default {
         let randomNumber = Math.floor(Math.random() * 5)
         let randomImage =  require(`@/assets/randomNFT/${randomNumber}.jpg`)
         let imageBase64 = null
+        this.showApproveModal = true
 
         if (nftType === 'effectNFT') {
           contract_id = process.env.VUE_APP_NFTS_EFFECTS_CONTRACT
@@ -266,6 +282,7 @@ export default {
           contract_id,
         })
       } catch(err) {
+        this.showApproveModal = false
         console.log(err, 'MAIN ERROR')
         // if(err instanceof AppError) {
         //   alert(err.message)

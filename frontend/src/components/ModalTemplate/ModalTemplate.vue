@@ -1,5 +1,11 @@
 <template>
-  <div :class="['modal-template', { small: small }]">
+  <div
+    :class="['modal-template',
+             {
+               small: small,
+               disabled: isBlocked
+             }]"
+  >
     <div
       @click="closeModal"
       class="modal-template_bg"
@@ -10,50 +16,28 @@
 
       <div
         class="modal-template__body-close"
+        v-if="!isBlocked"
         @click="closeModal"
       >
         <icon name="cross" :size="32" class="cross-icon" />
       </div>
 
-
-      <slot name="content"/>
-
-      <div
-        class="effect-confirm__inner"
-        v-if="tokenMeta"
-      >
-        <h4>Picture could not appear at first, approximately 1-3 minutes for upload</h4>
-
-        <div
-          class="effect-cards-box"
-          
-        >
-          <token-card
-            :metadata="tokenMeta"
-          />
-          <button
-            class="main-btn"
-            @click="submitResult"
-          >Submit</button>
-        </div>
+      <div class="modal-template__body__content">
+        <slot name="content"/>
       </div>
+
     </div>
   </div>
 </template>
 
 <script>
-import TokenCard from "@/components/TokenCard/TokenCard.vue"
-
 export default {
   name: "ModalTemplate",
 
   props: {
     tokenMeta: Object,
+    isBlocked: Boolean,
     small: Boolean,
-  },
-
-  components: {
-    TokenCard,
   },
 
 
@@ -85,6 +69,14 @@ export default {
   z-index: 100;
 }
 
+.modal-template.disabled {
+  cursor: default;
+}
+
+.modal-template__body__content {
+  height: 90%;
+}
+
 .modal-template__body-close {
   position: absolute;
   right: 20px;
@@ -108,12 +100,20 @@ export default {
   transition: background-color .3s linear;
   cursor: pointer;
 
+  .modal-template.disabled & {
+    pointer-events: none;
+    cursor: default;
+  }
+
   &:hover {
     background-color: #fcf7ff6b;
   }
 }
 
 .modal-template__body {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   position: relative;
   background-color: #fcf7ff;
   width: 70vw;

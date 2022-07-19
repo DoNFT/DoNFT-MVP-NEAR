@@ -104,6 +104,7 @@ const store = new Vuex.Store({
       addTokenToBundle(state.bundle_contract, token_to_add_data, bundle_token_id)
     },
     CREATE_NEW_BUNDLE_WITH_APPROVE(state, { tokens_for_approve, account_for_approve, contract_of_tokens, token_id, metadata, bundles }) {
+      state.status = StatusType.Minting
       bundleWithApprove(tokens_for_approve, account_for_approve, contract_of_tokens, token_id, metadata, bundles, state.account_id, state.bundle_contract)
     },
     SET_CURRENT_CONTRACT_NFT (state, payload) {
@@ -207,6 +208,7 @@ const store = new Vuex.Store({
       try {
         dispatch('setStatus', StatusType.Applying)
         commit('SET_DEPLOYED_PICTURE_META', await applyNFTsEffect(effectData))
+        dispatch('setStatus', StatusType.ChoosingParameters)
       } catch(err) {
         dispatch('setStatus', StatusType.ChoosingParameters)
 
@@ -284,7 +286,7 @@ const store = new Vuex.Store({
     },
     async triggerUnbundleNFT ({getters, dispatch},  { token_id }) {
       try {
-        dispatch('setStatus', StatusType.Minting)
+        dispatch('setStatus', StatusType.Unbundling)
         await unbundleNFT(token_id, getters.getBundleContract)
       } catch(err) {
         dispatch('setStatus', StatusType.ChoosingParameters)
