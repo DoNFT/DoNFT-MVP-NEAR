@@ -1,7 +1,7 @@
 <template>
   <div class="page">
     <nav-bar :navigation="getNav"/>
-    <div v-if="getNftsAreLoading || getStatus === StatusType.Approving" class="loading-container">
+    <div v-if="getNftsAreLoading" class="loading-container">
       <spinner :size="92" color="#000" />
       <h2>{{ statusText }}</h2>
     </div>
@@ -264,7 +264,7 @@ export default {
 
           this.bundlesArrApproved = bundleArr.map((item) => {
             const obj = {
-              contract: item.contract === 'list' ? this.getContract.contractId : this.getEffectsContract.contractId,
+              contract: item.data.contract,
               token_id: item.data.token_id,
               approval_id: item.data.approved_account_ids[this.getBundleContract.contractId] || 0,
               token_role: item.contract === 'list' ? 'original' : 'modifier',

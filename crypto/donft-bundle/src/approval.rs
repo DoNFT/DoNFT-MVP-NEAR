@@ -75,7 +75,7 @@ impl NonFungibleTokenCore for Contract {
     ) -> u64 {
         let mut token = self.tokens_by_id
             .get(&token_id)
-            .unwrap_or_else(|| panic!("token: {} doesn't exist", token_id));
+            .expect("token: doesn't exist");
 
         //make sure that the person calling the function is the owner of the token
         // assert_eq!(
