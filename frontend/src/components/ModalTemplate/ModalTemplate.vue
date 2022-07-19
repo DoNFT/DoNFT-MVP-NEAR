@@ -34,7 +34,7 @@
           <button
             class="main-btn"
             @click="submitResult"
-          >Submit Image</button>
+          >Submit</button>
         </div>
       </div>
     </div>
@@ -117,7 +117,7 @@ export default {
   position: relative;
   background-color: #fcf7ff;
   width: 70vw;
-  height: 55vh;
+  height: 70vh;
   padding: 20px;
   border-radius: 4px;
   overflow-y: auto;

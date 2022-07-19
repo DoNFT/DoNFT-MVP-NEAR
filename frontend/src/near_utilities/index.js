@@ -179,7 +179,7 @@ export async function getImageForTokenByURI(ipfsInstance, imageAddress) {
 
     // nft.storage return images with /blob in the end
     // server on apply effect return image without /blob
-    let cid = CID_RE.exec(imageAddress)?.[0]
+    let cid = CID_RE.exec(imageAddress)?.[0] || ipfsAddres
     let localImageURL = null
 
     if (ipfsAddres.endsWith("/file")) {
