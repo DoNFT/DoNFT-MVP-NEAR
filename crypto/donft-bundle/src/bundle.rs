@@ -184,6 +184,7 @@ impl Contract {
             //we remove the token from the receiver
             self.internal_remove_token_from_owner(&caller_id.clone(), &token_id);
         } else {
+            env::panic_str("cant unbundle");
             //we refund the owner for releasing the storage used up by the approved account IDs
            // refund_approved_account_ids(self.owner_id, &approved_account_ids);
         };

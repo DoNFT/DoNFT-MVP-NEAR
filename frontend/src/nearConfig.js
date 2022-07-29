@@ -22,7 +22,6 @@ export async function initContract(store) {
   store.dispatch('setAccountId', walletConnection.getAccountId())
 
   const domain = `https://testnet-api.kitwallet.app/account/${store.getters.getAccountId}/likelyNFTs`
-  
   const headers = new Headers({
     'max-age': '300'
   })

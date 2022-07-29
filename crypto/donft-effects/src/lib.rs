@@ -19,6 +19,7 @@ pub struct DonftEffects {
     //contract owner
     pub owner_id: AccountId,
     pub effect_info: UnorderedSet<EffectInfo>,
+    pub manager_keys: UnorderedSet<AccountId>,
 }
 
 /// Helper structure for keys of the persistent collections.
@@ -26,39 +27,59 @@ pub struct DonftEffects {
 pub enum StorageEffectsKey {
     EffectsInfo,
     EffectDataKey,
+    ManagersKey,
 }
 
 #[near_bindgen]
 impl DonftEffects {
+    #[payable]
+    pub fn add_manager_of_contracts(
+        &mut self,
+        account_id: AccountId
+    ) {
+        assert_eq!(
+            env::predecessor_account_id(),
+            self.owner_id,
+            "Only contract owner can call this method"
+        );
+        self.manager_keys.insert(&account_id);
+    }
 
     #[payable]
     pub fn add_effect_contract_to_list(
         &mut self,
         effect_data: EffectInfo,
     ) {
-        let initial_storage_usage = env::storage_usage();
-        env::log_str(&format!("effect_data 1: {:?}", effect_data.clone()));
-        self.effect_info.insert(&effect_data);
-        env::log_str(&format!("effect_data 2: {:?}", effect_data.clone()));
-        let required_storage_in_bytes = env::storage_usage() - initial_storage_usage;
-
-        refund_deposit(required_storage_in_bytes);
+        if self.manager_keys.contains(&env::predecessor_account_id()) {
+            let initial_storage_usage = env::storage_usage();
+            env::log_str(&format!("effect_data 1: {:?}", effect_data.clone()));
+            self.effect_info.insert(&effect_data);
+            env::log_str(&format!("effect_data 2: {:?}", effect_data.clone()));
+            let required_storage_in_bytes = env::storage_usage() - initial_storage_usage;
+    
+            refund_deposit(required_storage_in_bytes);
+        } else {
+            env::panic_str("Caller dont have permission for change");
+        }
     }
-
     #[payable]
     pub fn remove_effect_contract_from_list(
         &mut self,
         effect_info_address: AccountId,
     ) {
-        let effects_vec = self.effect_info.to_vec();
-
-        let effect_index = self.effect_info
-            .to_vec()
-            .iter()
-            .position(|x| x.original_contract == effect_info_address)
-            .unwrap();
-
-        self.effect_info.remove(&effects_vec[effect_index]);
+        if self.manager_keys.contains(&env::predecessor_account_id()) {
+            let effects_vec = self.effect_info.to_vec();
+    
+            let effect_index = self.effect_info
+                .to_vec()
+                .iter()
+                .position(|x| x.original_contract == effect_info_address)
+                .unwrap();
+    
+            self.effect_info.remove(&effects_vec[effect_index]);
+        } else {
+            env::panic_str("Caller dont have permission for change");
+        }
     }
 
     pub fn get_effects_list(
@@ -85,7 +106,8 @@ impl DonftEffects {
         //create a variable of type Self with all the fields initialized.
         Self {
             owner_id: env::predecessor_account_id(),
-            effect_info: UnorderedSet::new(StorageEffectsKey::EffectDataKey.try_to_vec().unwrap()),
+            manager_keys:  UnorderedSet::new(StorageEffectsKey::EffectDataKey.try_to_vec().unwrap()),
+            effect_info: UnorderedSet::new(StorageEffectsKey::ManagersKey.try_to_vec().unwrap()),
         }
     }
 
