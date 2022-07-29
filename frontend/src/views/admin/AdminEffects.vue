@@ -22,7 +22,7 @@
       @close="showAddingModal = false"
     >
       <template #header>
-        <h2>Send NFT</h2>
+        <h2>Add contract</h2>
       </template>
       <template #content>
         <div
@@ -39,6 +39,18 @@
                 class="input form-nft__input"
                 v-model="contractData.original_contract"
               >
+              <span class="form-nft-send__inputs-title required">Contract type</span>
+              <select
+                class="input form-nft__input"
+                v-model="contractData.collection_type"
+              >
+                <option :value="null">--Choose a contract type--</option>
+                <option value="colors">COLORS</option>
+                <option value="things">THINGS</option>
+                <option value="characters">CHARACTERS</option>
+                <option value="achievements">ACHIEVEMENTS</option>
+              </select>
+
               <span class="form-nft-send__inputs-title required">Effects server url</span>
               <input
                 type="text"
@@ -168,13 +180,8 @@ export default {
     font-weight: 600;
     font-size: 24px;
     line-height: 30px;
-    cursor: pointer;
-    padding-right: 40px;
+    padding-right: 15px;
     transition: color .2s ease;
-
-    &:hover {
-      color: #1bdc9e;
-    }
   }
 
   &__toggle{
@@ -195,6 +202,7 @@ export default {
 
   &__address{
     text-align: left;
+    cursor: pointer;
 
     a{
       color: #000;
@@ -245,5 +253,9 @@ export default {
   &.active &__actions{
     display: block;
   }
+}
+
+.page__content {
+  width: 75%;
 }
 </style>
