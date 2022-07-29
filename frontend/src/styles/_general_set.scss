@@ -215,6 +215,25 @@ button, input {
 	}
 }
 
+.main-btn--red {
+	background-color: rgba(92, 233, 188, 1);
+	color: #000;
+
+	&:hover {
+		color: #fff;
+		background-color:#ee3838;
+
+		span {
+			color: #fff;
+		}
+	}
+
+	&:focus {
+		background-color:#ee3838;
+	}
+}
+
+
 .main-btn--choose {
 	margin-bottom: 20px;
 }

@@ -7,7 +7,7 @@
       <h1>Effects panel</h1>
       <effect-data
         v-for="contract in contractsAdded"
-        :key="contract.original_contract"
+        :key="contract.original_contract + contract.owner_id"
         :contract="contract"
         @remove="removeContract"
       />
@@ -170,6 +170,9 @@ export default {
 
 .admin-effects-contract{
   position: relative;
+  padding: 15px 10px;
+  background: #5ce9bc21;
+  box-shadow: 0 0 5px 1px rgba(0, 0, 0, .2);
 
   & + &{
     margin-top: 20px
@@ -187,7 +190,7 @@ export default {
   &__toggle{
     position: absolute;
     right: 0;
-    top: 0;
+    top: 16px;
     cursor: pointer;
     transition: .2s;
 
@@ -228,8 +231,7 @@ export default {
       line-height: 28px;
 
       &:nth-child(odd){
-        font-weight: 500;
-        color: #f96b8a;
+        font-weight: 700;
       }
     }
   }
