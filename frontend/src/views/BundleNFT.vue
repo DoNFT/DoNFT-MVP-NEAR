@@ -234,7 +234,7 @@ export default {
             contract: item.contract,
             token_id: item.token_id,
             approval_id: item.approved_account_ids[this.getBundleContract.contractId] || 0,
-            token_role: 'original',
+            token_role: 0,
           }
 
           return obj

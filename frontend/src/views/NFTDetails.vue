@@ -290,7 +290,7 @@ export default {
           contract: contract_of_mint ? contract_of_mint.contract : null,
           token_id: token_to_add_data.token_id,
           approval_id: token_to_add_data.approved_account_ids[this.getBundleContract.contractId] || 0,
-          token_role: 'original',
+          token_role: 1,
         },
         bundle_token_id: this.NFTComputedData.token_id,
       })

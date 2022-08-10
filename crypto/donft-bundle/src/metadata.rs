@@ -47,7 +47,9 @@ pub struct Bundle {
     pub token_id: TokenId,
     //the next approval ID to give out. 
     pub approval_id: u64,
-    pub token_role: Option<String>, 
+    // current roles:
+    // none 0, original 1, modifier 2
+    pub token_role: u64, 
 }
 
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone, Debug)]
