@@ -100,8 +100,8 @@ const store = new Vuex.Store({
     REMOVE_TOKEN_FROM_BUNDLE(state, { remove_token_data, bundle_id }) {
       removeTokenFromBundle(state.bundle_contract, remove_token_data, bundle_id)
     },
-    ADD_TOKEN_TO_BUNDLE(state, { token_to_add_data, bundle_token_id }) {
-      addTokenToBundle(state.bundle_contract, token_to_add_data, bundle_token_id)
+    ADD_TOKEN_TO_BUNDLE(state, { token_to_add_data, tokens_to_approve, bundle_token_id }) {
+      addTokenToBundle(state.bundle_contract, token_to_add_data, tokens_to_approve, bundle_token_id)
     },
     CREATE_NEW_BUNDLE_WITH_APPROVE(state, { tokens_for_approve, account_for_approve, contract_of_tokens, token_id, metadata, bundles }) {
       state.status = StatusType.Minting

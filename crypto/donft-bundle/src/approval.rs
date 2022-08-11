@@ -77,13 +77,6 @@ impl NonFungibleTokenCore for Contract {
             .get(&token_id)
             .expect("token: doesn't exist");
 
-        //make sure that the person calling the function is the owner of the token
-        // assert_eq!(
-        //     &env::predecessor_account_id(),
-        //     &token.owner_id,
-        //     "Predecessor must be the token owner."
-        // );
-
         // assert_token_unloaned!(token);
         // assert_token_owned_by_predecessor!(token);
         env::log_str(&format!("approve_internal ID: {}", account_id));

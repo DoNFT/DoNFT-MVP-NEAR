@@ -10,10 +10,8 @@
       @click="closeModal"
       class="modal-template_bg"
     ></div>
-    <div class="modal-template__body">
-      
-      <slot name="header"/>
 
+    <div class="modal-template__main-wrap">
       <div
         class="modal-template__body-close"
         v-if="!isBlocked"
@@ -21,11 +19,18 @@
       >
         <icon name="cross" :size="32" class="cross-icon" />
       </div>
+      <div class="modal-template__body">
+      
+        <slot name="header"/>
 
-      <div class="modal-template__body__content">
-        <slot name="content"/>
+        <div class="modal-template__body__content">
+          <slot name="content"/>
+        </div>
       </div>
 
+      <div v-if="hasFooterSlot" class="modal-template__footer">
+        <slot name="footer"/>
+      </div>
     </div>
   </div>
 </template>
@@ -38,6 +43,12 @@ export default {
     tokenMeta: Object,
     isBlocked: Boolean,
     small: Boolean,
+  },
+
+  computed: {
+    hasFooterSlot() {
+      return !!this.$slots.footer
+    }
   },
 
 
@@ -79,14 +90,21 @@ export default {
 
 .modal-template__body-close {
   position: absolute;
-  right: 20px;
-  top: 20px;
+  right: -45px;
+  top: -50px;
+  z-index: 3;
+  height: 32px;
+  color: #fff;
+  background-color: #692bb4;
+  border: 1px solid #fff;
   cursor: pointer;
+  border-radius: 4px;
+  transition: background-color .2s ease;
 
 
   &:hover {
-    color: red;
-    fill: red;
+    color: #fff;
+    background-color: red;
   }
 }
 
@@ -121,14 +139,14 @@ export default {
   padding: 20px;
   border-radius: 4px;
   overflow-y: auto;
-  border: 1px solid #2d0949;
+  overflow-x: hidden;
   z-index: 2;
 
   .small & {
     width: auto;
     height: auto;
-    max-width: 50vw;
-    max-height: 50vh;
+    max-width: 60vw;
+    max-height: 60vh;
   }
   
   .effect-confirm__inner {
@@ -147,5 +165,23 @@ export default {
       margin-bottom: 10px;
     }
   }
+}
+
+.modal-template__main-wrap {
+  position: relative;
+  box-shadow: 0 0 0 1px rgb(0, 0, 0);
+}
+
+.modal-template__footer {
+  position: absolute;
+  width: 100%;
+  padding: 10px 15px;
+  bottom: -63px;
+  left: 0;
+  background: #fff;
+  display: flex;
+  justify-content: flex-end;
+  z-index: 3;
+  box-shadow: 0 0 0 1px rgb(0, 0, 0);
 }
 </style>

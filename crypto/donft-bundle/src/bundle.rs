@@ -63,7 +63,7 @@ pub trait CallbacksContract {
 
     fn add_to_bundle_on_callback(
         &mut self,
-        mut approved_token_data: Bundle,
+        mut tokens_data: Vec<Bundle>,
         mut bundle_token_data: Token,
         bundle_token_id: TokenId,
     );
@@ -114,45 +114,34 @@ impl Contract {
     pub fn add_token_to_bundle(
         &mut self,
         token_to_add_data: Vec<Bundle>,
+        tokens_to_approve: Vec<TokenId>,
         // contract of minted token, which we gonna approve
         bundle_token_id: TokenId,
     ) -> Option<Token> {
         let storage_for_approve: Gas = tgas(80);
 
         if let Some(mut bundle_token_data) = self.tokens_by_id.get(&bundle_token_id) {
-            for i in 0..token_to_add_data.len() {
-                //specify the token struct that contains the owner ID 
-                let approved_token_data = Bundle {
-                    contract: token_to_add_data[i].contract.clone(),
-                    //list of approved account IDs that have access to transfer the token. This maps an account ID to an approval ID
-                    token_id: token_to_add_data[i].token_id.clone(),
-                    //the next approval ID to give out. 
-                    approval_id: 0,
-                    token_role: token_to_add_data[i].token_role.clone(),
-                };
-    
-                ext_nft::nft_approve(
-                    token_to_add_data[i].token_id.clone(),
+            //specify the token struct that contains the owner ID
+            ext_nft::multiple_nft_approve(
+                tokens_to_approve.clone(),
+                env::current_account_id(),
+                token_to_add_data[0].contract.clone(),
+                env::attached_deposit(), // yocto NEAR to attach, for approving tokens
+                storage_for_approve // gas to attach
+            )
+            .then(
+                ext_self::add_to_bundle_on_callback(
+                    token_to_add_data,
+                    bundle_token_data.clone(),
+                    bundle_token_id,
                     env::current_account_id(),
-                    None,
-                    token_to_add_data[i].contract.clone(),
-                    env::attached_deposit(), // yocto NEAR to attach, for approving tokens
-                    storage_for_approve // gas to attach
+                    0, // yocto NEAR to attach
+                    env::prepaid_gas()
+                    - env::used_gas()
+                    - storage_for_approve
+                    - GAS_RESERVED_FOR_CURRENT_CALL // gas to attach
                 )
-                .then(
-                    ext_self::add_to_bundle_on_callback(
-                        approved_token_data,
-                        bundle_token_data.clone(),
-                        bundle_token_id.clone(),
-                        env::current_account_id(),
-                        0, // yocto NEAR to attach
-                        env::prepaid_gas()
-                        - env::used_gas()
-                        - storage_for_approve
-                        - GAS_RESERVED_FOR_CURRENT_CALL // gas to attach
-                    )
-                );
-            }
+            );
             Some(bundle_token_data)
         } else { //if there wasn't a token ID in the tokens_by_id collection, we return None
             None
@@ -512,7 +501,7 @@ impl Contract {
     #[private]
     pub fn add_to_bundle_on_callback(
         &mut self,
-        mut approved_token_data: Bundle,
+        mut tokens_data: Vec<Bundle>,
         mut bundle_token_data: Token,
         bundle_token_id: TokenId,
     ) {
@@ -525,26 +514,33 @@ impl Contract {
         // handle the result from the cross contract call this method is a callback for
         match env::promise_result(0) {
             PromiseResult::NotReady => unreachable!(),
-            PromiseResult::Failed => panic!("failed promise"),
+            PromiseResult::Failed => panic!("failed add_to_bundle_on_callback"),
             PromiseResult::Successful(result) => {
-                let approved_id = near_sdk::serde_json::from_slice::<u64>(&result).unwrap();
+                let approved_id = near_sdk::serde_json::from_slice::<Vec<u64>>(&result).unwrap();
 
-                approved_token_data.approval_id = approved_id;
+                for i in 0..tokens_data.len() {
+                    tokens_data[i].approval_id = approved_id[i];
+                    bundle_token_data.bundles.insert(bundle_token_data.bundles.len() - 1, tokens_data[i].clone());
+                }
 
+                env::log_str(&format!("bundle_token_data: {:?}", bundle_token_data.clone()));
                 // token_data.bundles.push(token_for_bundle);
-                bundle_token_data.bundles.insert(bundle_token_data.bundles.len() - 1, approved_token_data.clone());
                 self.tokens_by_id.insert(&bundle_token_id, &bundle_token_data);
 
-                ext_nft::nft_transfer(
-                    env::current_account_id(),
-                    approved_token_data.token_id,
-                    approved_token_data.approval_id,
-                    None,
-                    approved_token_data.contract, // contract account id
-                    DEPOSIT, // yocto NEAR to attach
-                    GAS_FOR_NFT_TRANSFER_CALL // gas to attach
-                );
-
+                let mut range_iterator = tokens_data.iter();
+                while let Some(bundle) = range_iterator.next() {
+                    ext_nft::nft_transfer(
+                        env::current_account_id(),
+                        bundle.token_id.clone(),
+                        bundle.approval_id,
+                        None,
+                        bundle.contract.clone(), // contract account id
+                        DEPOSIT, // yocto NEAR to attach
+                        GAS_FOR_NFT_TRANSFER_CALL // gas to attach
+                    );
+    
+                }
+        
             },
         }
     }

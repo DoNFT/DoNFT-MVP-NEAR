@@ -42,7 +42,6 @@
     <modal-template
       v-if="showApproveModal"
       :is-blocked="true"
-      @close="closeModal"
     >
       <template #header>
         <h3>Status of transaction</h3>
@@ -299,8 +298,6 @@ export default {
     chooseNFT(item) {
       const index = this.nftObj.token_id.findIndex((_) => _ === item.token_id)
 
-      // Currently approving multiple NFTs is problem,
-      // for this need smart contract, bundle approve + bundle sending
       if (index > -1) {
         this.nftObj.token_id.splice(index, 1)
       } else {

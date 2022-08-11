@@ -89,18 +89,25 @@
                     v-for="item in contractData.NFTS"
                     :key="`nft--${item.token_id}`"
                     class="nft-cards__contract__item"
+                    :class="{ 'chosen-card': cardClass(item)}"
                   >
                     <token-card
                       :metadata="item"
                       :is-adding="true"
-                      @submit-token="createNFTforBundle"
+                      @submit-token="chooseNFT"
                     />
                   </div>
                 </div>
               </template>
             </div>
           </div>
+        </template>
 
+        <template #footer>
+          <button
+            @click="createNFTforBundle"
+            class="main-btn"
+          >Submit</button>
         </template>
       </modal-template>
 
@@ -160,6 +167,7 @@ export default {
         token_id: [],
         media: '',
       },
+      choosenTokens: [],
       nftObjForBundle: {
         metadata: {
           title: 'NFT token 2 title',
@@ -223,6 +231,9 @@ export default {
     NFTComputedData() {
       return this.getAllNFTs.find((item) => item.token_id === this.$route.params.id)
     },
+    cardClass() {
+      return (idx) => this.choosenTokens.indexOf(idx) !== -1
+    },
     mergedTokens() {
       let arr = []
       let mainContracts = [process.env.VUE_APP_BUNDLE_CONTRACT, process.env.VUE_APP_NFTS_CONTRACT]
@@ -281,17 +292,38 @@ export default {
       'REMOVE_TOKEN_FROM_BUNDLE',
       'ADD_TOKEN_TO_BUNDLE',
     ]),
-    async createNFTforBundle(token_to_add_data) {
-      console.log('cre')
-      const contract_of_mint = this.getAllNFTs.find((item) => item.token_id === token_to_add_data.token_id)
+    chooseNFT(item) {
+      const index = this.choosenTokens.findIndex((_) => _ === item.token_id)
 
+      if (index > -1) {
+        this.choosenTokens.splice(index, 1)
+      } else {
+        this.choosenTokens.push(item)
+      }
+    },
+    async createNFTforBundle() {
+      console.log(this.choosenTokens, 'this.choosenTokens')
+      const tokensToAdd = []
+      const tokensToApprove = []
+
+      this.choosenTokens.map((tokenData) => {
+        const obj = {
+          contract: null,
+          token_id: tokenData.token_id,
+          approval_id: tokenData.approved_account_ids[this.getBundleContract.contractId] || 0,
+          token_role: 0,
+        }
+
+        obj.contract = this.getAllNFTs.find((item) => item.token_id === tokenData.token_id).contract
+        
+        tokensToApprove.push(obj.token_id)
+        tokensToAdd.push(obj)
+      })
+
+      console.log(tokensToAdd, 'tokensToAdd')
       this.ADD_TOKEN_TO_BUNDLE({
-        token_to_add_data: {
-          contract: contract_of_mint ? contract_of_mint.contract : null,
-          token_id: token_to_add_data.token_id,
-          approval_id: token_to_add_data.approved_account_ids[this.getBundleContract.contractId] || 0,
-          token_role: 1,
-        },
+        token_to_add_data: tokensToAdd,
+        tokens_to_approve: tokensToApprove,
         bundle_token_id: this.NFTComputedData.token_id,
       })
     },
