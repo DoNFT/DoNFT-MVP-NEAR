@@ -7,3 +7,4 @@ near dev-deploy --wasmFile out/donft_bundle.wasm
 
 # for effects list contract
 # near call $DEV_CONTRACT new_effects_meta '{"owner_id": "'$DEV_CONTRACT'", "total_supply": "1000000000000000", "metadata": { "spec": "ft-1.0.0", "name": "Example Token Name", "symbol": "EXLT", "decimals": 8 }}' --accountId $DEV_CONTRACT
+# near call $DEV_CONTRACT add_manager_of_contracts '{"owner_id": "'$DEV_CONTRACT'"}' --accountId $DEV_CONTRACT
