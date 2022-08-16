@@ -66,9 +66,9 @@
       
 
       <modal-template
-        v-if="addingToBundle"
+        v-if="addingToBundle || addingToToken"
         small
-        @close="addingToBundle = false"
+        @close="addingToBundle = false; addingToToken = false"
       >
         <template #header>
           <h2>Add new NFT to bundle</h2>
@@ -123,8 +123,22 @@
               class="bundle-data__token"
               :is-bundle="true"
               :metadata="item"
-              @submit-token="removeBundleToken"
+              @remove-token="removeBundleToken"
+              @add-token="addToToken"
             />
+            <div
+              class="nft-cards__contract__item__inside"
+              v-if="item.bundles && item.bundles.length"
+            >
+              DATA:
+              <!-- <token-card
+                class="bundle-data__token"
+                :is-bundle="true"
+                :metadata="getInnerNFTdata(item.bundles)"
+                @remove-token="removeBundleToken"
+                @add-token="addToToken"
+              /> -->
+            </div>
           </div>
           <div
             class="card-placeholder"
@@ -179,7 +193,10 @@ export default {
         contract_id: '',
       },
       addingToBundle: false,
-      NFTData: {},
+      // in this case, we adding NFT to inner bundle, 2nd-3rd level etc...
+      addingToToken: false,
+      innerBundleForAdd: {},
+      innerNFTsData: [],
       bundleNFTsData: [],
     }
   },
@@ -193,6 +210,7 @@ export default {
       'getStatus',
       'getNearAccount',
       'getContract',
+      'getEffectsContract',
       'getAccountId',
       'getBundleContract',
       'getNFTsByContract',
@@ -247,7 +265,6 @@ export default {
       handler(value) {
         const data = value.find((item) => item.token_id === this.$route.params.id)
         if (this.getAllNFTs && data) {
-          this.NFTData = data
           this.nftObj.media = data.metadata.media
 
           if (this.NFTComputedData.bundles && this.NFTComputedData.bundles.length) {
@@ -272,10 +289,11 @@ export default {
     },
   },
 
-  mounted() {
+  async mounted() {
+    this.getNFTs(this.getEffectsContract)
     if (this.NFTComputedData) {
       if (this.NFTComputedData.bundles && this.NFTComputedData.bundles.length) {
-        this.loadBundlesNFTsData()
+        this.bundleNFTsData = await this.loadBundlesNFTsData(this.NFTComputedData.bundles)
       }
     }
   },
@@ -292,8 +310,36 @@ export default {
       'REMOVE_TOKEN_FROM_BUNDLE',
       'ADD_TOKEN_TO_BUNDLE',
     ]),
+    // just for testing purposes
+    async getNFTs(contract) {
+      await contract
+        .nft_tokens().then((res) => console.log(res, 'TOKENS getOwnerNFTs'))
+      await contract
+        .nft_total_supply().then((res) => console.log(res, 'TOKENS nft_total_supply'))
+    },
+    async getInnerNFTdata(data) {
+      console.log(data, 'fetchedData 1')
+      const fetchedData = await this.loadBundlesNFTsData(data)
+      // fetchedData.forEach((item) => {
+      //   const index = this.innerNFTsData.findIndex((_) => _.token_id === item.token_id)
+
+      //   if (index > -1) {
+      //     this.innerNFTsData.splice(index, 1)
+      //   } else {
+      //     this.innerNFTsData.push(item)
+      //   }
+      // })
+      console.log(fetchedData, 'fetchedData 2')
+      this.innerNFTsData = fetchedData
+      return this.innerNFTsData
+    },
+    addToToken(data) {
+      console.log(data, 'data')
+      this.innerBundleForAdd = this.NFTComputedData.bundles.find((item) => item.token_id === data.token_id)
+      this.addingToToken = true
+    },
     chooseNFT(item) {
-      const index = this.choosenTokens.findIndex((_) => _ === item.token_id)
+      const index = this.choosenTokens.findIndex((_) => _ === item)
 
       if (index > -1) {
         this.choosenTokens.splice(index, 1)
@@ -305,6 +351,7 @@ export default {
       console.log(this.choosenTokens, 'this.choosenTokens')
       const tokensToAdd = []
       const tokensToApprove = []
+      let contractOfBundle = null
 
       this.choosenTokens.map((tokenData) => {
         const obj = {
@@ -320,11 +367,17 @@ export default {
         tokensToAdd.push(obj)
       })
 
+      if (this.addingToToken) contractOfBundle = this.innerBundleForAdd
+
       console.log(tokensToAdd, 'tokensToAdd')
-      this.ADD_TOKEN_TO_BUNDLE({
+      this.addNFTtoBundle({
         token_to_add_data: tokensToAdd,
         tokens_to_approve: tokensToApprove,
-        bundle_token_id: this.NFTComputedData.token_id,
+        // if we adding to inner NFTs, pulling their id, if not, using MAIN NFT id
+        bundle_token_id: this.addingToToken ? this.innerBundleForAdd.token_id : this.NFTComputedData.token_id,
+        contractId: contractOfBundle ? contractOfBundle.contract : null,
+        // owner of all bundle NFTs should be bundle contract, contracts dont know that
+        owner_id: process.env.VUE_APP_BUNDLE_CONTRACT,
       })
     },
     removeBundleToken(remove_token_data) {
@@ -334,15 +387,14 @@ export default {
     // requesting metadata of bundles NFT. to render them
     // todo: bundle contract could contain infinite number of nft,
     // so there can be a problem with searching for bundle nfts
-    loadBundlesNFTsData() {
+    async loadBundlesNFTsData(passedBundleData) {
       const loadedBundleNFTs = []
 
-      this.NFTComputedData.bundles.forEach(async (bundleData) => {
+      await Promise.all(passedBundleData.map(async (bundleData) => {
         const request = await this.getNearAccount.viewFunction(bundleData.contract, 'nft_tokens_for_owner', { account_id: this.getBundleContract.contractId, limit: 100 })
-        console.log(request, 'request')
 
         let requestedNFTs = request.filter((item) => {
-          return this.NFTComputedData.bundles.find((bundleItem) => bundleItem.token_id === item.token_id)
+          return passedBundleData.find((bundleItem) => bundleItem.token_id === item.token_id)
         })
         
         let requestedNFTsRepeated = []
@@ -355,12 +407,18 @@ export default {
           })
         }
 
+        console.log(bundleData, 'bundleData')
+
+        console.log(requestedNFTs, 'requestedNFTs')
+
         if (requestedNFTsRepeated && !requestedNFTsRepeated.length) {
           loadedBundleNFTs.push.apply(loadedBundleNFTs, requestedNFTs)
         }
-      })
+        
+      }))
 
-      this.bundleNFTsData = loadedBundleNFTs
+      console.log(loadedBundleNFTs, 'loadedBundleNFTs')
+      return loadedBundleNFTs
     },
     approveNFTHandler() {
       this.setNFTApproveId({

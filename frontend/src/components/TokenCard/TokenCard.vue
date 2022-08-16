@@ -7,10 +7,16 @@
 
     <div v-if="isBundle">
       <icon
+        name="plus"
+        :size="26"
+        class="add-icon add-icon--bundle"
+        @click.native="addToken"
+      />
+      <icon
         name="trash"
         :size="26"
         class="delete-icon delete-icon--token"
-        @click.native="submitToken"
+        @click.native="removeToken"
       />
     </div>
 
@@ -124,6 +130,14 @@ export default {
       'setTokenImage',
       'setNFTApproveId',
     ]),
+    removeToken() {
+      console.log('submitToken')
+      this.$emit('remove-token', this.metadata)
+    },
+    addToken() {
+      console.log('submitToken')
+      this.$emit('add-token', this.metadata)
+    },
     submitToken() {
       console.log('submitToken')
       this.$emit('submit-token', this.metadata)
@@ -142,7 +156,6 @@ export default {
 
         if (!this.urlData || this.isBundle) {
           url = await this.setTokenImage(this.metadata)
-          console.log(url, '----URL')
         }
 
         this.urlData = url ? url : null

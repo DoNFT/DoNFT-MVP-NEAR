@@ -63,8 +63,8 @@ export async function initContract(store) {
     } catch(err) {
       console.log(err, 'err')
     }
-    console.log(request, 'request')
-    console.log(contract, 'contract')
+    // console.log(request, 'request')
+    // console.log(contract, 'contract')
 
     let obj = {}
 
@@ -98,7 +98,7 @@ export async function initContract(store) {
     // View methods are read only. They don't modify the state, but usually return some value.
     viewMethods: ['nft_total_supply', 'nft_tokens_for_owner', 'nft_tokens'],
     // Change methods can modify the state. But you don't receive the returned value when called.
-    changeMethods: ['nft_mint', 'nft_transfer', 'nft_approve', 'nft_bundle', 'nft_unbundle', 'multiple_nft_approve'],
+    changeMethods: ['nft_mint', 'nft_transfer', 'nft_approve', 'nft_bundle', 'nft_unbundle', 'multiple_nft_approve', 'add_token_to_bundle'],
   })
   store.dispatch('setCurrentContract', cotractSettings)
 
@@ -123,7 +123,8 @@ export async function initContract(store) {
 
   // Initializing our contract APIs by contract name and configuration
   const cotractEffectsSettings = await new Contract(nftEffectsWallet.account(), nfts_effects_contract.contractName, {
-    changeMethods: ['nft_mint', 'nft_bundle', 'nft_unbundle', 'nft_approve', 'nft_transfer'],
+    changeMethods: ['nft_mint', 'nft_bundle', 'nft_unbundle', 'nft_approve', 'nft_transfer', 'add_token_to_bundle'],
+    viewMethods: ['nft_total_supply', 'nft_tokens_for_owner', 'nft_tokens'],
   })
   store.dispatch('setCurrentEffectsContract', cotractEffectsSettings)
 
@@ -172,7 +173,7 @@ export async function initNewContract(mintingContract) {
   const nearNewWallet = new WalletConnection(nearConnectInstance)
   console.log(nearNewWallet, 'nearNewWallet')
   const nearNewContractSettings = new Contract(nearNewWallet.account(), contractConfig.contractName, {
-    changeMethods: ['nft_mint', 'nft_bundle', 'nft_unbundle', 'nft_approve', 'nft_transfer', 'nft_tokens_for_owner'],
+    changeMethods: ['nft_mint', 'nft_bundle', 'nft_unbundle', 'nft_approve', 'nft_transfer', 'nft_tokens_for_owner', 'add_token_to_bundle'],
   })
   console.log(nearNewContractSettings, 'nearNewContractSettings')
   return nearNewContractSettings

@@ -66,6 +66,7 @@ pub trait CallbacksContract {
         mut tokens_data: Vec<Bundle>,
         mut bundle_token_data: Token,
         bundle_token_id: TokenId,
+        owner_id: AccountId,
     );
 }
 
@@ -117,6 +118,7 @@ impl Contract {
         tokens_to_approve: Vec<TokenId>,
         // contract of minted token, which we gonna approve
         bundle_token_id: TokenId,
+        owner_id: AccountId,
     ) -> Option<Token> {
         let storage_for_approve: Gas = tgas(80);
 
@@ -134,6 +136,7 @@ impl Contract {
                     token_to_add_data,
                     bundle_token_data.clone(),
                     bundle_token_id,
+                    owner_id,
                     env::current_account_id(),
                     0, // yocto NEAR to attach
                     env::prepaid_gas()
@@ -504,6 +507,7 @@ impl Contract {
         mut tokens_data: Vec<Bundle>,
         mut bundle_token_data: Token,
         bundle_token_id: TokenId,
+        owner_id: AccountId,
     ) {
         assert_eq!(
             env::promise_results_count(),
@@ -517,20 +521,27 @@ impl Contract {
             PromiseResult::Failed => panic!("failed add_to_bundle_on_callback"),
             PromiseResult::Successful(result) => {
                 let approved_id = near_sdk::serde_json::from_slice::<Vec<u64>>(&result).unwrap();
+                env::log_str(&format!(" bundle_token_data.bundles.len(): {:?}", bundle_token_data.bundles.len()));
 
                 for i in 0..tokens_data.len() {
                     tokens_data[i].approval_id = approved_id[i];
-                    bundle_token_data.bundles.insert(bundle_token_data.bundles.len() - 1, tokens_data[i].clone());
+
+                    if bundle_token_data.bundles.len() > 0 {
+                        bundle_token_data.bundles.insert(bundle_token_data.bundles.len() - 1, tokens_data[i].clone());
+                    } else {
+                        bundle_token_data.bundles.insert(0, tokens_data[i].clone());
+                    }
                 }
 
                 env::log_str(&format!("bundle_token_data: {:?}", bundle_token_data.clone()));
                 // token_data.bundles.push(token_for_bundle);
                 self.tokens_by_id.insert(&bundle_token_id, &bundle_token_data);
 
+                // need to use bundle contract instead of env::current_account_id()
                 let mut range_iterator = tokens_data.iter();
                 while let Some(bundle) = range_iterator.next() {
                     ext_nft::nft_transfer(
-                        env::current_account_id(),
+                        owner_id.clone(),
                         bundle.token_id.clone(),
                         bundle.approval_id,
                         None,
