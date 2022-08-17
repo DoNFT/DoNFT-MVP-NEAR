@@ -355,6 +355,16 @@ export default {
   }
 }
 
+.nft-cards__contract__item__inside {
+  position: absolute;
+  width: 100px;
+  font-size: 14px;
+
+  img {
+    height: auto;
+  }
+}
+
 .nft-cards__contract__item--bundle-data {
   width: 24%;
   cursor: initial;

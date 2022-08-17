@@ -123,21 +123,39 @@
               class="bundle-data__token"
               :is-bundle="true"
               :metadata="item"
+              @edit-token="showEditBundle = true"
               @remove-token="removeBundleToken"
               @add-token="addToToken"
             />
             <div
               class="nft-cards__contract__item__inside"
-              v-if="item.bundles && item.bundles.length"
+              v-if="item.bundles && item.bundles.length && innerNFTsData"
             >
-              DATA:
-              <!-- <token-card
-                class="bundle-data__token"
-                :is-bundle="true"
-                :metadata="getInnerNFTdata(item.bundles)"
-                @remove-token="removeBundleToken"
-                @add-token="addToToken"
-              /> -->
+              <modal-template
+                v-if="showEditBundle"
+                small
+                @close="showEditBundle = false"
+              >
+                <template #header>
+                  <h2>Bundle {{item.token_id}} contain {{item.bundles.length}} NFT</h2>
+                </template>
+                <template #content>
+                  <div
+                    class="nft-cards__contract__item__inside-wrap"
+                    v-for="bundle in item.bundles"
+                    :key="bundle.token_id"
+                  >
+                    <h3>Token ID: <br> {{ item.token_id }}</h3>
+                    <token-card
+                      class="bundle-data__token"
+                      :is-bundle="true"
+                      :metadata="getInnerNFTdata(bundle)"
+                      @remove-token="removeBundleToken"
+                      @add-token="addToToken"
+                    />
+                  </div>
+                </template>
+              </modal-template>
             </div>
           </div>
           <div
@@ -192,6 +210,7 @@ export default {
         token_id: [],
         contract_id: '',
       },
+      showEditBundle: false,
       addingToBundle: false,
       // in this case, we adding NFT to inner bundle, 2nd-3rd level etc...
       addingToToken: false,
@@ -252,6 +271,9 @@ export default {
     cardClass() {
       return (idx) => this.choosenTokens.indexOf(idx) !== -1
     },
+    getInnerNFTdata() {
+      return (token) => this.innerNFTsData.find((item) => item.token_id === token.token_id)
+    },
     mergedTokens() {
       let arr = []
       let mainContracts = [process.env.VUE_APP_BUNDLE_CONTRACT, process.env.VUE_APP_NFTS_CONTRACT]
@@ -261,18 +283,6 @@ export default {
   },
 
   watch: {
-    getAllNFTs: {
-      handler(value) {
-        const data = value.find((item) => item.token_id === this.$route.params.id)
-        if (this.getAllNFTs && data) {
-          this.nftObj.media = data.metadata.media
-
-          if (this.NFTComputedData.bundles && this.NFTComputedData.bundles.length) {
-            this.loadBundlesNFTsData()
-          }
-        }
-      },
-    },
     // removed watcher from mixin, because watcher triggering twice on status change
     getStatus: {
       handler(curVal) {
@@ -316,22 +326,6 @@ export default {
         .nft_tokens().then((res) => console.log(res, 'TOKENS getOwnerNFTs'))
       await contract
         .nft_total_supply().then((res) => console.log(res, 'TOKENS nft_total_supply'))
-    },
-    async getInnerNFTdata(data) {
-      console.log(data, 'fetchedData 1')
-      const fetchedData = await this.loadBundlesNFTsData(data)
-      // fetchedData.forEach((item) => {
-      //   const index = this.innerNFTsData.findIndex((_) => _.token_id === item.token_id)
-
-      //   if (index > -1) {
-      //     this.innerNFTsData.splice(index, 1)
-      //   } else {
-      //     this.innerNFTsData.push(item)
-      //   }
-      // })
-      console.log(fetchedData, 'fetchedData 2')
-      this.innerNFTsData = fetchedData
-      return this.innerNFTsData
     },
     addToToken(data) {
       console.log(data, 'data')
@@ -407,13 +401,28 @@ export default {
           })
         }
 
-        console.log(bundleData, 'bundleData')
-
-        console.log(requestedNFTs, 'requestedNFTs')
-
         if (requestedNFTsRepeated && !requestedNFTsRepeated.length) {
           loadedBundleNFTs.push.apply(loadedBundleNFTs, requestedNFTs)
         }
+
+        // loading recursively other NFTs if there some other bundles inside
+        // 2nd, 3rd level etc...
+        // loading it in one array, to find later in template
+        requestedNFTs.forEach(async (item) => {
+          if (item.bundles && item.bundles.length) {
+            const innerNFTs = await this.loadBundlesNFTsData(item.bundles)
+            innerNFTs.forEach((fullItem) => {
+              const index = this.innerNFTsData.findIndex((_) => _.token_id === fullItem.token_id)
+
+              if (index > -1) {
+                this.innerNFTsData.splice(index, 1)
+              } else {
+                this.innerNFTsData.push(fullItem)
+              }
+
+            })
+          }
+        })
         
       }))
 
@@ -492,5 +501,19 @@ export default {
   justify-content: space-between;
   position: relative;
   margin-top: 20px;
+}
+
+.nft-cards__contract__item__inside .modal-template__body__content {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.nft-cards__contract__item__inside-wrap {
+  margin-right: 20px;
+  margin-top: 30px;
+
+  &:last-child {
+    margin-right: 0;
+  }
 }
 </style>

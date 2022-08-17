@@ -7,6 +7,13 @@
 
     <div v-if="isBundle">
       <icon
+        v-if="metadata.bundles && metadata.bundles.length"
+        name="pencil"
+        :size="26"
+        class="add-icon add-icon--edit"
+        @click.native="editToken"
+      />
+      <icon
         name="plus"
         :size="26"
         class="add-icon add-icon--bundle"
@@ -130,16 +137,16 @@ export default {
       'setTokenImage',
       'setNFTApproveId',
     ]),
+    editToken() {
+      this.$emit('edit-token', this.metadata)
+    },
     removeToken() {
-      console.log('submitToken')
       this.$emit('remove-token', this.metadata)
     },
     addToken() {
-      console.log('submitToken')
       this.$emit('add-token', this.metadata)
     },
     submitToken() {
-      console.log('submitToken')
       this.$emit('submit-token', this.metadata)
     },
     async loadContent () {
