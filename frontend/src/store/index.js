@@ -276,7 +276,7 @@ const store = new Vuex.Store({
     async createNewUsualNFT ({getters, dispatch},  { token_id, metadata, contract_id }) {
       try {
         dispatch('setStatus', StatusType.Minting)
-        let contractData = await checkForContract(getters, contract_id)
+        const contractData = await checkForContract(getters, contract_id)
         await createUsualNFT(token_id, metadata, getters.getAccountId, contractData)
       } catch(err) {
         console.log(err)
@@ -287,10 +287,12 @@ const store = new Vuex.Store({
       dispatch('setStatus', StatusType.Minting)
       createBundleNFT(token_id, metadata, bundles, getters.getAccountId, getters.getBundleContract)
     },
-    async triggerUnbundleNFT ({getters, dispatch},  { token_id }) {
+    async triggerUnbundleNFT ({getters, dispatch},  { token_id, contract_id }) {
       try {
+        const contractData = await checkForContract(getters, contract_id)
+
         dispatch('setStatus', StatusType.Unbundling)
-        await unbundleNFT(token_id, getters.getBundleContract)
+        await unbundleNFT(token_id,contractData)
       } catch(err) {
         dispatch('setStatus', StatusType.ChoosingParameters)
 

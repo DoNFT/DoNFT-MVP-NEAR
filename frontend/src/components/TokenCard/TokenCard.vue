@@ -191,6 +191,11 @@ export default {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+
+    p {
+      margin-bottom: 20px;
+      font-size: 20px;
+    }
   }
 
   &:hover {
@@ -205,6 +210,10 @@ export default {
     flex-direction: column;
     justify-content: center;
     margin: 0 auto;
+
+    .nft-cards__contract__item__inside & {
+      margin: 0;
+    }
   }
 
   .bundle-item & {

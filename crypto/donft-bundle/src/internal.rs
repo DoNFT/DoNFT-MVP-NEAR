@@ -149,6 +149,7 @@ impl Contract {
     ) -> Token {
         //get the token object by passing in the token_id
         let token = self.tokens_by_id.get(token_id).expect("No token");
+        env::log_str(&format!("token internal_transfer: {:?}", token.clone()));
 
         //if the sender doesn't equal the owner, we check if the sender is in the approval list
 		if sender_id != &token.owner_id {
@@ -194,7 +195,7 @@ impl Contract {
             next_approval_id: token.next_approval_id,
             //we copy over the royalties from the previous token
             royalty: token.royalty.clone(),
-            bundles: Vec::new(),
+            bundles: token.bundles.clone(),
         };
         //insert that new token into the tokens_by_id, replacing the old entry 
         self.tokens_by_id.insert(token_id, &new_token);
