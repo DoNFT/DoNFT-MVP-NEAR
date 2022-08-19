@@ -389,6 +389,11 @@ export default {
   height: 200px;
   object-fit: cover;
 
+  .effect-cards-box & {
+    min-height: 350px;
+    object-fit: contain;
+  }
+
   .modal-template__body & {
     height: 250px;
     margin: 30px 0;

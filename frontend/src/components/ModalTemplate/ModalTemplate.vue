@@ -178,10 +178,11 @@ export default {
   padding: 10px 15px;
   bottom: -63px;
   left: 0;
-  background: #fff;
+  background: #fcf7ff;
   display: flex;
   justify-content: flex-end;
   z-index: 3;
+  font-size: 20px;
   box-shadow: 0 0 0 1px rgb(0, 0, 0);
 }
 </style>

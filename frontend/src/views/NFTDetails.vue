@@ -123,18 +123,18 @@
               class="bundle-data__token"
               :is-bundle="true"
               :metadata="item"
-              @edit-token="showEditBundle = true"
+              @edit-token="toggleEditBundle"
               @remove-token="removeBundleToken"
               @add-token="addToToken"
             />
             <div
               class="nft-cards__contract__item__inside"
-              v-if="item.bundles && item.bundles.length && innerNFTsData"
+              v-if="item.bundles && item.bundles.length && modalBundleNFTData"
             >
               <modal-template
                 v-if="showEditBundle"
                 small
-                @close="showEditBundle = false"
+                @close="closeEditModal"
               >
                 <template #header>
                   <h2>Bundle {{item.token_id}} contain {{item.bundles.length}} NFT</h2>
@@ -142,7 +142,7 @@
                 <template #content>
                   <div
                     class="nft-cards__contract__item__inside-wrap"
-                    v-for="bundle in item.bundles"
+                    v-for="bundle in modalBundleNFTData.bundles"
                     :key="bundle.token_id"
                   >
                     <template v-if="getInnerNFTdata(bundle)">
@@ -151,12 +151,19 @@
                         class="bundle-data__token"
                         :is-bundle="true"
                         :metadata="getInnerNFTdata(bundle)"
+                        @edit-token="toggleEditBundle"
                         @remove-token="removeBundleToken"
                         @add-token="addToToken"
                       />
                     </template>
                     <h3 v-else>Can't load Tokens metadata</h3>
                   </div>
+                </template>
+                <template #footer>
+                  <button
+                    @click="addingToBundle = true; showEditBundle = false"
+                    class="main-btn"
+                  >Add NFT</button>
                 </template>
               </modal-template>
             </div>
@@ -217,10 +224,12 @@ export default {
       addingToBundle: false,
       // in this case, we adding NFT to inner bundle, 2nd-3rd level etc...
       addingToToken: false,
+      editingBundle: {},
       innerBundleForAdd: {},
-      innerNFTsData: [],
-      bundleNFTsData: [],
+      mainBundleNFTData: {},
+      modalBundleNFTData: {},
       computedNFTdata: {},
+      secondaryNFTsFullData: [],
     }
   },
 
@@ -239,7 +248,7 @@ export default {
       'getNFTsByContract',
     ]),
     bundleNFTsComputedData() {
-      return this.bundleNFTsData
+      return this.mainBundleNFTData
     },
     getNav() {
       return [
@@ -276,7 +285,7 @@ export default {
       return (idx) => this.choosenTokens.indexOf(idx) !== -1
     },
     getInnerNFTdata() {
-      return (token) => this.innerNFTsData.find((item) => item.token_id === token.token_id)
+      return (token) => this.secondaryNFTsFullData.find((item) => item.token_id === token.token_id)
     },
     mergedTokens() {
       let arr = []
@@ -314,7 +323,7 @@ export default {
 
     if (this.NFTComputedData) {
       if (this.NFTComputedData.bundles && this.NFTComputedData.bundles.length) {
-        this.bundleNFTsData = await this.loadBundlesNFTsData(this.NFTComputedData.bundles, this.NFTComputedData.contract)
+        this.mainBundleNFTData = await this.loadBundlesNFTsData(this.NFTComputedData.bundles, this.NFTComputedData.contract)
       }
     }
   },
@@ -331,6 +340,19 @@ export default {
       'REMOVE_TOKEN_FROM_BUNDLE',
       'ADD_TOKEN_TO_BUNDLE',
     ]),
+    closeEditModal() {
+      this.showEditBundle = !this.showEditBundle
+      this.innerBundleForAdd = {}
+    },
+    toggleEditBundle(data) {
+      console.log(data, 'toggle EDIT')
+      this.showEditBundle = true
+      const mainBundle = this.bundleNFTsComputedData.find((item) => item.token_id === data.token_id)
+      const secondaryBundle = this.secondaryNFTsFullData.find((item) => item.token_id === data.token_id)
+
+      this.modalBundleNFTData = mainBundle ? mainBundle : secondaryBundle
+      console.log(this.modalBundleNFTData, 'this.modalBundleNFTData EDIT')
+    },
     // just for testing purposes
     async getNFTs(contract) {
       await contract
@@ -354,6 +376,7 @@ export default {
     },
     async createNFTforBundle() {
       console.log(this.choosenTokens, 'this.choosenTokens')
+      // const bundleFullData = innerBundle ? innerBundle : this.choosenTokens
       const tokensToAdd = []
       const tokensToApprove = []
       const contractOfBundle = this.addingToToken ? this.innerBundleForAdd : null
@@ -431,9 +454,9 @@ export default {
             const innerNFTs = await this.loadBundlesNFTsData(item.bundles, item.bundles[0].contract)
 
             innerNFTs.forEach((fullItem) => {
-              const index = this.innerNFTsData.findIndex((_) => _.token_id === fullItem.token_id)
+              const index = this.secondaryNFTsFullData.findIndex((_) => _.token_id === fullItem.token_id)
 
-              if (index === -1) this.innerNFTsData.push(fullItem)
+              if (index === -1) this.secondaryNFTsFullData.push(fullItem)
             })
           }
         })
@@ -526,7 +549,7 @@ export default {
 }
 
 .nft-cards__contract__item__inside-wrap {
-  width: 50%;
+  width: 49%;
   margin-top: 30px;
 
   &:last-child {

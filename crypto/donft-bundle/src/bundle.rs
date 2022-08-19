@@ -110,6 +110,8 @@ impl Contract {
         }
     }
 
+    // problem for adding multiple tokens from different contracts
+    // todo: make it work from diff contracts
     #[payable]
     pub fn add_token_to_bundle(
         &mut self,
