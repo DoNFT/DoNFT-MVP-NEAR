@@ -291,6 +291,8 @@ export default {
               token_id: item.data.token_id,
               approval_id: item.data.approved_account_ids[this.getBundleContract.contractId] || 0,
               token_role: item.contract === 'list' ? 1 : 2,
+              // cause in this case we always change owner to MAIN bundle contract
+              owner_id: process.env.VUE_APP_BUNDLE_CONTRACT,
             }
 
             const tokensForContract = {

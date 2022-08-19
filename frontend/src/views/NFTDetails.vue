@@ -356,7 +356,7 @@ export default {
       console.log(this.choosenTokens, 'this.choosenTokens')
       const tokensToAdd = []
       const tokensToApprove = []
-      let contractOfBundle = null
+      const contractOfBundle = this.addingToToken ? this.innerBundleForAdd : null
 
       this.choosenTokens.map((tokenData) => {
         const obj = {
@@ -364,6 +364,8 @@ export default {
           token_id: tokenData.token_id,
           approval_id: tokenData.approved_account_ids[this.getBundleContract.contractId] || 0,
           token_role: 0,
+          // todo: possibly need rename, meaning not clear
+          owner_id: this.addingToToken ? contractOfBundle.contract : this.NFTComputedData.contract,
         }
 
         obj.contract = this.getAllNFTs.find((item) => item.token_id === tokenData.token_id).contract
@@ -371,8 +373,6 @@ export default {
         tokensToApprove.push(obj.token_id)
         tokensToAdd.push(obj)
       })
-
-      if (this.addingToToken) contractOfBundle = this.innerBundleForAdd
 
       console.log(tokensToAdd, 'tokensToAdd')
       this.addNFTtoBundle({
@@ -392,7 +392,7 @@ export default {
       this.REMOVE_TOKEN_FROM_BUNDLE({ remove_token_data: bundle_token_data, bundle_id: this.NFTComputedData.token_id })
     },
     // requesting metadata of bundles NFT. to render them
-    async loadBundlesNFTsData(passedBundleData, contractId) {
+    async loadBundlesNFTsData(passedBundleData) {
       const loadedBundleNFTs = []
 
       // account_id for nft_tokens_for_owner
@@ -402,7 +402,7 @@ export default {
         console.log(bundleData, 'bundleData ID 1')
         // todo: nft_tokens is not right way to watch for NFTS
         // rethink logic of watching bundle NFTs, it's problem of smart contracts first of all
-        const request = await this.getNearAccount.viewFunction(bundleData.contract, 'nft_tokens', { account_id: contractId ? contractId : this.NFTComputedData.contract, limit: 100 })
+        const request = await this.getNearAccount.viewFunction(bundleData.contract, 'nft_tokens_for_owner', { account_id: bundleData.owner_id, limit: 100 })
 
         console.log(request, 'request ID 2')
         let requestedNFTs = request.filter((item) => {
@@ -522,10 +522,11 @@ export default {
 .nft-cards__contract__item__inside .modal-template__body__content {
   display: flex;
   flex-wrap: wrap;
+  justify-content: space-between;
 }
 
 .nft-cards__contract__item__inside-wrap {
-  margin-right: 20px;
+  width: 50%;
   margin-top: 30px;
 
   &:last-child {

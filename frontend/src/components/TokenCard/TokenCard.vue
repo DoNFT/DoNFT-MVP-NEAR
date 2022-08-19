@@ -205,7 +205,7 @@ export default {
   }
   
   .modal-template__body & {
-    width: 80%;
+    width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;

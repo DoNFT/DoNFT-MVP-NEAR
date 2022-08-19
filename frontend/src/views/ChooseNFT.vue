@@ -370,7 +370,6 @@ export default {
   cursor: initial;
 
   img {
-    border: 1px solid #2d094970;
     margin-top: 15px;
     border-radius: 4px;
   }
@@ -388,10 +387,10 @@ export default {
   display: block;
   width: 100%;
   height: 200px;
-  object-fit: contain;
+  object-fit: cover;
 
   .modal-template__body & {
-    height: 350px;
+    height: 250px;
     margin: 30px 0;
   }
 

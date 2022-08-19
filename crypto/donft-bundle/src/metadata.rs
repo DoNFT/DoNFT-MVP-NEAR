@@ -47,6 +47,8 @@ pub struct Bundle {
     pub token_id: TokenId,
     //the next approval ID to give out. 
     pub approval_id: u64,
+    // owner id of nft
+    pub owner_id: AccountId,
     // current roles:
     // none 0, original 1, modifier 2
     pub token_role: u64, 

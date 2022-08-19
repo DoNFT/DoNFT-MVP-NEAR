@@ -66,7 +66,6 @@ pub trait CallbacksContract {
         mut tokens_data: Vec<Bundle>,
         mut bundle_token_data: Token,
         bundle_token_id: TokenId,
-        owner_id: AccountId,
     );
 }
 
@@ -118,7 +117,6 @@ impl Contract {
         tokens_to_approve: Vec<TokenId>,
         // contract of minted token, which we gonna approve
         bundle_token_id: TokenId,
-        owner_id: AccountId,
     ) -> Option<Token> {
         let storage_for_approve: Gas = tgas(80);
 
@@ -136,7 +134,6 @@ impl Contract {
                     token_to_add_data,
                     bundle_token_data.clone(),
                     bundle_token_id,
-                    owner_id,
                     env::current_account_id(),
                     0, // yocto NEAR to attach
                     env::prepaid_gas()
@@ -177,7 +174,7 @@ impl Contract {
                 );
             }
 
-            // //we remove the token from the receiver
+            // we remove the token from the receiver
             self.internal_remove_token_from_owner(&caller_id.clone(), &token_id);
         } else {
             env::panic_str("can't unbundle");
@@ -507,7 +504,6 @@ impl Contract {
         mut tokens_data: Vec<Bundle>,
         mut bundle_token_data: Token,
         bundle_token_id: TokenId,
-        owner_id: AccountId,
     ) {
         assert_eq!(
             env::promise_results_count(),
@@ -541,7 +537,7 @@ impl Contract {
                 let mut range_iterator = tokens_data.iter();
                 while let Some(bundle) = range_iterator.next() {
                     ext_nft::nft_transfer(
-                        owner_id.clone(),
+                        bundle.owner_id.clone(),
                         bundle.token_id.clone(),
                         bundle.approval_id,
                         None,

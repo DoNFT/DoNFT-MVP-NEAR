@@ -235,6 +235,8 @@ export default {
             token_id: item.token_id,
             approval_id: item.approved_account_ids[this.getBundleContract.contractId] || 0,
             token_role: 0,
+            // cause in this case we always change owner to MAIN bundle contract
+            owner_id: process.env.VUE_APP_BUNDLE_CONTRACT,
           }
 
           return obj
