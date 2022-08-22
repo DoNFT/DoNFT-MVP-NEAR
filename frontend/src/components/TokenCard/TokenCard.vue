@@ -6,20 +6,13 @@
     >
 
     <div v-if="isBundle">
+      <!-- we can add NFT only to bundle NFT -->
       <icon
         v-if="metadata.bundles && metadata.bundles.length"
         name="pencil"
         :size="26"
         class="add-icon add-icon--edit"
         @click.native="editToken"
-      />
-      <!-- cause we can add NFT only to bundle NFT -->
-      <icon
-        v-if="metadata.bundles && metadata.bundles.length"
-        name="plus"
-        :size="26"
-        class="add-icon add-icon--bundle"
-        @click.native="addToken"
       />
       <icon
         name="trash"

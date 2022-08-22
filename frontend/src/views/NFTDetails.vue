@@ -66,9 +66,9 @@
       
 
       <modal-template
-        v-if="addingToBundle || addingToToken"
+        v-if="addingToBundle"
         small
-        @close="addingToBundle = false; addingToToken = false"
+        @close="addingToBundle = false; showEditBundle = false"
       >
         <template #header>
           <h2>Add new NFT to bundle</h2>
@@ -78,7 +78,7 @@
             class="bundle-item"
           >
             <div
-              v-for="contractData in getNFTsByContract"
+              v-for="contractData in listedContractNFTs"
               :key="contractData.id"
               class="nft-cards__contract"
             >
@@ -86,12 +86,13 @@
                 <h3>Contract: {{contractData.contractName}}</h3>
                 <div class="nft-cards__contract-inner">
                   <div
-                    v-for="item in contractData.NFTS"
+                    v-for="item in (contractData.NFTS).filter((item) => item.token_id !== NFTComputedData.token_id)"
                     :key="`nft--${item.token_id}`"
                     class="nft-cards__contract__item"
                     :class="{ 'chosen-card': cardClass(item)}"
                   >
                     <token-card
+                      v-if="item.token_id !== NFTComputedData.token_id"
                       :metadata="item"
                       :is-adding="true"
                       @submit-token="chooseNFT"
@@ -125,7 +126,6 @@
               :metadata="item"
               @edit-token="toggleEditBundle"
               @remove-token="removeBundleToken"
-              @add-token="addToToken"
             />
             <div
               class="nft-cards__contract__item__inside"
@@ -153,7 +153,6 @@
                         :metadata="getInnerNFTdata(bundle)"
                         @edit-token="toggleEditBundle"
                         @remove-token="removeBundleToken"
-                        @add-token="addToToken"
                       />
                     </template>
                     <h3 v-else>Can't load Tokens metadata</h3>
@@ -161,7 +160,7 @@
                 </template>
                 <template #footer>
                   <button
-                    @click="addingToBundle = true; showEditBundle = false"
+                    @click="addFromEditModal"
                     class="main-btn"
                   >Add NFT</button>
                 </template>
@@ -225,7 +224,7 @@ export default {
       // in this case, we adding NFT to inner bundle, 2nd-3rd level etc...
       addingToToken: false,
       editingBundle: {},
-      innerBundleForAdd: {},
+      contractBundleInfo: {},
       mainBundleNFTData: {},
       modalBundleNFTData: {},
       computedNFTdata: {},
@@ -287,11 +286,13 @@ export default {
     getInnerNFTdata() {
       return (token) => this.secondaryNFTsFullData.find((item) => item.token_id === token.token_id)
     },
-    mergedTokens() {
-      let arr = []
-      let mainContracts = [process.env.VUE_APP_BUNDLE_CONTRACT, process.env.VUE_APP_NFTS_CONTRACT]
-      this.getNFTsByContract.filter((item) => mainContracts.includes(item.contractName)).filter((contract) => arr.push(...contract.NFTS))
-      return arr
+    // whitelisting contracts
+    listedContractNFTs() {
+      return this.getNFTsByContract.filter((item) => [
+        process.env.VUE_APP_BUNDLE_CONTRACT,
+        process.env.VUE_APP_NFTS_CONTRACT,
+        process.env.VUE_APP_NFTS_EFFECTS_CONTRACT,
+      ].includes(item.contractName))
     }
   },
 
@@ -340,9 +341,29 @@ export default {
       'REMOVE_TOKEN_FROM_BUNDLE',
       'ADD_TOKEN_TO_BUNDLE',
     ]),
+    addFromEditModal() {
+      this.addingToBundle = true
+      this.showEditBundle = false
+      // searching for contract data, in our case
+      // we have modal wrapper, and have that modal wrapper parent
+      // we need to find info about that token in wrapper parent bundles.field
+      const mainBundle = this.NFTComputedData.bundles.find((bundleData) => bundleData.token_id === this.modalBundleNFTData.token_id)
+      let secondaryBundle = this.secondaryNFTsFullData
+        .concat(this.bundleNFTsComputedData)
+        .filter((bundleData) => {
+          const contractData = bundleData.bundles.find((item) => item.token_id === this.modalBundleNFTData.token_id)
+          return contractData ? contractData : false
+        })
+
+      if (secondaryBundle && secondaryBundle.length) {
+        secondaryBundle = secondaryBundle[0].bundles.find((bundleData) => bundleData.token_id === this.modalBundleNFTData.token_id)
+      }
+
+      this.contractBundleInfo = mainBundle ? mainBundle : secondaryBundle
+    },
     closeEditModal() {
       this.showEditBundle = !this.showEditBundle
-      this.innerBundleForAdd = {}
+      this.contractBundleInfo = {}
     },
     toggleEditBundle(data) {
       console.log(data, 'toggle EDIT')
@@ -360,11 +381,6 @@ export default {
       await contract
         .nft_total_supply().then((res) => console.log(res, 'TOKENS nft_total_supply'))
     },
-    addToToken(data) {
-      console.log(data, 'data')
-      this.innerBundleForAdd = this.NFTComputedData.bundles.find((item) => item.token_id === data.token_id)
-      this.addingToToken = true
-    },
     chooseNFT(item) {
       const index = this.choosenTokens.findIndex((_) => _ === item)
 
@@ -379,7 +395,7 @@ export default {
       // const bundleFullData = innerBundle ? innerBundle : this.choosenTokens
       const tokensToAdd = []
       const tokensToApprove = []
-      const contractOfBundle = this.addingToToken ? this.innerBundleForAdd : null
+      const contractOfBundle = this.addingToBundle ? this.contractBundleInfo : null
 
       this.choosenTokens.map((tokenData) => {
         const obj = {
@@ -388,7 +404,7 @@ export default {
           approval_id: tokenData.approved_account_ids[this.getBundleContract.contractId] || 0,
           token_role: 0,
           // todo: possibly need rename, meaning not clear
-          owner_id: this.addingToToken ? contractOfBundle.contract : this.NFTComputedData.contract,
+          owner_id: this.addingToBundle ? contractOfBundle.contract : this.NFTComputedData.contract,
         }
 
         obj.contract = this.getAllNFTs.find((item) => item.token_id === tokenData.token_id).contract
@@ -402,7 +418,7 @@ export default {
         token_to_add_data: tokensToAdd,
         tokens_to_approve: tokensToApprove,
         // if we adding to inner NFTs, pulling their id, if not, using MAIN NFT id
-        bundle_token_id: this.addingToToken ? this.innerBundleForAdd.token_id : this.NFTComputedData.token_id,
+        bundle_token_id: this.addingToBundle ? this.modalBundleNFTData.token_id : this.NFTComputedData.token_id,
         contractId: contractOfBundle ? contractOfBundle.contract : null,
         // Important
         // currently only support NFTS from 1 CONTRACT for adding
