@@ -137,7 +137,7 @@
                 @close="closeEditModal"
               >
                 <template #header>
-                  <h2>Bundle {{item.token_id}} contain {{item.bundles.length}} NFT</h2>
+                  <h2>Bundle {{modalBundleNFTData.token_id}} contain {{modalBundleNFTData.bundles.length}} NFT</h2>
                 </template>
                 <template #content>
                   <div
