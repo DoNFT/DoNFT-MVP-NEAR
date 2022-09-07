@@ -46,7 +46,7 @@
               >Change Format</button>
               <button
                 class="main-btn"
-                @click="approveNFTHandler"
+                @click="approveModal = true"
                 :disabled="!isNFTApproved(NFTComputedData) || !nftObj.receiver_id"
               >Approve NFT</button>
               <button
@@ -64,6 +64,45 @@
         </div>
       </div>
       
+
+      <modal-template
+        v-if="approveModal"
+        small
+        @close="approveModal = false;"
+      >
+        <template #header>
+          <h2 class="title">Approve NFT</h2>
+        </template>
+        <template #content>
+          <div
+            class="modal-approve"
+          >
+            <div class="form-nft-send__inputs">
+              <span class="form-nft-send__inputs-title">Enter contract address</span>
+              <input
+                type="text"
+                placeholder="NFT title"
+                class="input form-nft__input"
+                v-model="approveData.contract"
+              >
+            </div>
+            <div class="form-nft-send__inputs">
+              <span class="form-nft-send__inputs-title">Enter NFT ID</span>
+              <input
+                type="text"
+                placeholder="NFT title"
+                class="input form-nft__input"
+                v-model="approveData.token_id"
+              >
+            </div>
+            <button
+              @click="approveNFTHandler"
+              class="main-btn"
+            >Submit</button>
+          </div>
+        </template>
+      </modal-template>
+
 
       <modal-template
         v-if="addingToBundle"
@@ -198,7 +237,7 @@ export default {
     Spinner,
     NavBar,
     TokenCard,
-    ModalTemplate,
+    ModalTemplate
   },
 
   data() {
@@ -207,6 +246,10 @@ export default {
         receiver_id: 'near_testing2.testnet',
         token_id: [],
         media: '',
+      },
+      approveData: {
+        contract: null,
+        token_id: null,
       },
       choosenTokens: [],
       nftObjForBundle: {
@@ -219,6 +262,7 @@ export default {
         token_id: [],
         contract_id: '',
       },
+      approveModal: false,
       showEditBundle: false,
       addingToBundle: false,
       // in this case, we adding NFT to inner bundle, 2nd-3rd level etc...
@@ -325,6 +369,11 @@ export default {
     if (this.NFTComputedData) {
       if (this.NFTComputedData.bundles && this.NFTComputedData.bundles.length) {
         this.mainBundleNFTData = await this.loadBundlesNFTsData(this.NFTComputedData.bundles, this.NFTComputedData.contract)
+      }
+
+      this.approveData = {
+        token_id: this.NFTComputedData.token_id,
+        contract: this.NFTComputedData.contract,
       }
     }
   },
@@ -483,8 +532,8 @@ export default {
     },
     approveNFTHandler() {
       this.setNFTApproveId({
-        token_id: this.NFTComputedData.token_id,
-        approve_id: this.getBundleContract.contractId,
+        token_id: this.approveData.token_id,
+        approve_id: this.approveData.contract,
         minting_contract_id: this.NFTComputedData.contract,
       })
     },

@@ -147,6 +147,7 @@ export default {
     height: auto;
     max-width: 60vw;
     max-height: 60vh;
+    min-width: 40vw;
   }
   
   .effect-confirm__inner {
@@ -164,6 +165,11 @@ export default {
       margin-top: 20px;
       margin-bottom: 10px;
     }
+  }
+
+  .title {
+    margin-bottom: 20px;
+    font-size: 24px;
   }
 }
 
@@ -184,5 +190,15 @@ export default {
   z-index: 3;
   font-size: 20px;
   box-shadow: 0 0 0 1px rgb(0, 0, 0);
+}
+
+.modal-approve {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.modal-approve .form-nft-send__inputs {
+  margin-bottom: 20px;
 }
 </style>
