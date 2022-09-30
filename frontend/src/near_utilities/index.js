@@ -33,6 +33,21 @@ export async function checkForContract(getters, minting_contract_id) {
   }
 }
 
+export async function nftRevoke(token_id, account_id, contract) {
+  await contract
+    .nft_revoke({
+      token_id,
+      account_id,
+    }, attachedGas, '1')
+}
+
+export async function bundleMetaUpdate(bundle_token_id, bundle_metadata, contract) {
+  await contract
+    .bundle_metadata_update({
+      bundle_token_id,
+      metadata: bundle_metadata,
+    }, attachedGas, '100000000000000000000000')
+}
 
 export async function removeEffectContract(effect_info_address, contract) {
   await contract
@@ -40,6 +55,7 @@ export async function removeEffectContract(effect_info_address, contract) {
       effect_info_address,
     }, attachedGas, '100000000000000000000000')
 }
+
 export async function addNewEffectContract(effect_data, contract) {
   await contract
     .add_effect_contract_to_list({

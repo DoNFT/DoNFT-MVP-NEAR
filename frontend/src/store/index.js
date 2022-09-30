@@ -16,6 +16,8 @@ import {
   addTokenToBundle,
   addNewEffectContract,
   removeEffectContract,
+  nftRevoke,
+  bundleMetaUpdate,
 } from "@/near_utilities"
 
 import {StatusType, getIPFS} from "@/utilities"
@@ -96,6 +98,14 @@ const store = new Vuex.Store({
     },
     setNFTArray (state, payload) {
       state.arrayNFTs = payload
+    },
+    NFT_REVOKE(state, { token_id, account_id }) {
+      state.status = StatusType.Minting
+      nftRevoke(token_id, account_id, state.bundle_contract)
+    },
+    BUNDLE_META_UPDATE(state, { token_id, metadata }) {
+      state.status = StatusType.Minting
+      bundleMetaUpdate(token_id, metadata, state.bundle_contract)
     },
     REMOVE_TOKEN_FROM_BUNDLE(state, { remove_token_data, bundle_id }) {
       removeTokenFromBundle(state.bundle_contract, remove_token_data, bundle_id)

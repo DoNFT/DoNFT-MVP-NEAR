@@ -12,11 +12,18 @@
           class="form-nft-send form-nft__detail-page"
           v-if="NFTComputedData && NFTComputedData.metadata"
         >
-          <div class="nft-cards">
+          <div class="nft-cards nft-cards--details">
             <token-card
               :metadata="NFTComputedData"
               :edit-available="false"
             />
+            <div class="nft-cards__approve-list" v-if="Object.keys(NFTComputedData.approved_account_ids).length">
+              <h4>Approved accounts</h4>
+              <div class="nft-cards__approve-list__item" v-for="item in Object.keys(NFTComputedData.approved_account_ids)" :key="item">
+                {{item}}
+                <icon name="cross" :size="24" class="delete-icon" @click.native="revokeApprove(item)"/>
+              </div>
+            </div>
           </div>
           <div class="form-nft-send__inputs">
             <span class="form-nft-send__inputs-title">Title</span>
@@ -41,9 +48,8 @@
               <button
                 class="main-btn"
                 type="submit"
-                :disabled="true"
-                @click="changeFormat"
-              >Change Format</button>
+                @click="updateMeta"
+              >Update metadata</button>
               <button
                 class="main-btn"
                 @click="approveModal = true"
@@ -389,6 +395,8 @@ export default {
     ...mapMutations([
       'REMOVE_TOKEN_FROM_BUNDLE',
       'ADD_TOKEN_TO_BUNDLE',
+      'BUNDLE_META_UPDATE',
+      'NFT_REVOKE',
     ]),
     addFromEditModal() {
       this.addingToBundle = true
@@ -543,14 +551,34 @@ export default {
         contract_id: this.NFTComputedData.contract,
       })
     },
-    changeFormat() {
-      console.log('changeFormat')
+    revokeApprove(account_id) {
+      this.NFT_REVOKE({
+        token_id: this.NFTComputedData.token_id,
+        account_id,
+      })
+    },
+    updateMeta() {
+      const bundleMetadata = {
+        ...this.NFTComputedData.metadata,
+        // for test
+        media: 'https://ipfs.io/ipfs/bafybeicqkpltfmhrqehnizu66rnrt7b7la6bopphbt7tofiskhlnwqzgt4/file',
+      }
+
+      this.BUNDLE_META_UPDATE({
+        token_id: this.NFTComputedData.token_id,
+        metadata: bundleMetadata,
+      })
     },
   },
 }
 </script>
 
 <style lang="scss">
+.nft-cards--details {
+  flex-direction: column;
+  width: 45%;
+}
+
 .bundle-data {
   margin-top: 50px;
 }
@@ -619,6 +647,25 @@ export default {
 
   &:last-child {
     margin-right: 0;
+  }
+}
+
+.nft-cards__approve-list {
+  margin-top: 12px;
+
+  h4 {
+    margin-bottom: 12px;
+  }
+}
+
+.nft-cards__approve-list__item {
+  position: relative;
+
+  svg {
+    position: relative;
+    top: -5px;
+    right: -2px;
+    padding: 2px;
   }
 }
 </style>

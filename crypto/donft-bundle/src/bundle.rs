@@ -71,6 +71,20 @@ pub trait CallbacksContract {
 
 #[near_bindgen]
 impl Contract {
+    // method to update bundle/nft metadata update
+    #[payable]
+    pub fn bundle_metadata_update(
+        &mut self,
+        bundle_token_id: TokenId,
+        metadata: TokenMetadata,
+    ) {
+        if let Some(mut token_data) = self.tokens_by_id.get(&bundle_token_id) {
+            self.token_metadata_by_id.insert(&bundle_token_id, &metadata);
+        } else { //if there wasn't a token ID in the tokens_by_id collection, we return None
+            env::panic_str("No such token in contract list");
+        }
+    }
+
     #[payable]
     pub fn remove_token_from_bundle(
         &mut self,
@@ -82,12 +96,6 @@ impl Contract {
             remove_token_data.token_role.clone() == 0 as u64,
             "You can only remove token without a role"
         );
-
-        let mut tokens_set = self
-            .tokens_by_id
-            .get(&bundle_token_id)
-            //if there is no set of tokens for the owner, we panic with the following message:
-            .expect("Token should be owned by the sender");
 
         //we remove the the token_id from the set of tokens
         if let Some(mut token_data) = self.tokens_by_id.get(&bundle_token_id) {
@@ -106,7 +114,7 @@ impl Contract {
 
             Some(token_data)
         } else { //if there wasn't a token ID in the tokens_by_id collection, we return None
-            None
+            env::panic_str("No such token in contract list");
         }
     }
 
@@ -146,7 +154,7 @@ impl Contract {
             );
             Some(bundle_token_data)
         } else { //if there wasn't a token ID in the tokens_by_id collection, we return None
-            None
+            env::panic_str("No such token in contract list");
         }
 
     }

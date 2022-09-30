@@ -110,7 +110,7 @@ export async function initContract(store) {
 
   // Initializing our contract APIs by contract name and configuration
   const cotractBundleSettings = await new Contract(walletBundleConnection.account(), bundle_contract.contractName, {
-    changeMethods: ['nft_mint', 'nft_bundle', 'nft_unbundle', 'nft_approve', 'nft_transfer', 'nft_bundle_with_approve', 'remove_token_from_bundle', 'add_token_to_bundle'],
+    changeMethods: ['nft_mint', 'nft_bundle', 'nft_unbundle', 'nft_approve', 'nft_transfer', 'nft_bundle_with_approve', 'remove_token_from_bundle', 'add_token_to_bundle', 'bundle_metadata_update', 'nft_revoke'],
     viewMethods: ['nft_tokens', 'nft_total_supply', 'nft_tokens_for_owner']
   })
   store.dispatch('setCurrentBundleContract', cotractBundleSettings)
