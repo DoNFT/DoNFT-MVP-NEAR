@@ -76,6 +76,21 @@ export default {
       return false
     }
   },
+  mounted() {
+    fetch(process.env.VUE_APP_NFT_SAMPLE)
+      .then(response => response.blob())
+      .then(blob => {
+        const file = new File([blob], 'nft_sample', {type: blob.type})
+        this.onFileSelected({
+          target: {
+            files: [file]
+          }
+        })
+      })
+      .catch(e => {
+        console.warn('Error load nft sample', e)
+      })
+  },
   methods: {
     ...mapActions([
       'setEffectModal',
