@@ -1,19 +1,12 @@
 import axios from 'axios'
 import { SystemErrors, CID_RE  } from "@/utilities"
-// import { NFTStorage } from "nft.storage/dist/bundle.esm.min.js"
 
 const attachedGas = "300000000000000"
 const attachedTokens = "1"
 
 import { initNewContract } from "@/nearConfig"
 
-// const API_KEY = process.env.VUE_APP_NFT_STORAGE_API_KEY
-
 import { uploadtoIPFS} from "@/api"
-
-// const client = new NFTStorage({
-//   token: API_KEY,
-// })
 
 // firstly, search among 3 main contracts
 // if not found, init new Contract, for using change method
@@ -222,7 +215,7 @@ async function loadFileFromIPFS(ipfs, cid) {
   const resp = await axios(url, {
     responseType: 'blob'
   })
-  
+
   // IPFS-CORE 0.12v STOP WORKING somewhy?
   // new version 0.18v working only with 18node js, while near-api-js not
 

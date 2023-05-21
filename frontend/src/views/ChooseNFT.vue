@@ -142,7 +142,6 @@ export default {
     ]),
     getFilteredNFTsByContract() {
       let newArr = [].concat(this.getNFTsByContract).sort((a, b) => a.id - b.id)
-      console.log(this.getNFTsByContract, "this.getNFTsByContract")
       return newArr.slice(0, this.contractLimit + 1)
     },
     cardClass() {

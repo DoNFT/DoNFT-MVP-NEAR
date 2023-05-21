@@ -221,11 +221,9 @@ router.beforeEach(async (to, from, next) => {
     await initContract(store)
       .then(() => {
         const user = store.getters.getCurrentWallet.isSignedIn()
-        console.log(user, '---CONTRACT INIT then 1---')
         if (!user) {
           router.push('/login')
         }
-        console.log('---CONTRACT INIT then 2---')
         store.commit('SET_CURRENT_CONTRACT_LOADING', false)
       })
   }
@@ -240,8 +238,6 @@ router.beforeEach(async (to, from, next) => {
   // current problem in Deploy page, where we give full access to user
   // it should be removed once its used, cause logic while full access different
   // near do not redirect to near wallet
-  console.log(to, 'to')
-  console.log(from, 'FROM')
   if (from.name === 'DeployContract' && !('public_key' in router.currentRoute.query) && store.getters.getContract) {
     const localKey = `near-api-js:keystore:${store.getters.getContract.account.accountId}:testnet`
     

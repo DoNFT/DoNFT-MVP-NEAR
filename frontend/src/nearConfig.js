@@ -42,7 +42,6 @@ export async function initContract(store) {
 
   let acc = []
 
-  console.log(nfts_contract, 'nfts_contract')
   if (store.getters.getAccountId) {
     acc = await near.account(store.getters.getAccountId)
     NFTsContracts = await getTokens(store.getters.getAccountId, 50)
