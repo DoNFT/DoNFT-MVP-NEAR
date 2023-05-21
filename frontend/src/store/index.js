@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import * as IPFS from 'ipfs-core'
 
 import {
   deployNFTtoIPFS,
@@ -20,7 +21,7 @@ import {
   bundleMetaUpdate,
 } from "@/near_utilities"
 
-import {StatusType, getIPFS} from "@/utilities"
+import {StatusType} from "@/utilities"
 import {modifyPicture, applyNFTsEffect} from "@/api"
 import {SystemErrors, AppError} from "@/utilities"
 
@@ -197,8 +198,7 @@ const store = new Vuex.Store({
       addTokenToBundle(contractData, token_to_add_data, tokens_to_approve, bundle_token_id, owner_id)
     },
     async setIpfs ({commit}) {
-      const ipfs = await getIPFS()
-      commit('setIpfs', await ipfs.create())
+      commit('setIpfs', await IPFS.create())
     },
     async setResult ({commit, dispatch, getters}, type) {
       try {
@@ -266,7 +266,6 @@ const store = new Vuex.Store({
     async removeFromList ({getters}, contract_id) {
       try {
         const contractData = await checkForContract(getters, process.env.VUE_APP_EFFECTS_WATCHER_CONTRACT)
-        console.log(contract_id, 'addEffectToList effect_data')
         await removeEffectContract(contract_id, contractData)
       } catch(err) {
         console.log(err)
@@ -276,7 +275,6 @@ const store = new Vuex.Store({
     async addEffectToList ({getters}, effect_data) {
       try {
         const contractData = await checkForContract(getters, process.env.VUE_APP_EFFECTS_WATCHER_CONTRACT)
-        console.log(effect_data, 'addEffectToList effect_data')
         await addNewEffectContract(effect_data, contractData)
       } catch(err) {
         console.log(err)
@@ -323,9 +321,7 @@ const store = new Vuex.Store({
       await sendNFT(receiver, token_data, contractData)
     },
     async fetchOwnerNFTs({ getters }, { account, nftContract }) {
-      console.log(account, nftContract, 'fetchOwnerNFTs')
       let contractData = await checkForContract(getters, nftContract)
-      console.log(contractData, 'contractData')
       getOwnerNFTs(account, contractData)
     },
     pushNFTbyContract ({commit}, NFTS) {

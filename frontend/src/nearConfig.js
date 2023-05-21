@@ -17,7 +17,6 @@ export async function initContract(store) {
   // Initializing Wallet based Account. It can work with NEAR testnet wallet that
   // is hosted at https://wallet.testnet.near.org
   const walletConnection = new WalletConnection(near)
-  console.log(walletConnection, 'walletConnection')
   store.dispatch('setNearWalletConnection', walletConnection)
   store.dispatch('setAccountId', walletConnection.getAccountId())
 
@@ -47,6 +46,9 @@ export async function initContract(store) {
   if (store.getters.getAccountId) {
     acc = await near.account(store.getters.getAccountId)
     NFTsContracts = await getTokens(store.getters.getAccountId, 50)
+    // important, most likely, without it Bundle NFTs wont show up
+    // before LikelyNfts worked for such case
+    NFTsContracts.push(process.env.VUE_APP_BUNDLE_CONTRACT)
 
     console.log(NFTsContracts, 'NFTsContracts')
     const balance = await acc.getAccountBalance()

@@ -119,7 +119,7 @@ export default {
             type: curVal < 5 ? 'info' : 'success',
             title: 'Status:',
             text: this.statusText,
-            duration: 5000,
+            duration: 3000,
           })
         }
       },

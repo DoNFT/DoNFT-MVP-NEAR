@@ -1,4 +1,4 @@
-import untar from "js-untar"
+import axios from 'axios'
 import { SystemErrors, CID_RE  } from "@/utilities"
 // import { NFTStorage } from "nft.storage/dist/bundle.esm.min.js"
 
@@ -19,10 +19,7 @@ import { uploadtoIPFS} from "@/api"
 // if not found, init new Contract, for using change method
 export async function checkForContract(getters, minting_contract_id) {
   let findMainContract = null
-  console.log(getters, minting_contract_id, 'getters.getMainContracts')
-  
   findMainContract = getters.getMainContracts ? getters.getMainContracts.find((item) => item === minting_contract_id) : []
-  console.log(findMainContract, 'getters.findMainContract')
   
   if (findMainContract && findMainContract.length) {
     return [getters.getBundleContract, getters.getContract, getters.getEffectsContract, getters.getEffectsListContract].find((item) => item.contractId === findMainContract)
@@ -74,7 +71,6 @@ export async function createUsualNFT(token_id, metadata, receiver_id, contract) 
 }
 
 export async function removeTokenFromBundle(contract, remove_token_data, bundle_token_id) {
-  console.log(contract, remove_token_data, 'contract')
   await contract
     .remove_token_from_bundle({
       remove_token_data,
@@ -83,7 +79,6 @@ export async function removeTokenFromBundle(contract, remove_token_data, bundle_
 }
 
 export async function addTokenToBundle(contract, token_to_add_data, tokens_to_approve, bundle_token_id, owner_id) {
-  console.log(contract, token_to_add_data, 'contract')
   await contract
     .add_token_to_bundle({
       token_to_add_data,
@@ -95,7 +90,6 @@ export async function addTokenToBundle(contract, token_to_add_data, tokens_to_ap
 
 // will be removed later, currently only for debugging
 export async function getOwnerNFTs(accountId, contract) {
-  console.log(contract, 'contract')
   await contract
     .nft_tokens().then((res) => console.log(res, 'TOKENS getOwnerNFTs'))
   await contract
@@ -105,7 +99,6 @@ export async function getOwnerNFTs(accountId, contract) {
 }
 
 export function createBundleNFT(token_id, metadata, bundles, owner_id, contract) {
-  console.log(contract, 'contract')
   contract
     .nft_bundle({
       token_id,
@@ -116,7 +109,6 @@ export function createBundleNFT(token_id, metadata, bundles, owner_id, contract)
 }
 
 export function bundleWithApprove(tokens_for_approve, account_for_approve, contract_of_tokens, token_id, metadata, bundles, owner_id, contract) {
-  console.log(contract, 'contract')
   contract
     .nft_bundle_with_approve({
       tokens_for_approve,
@@ -146,7 +138,6 @@ export async function approveNFT(account_id, token_id, contract) {
 }
 
 export async function sendNFT(receiver_id, token_data, contract) {
-  console.log(receiver_id, token_data, contract, 'receiver_id, token_id, contract')
   // todo: possibly will need to change logic of urls revoking, discussable
   URL.revokeObjectURL(token_data.metadata.media_hash)
 
@@ -215,7 +206,7 @@ export async function getImageForTokenByURI(ipfsInstance, imageAddress) {
 async function getImageFromIpfs(ipfsInstance, cid) {
   let blob = null
   try {
-    blob = await loadFileFromIPFS(ipfsInstance, cid, 6000)
+    blob = await loadFileFromIPFS(ipfsInstance, cid, 12000)
   } catch (e) {
     console.log(e)
     throw SystemErrors.IPFS_GET_IMAGE
@@ -223,19 +214,28 @@ async function getImageFromIpfs(ipfsInstance, cid) {
   return blob ? URL.createObjectURL(blob) : null
 }
 
-async function loadFileFromIPFS(ipfs, cid, timeout) {
+async function loadFileFromIPFS(ipfs, cid) {
   if (cid === "" || cid === null || cid === undefined) {
     return
   }
-  let content = []
-  for await (const buff of ipfs.get(cid, {timeout})) {
-    if (buff) {
-      content.push(buff)
-    }
-  }
-  let archivedBlob = new Blob(content, {type: "application/x-tar"})
-  let archiveArrayBuffer = await archivedBlob.arrayBuffer()
-  let archive = (await untar(archiveArrayBuffer))?.[0]
+  const url = `https://cloudflare-ipfs.com/ipfs/${cid}`
+  const resp = await axios(url, {
+    responseType: 'blob'
+  })
+  
+  // IPFS-CORE 0.12v STOP WORKING somewhy?
+  // new version 0.18v working only with 18node js, while near-api-js not
 
-  return archive.blob
+  // let content = []
+  // for await (const buff of ipfs.get(cid, {timeout})) {
+  //   if (buff) {
+  //     content.push(buff)
+  //   }
+  // }
+  // let archivedBlob = new Blob(content, {type: "application/x-tar"})
+  // let archiveArrayBuffer = await archivedBlob.arrayBuffer()
+  // let archive = (await untar(archiveArrayBuffer))?.[0]
+
+  // return archive.blob
+  return resp.data
 }

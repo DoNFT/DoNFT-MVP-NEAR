@@ -1,5 +1,4 @@
 export function getConfig(data) {
-  console.log(data, 'process.env 111')
   switch (data.env) {
 
   case 'production':

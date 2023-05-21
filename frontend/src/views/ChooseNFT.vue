@@ -121,7 +121,7 @@ export default {
             type: curVal < 5 ? 'info' : 'success',
             title: 'Status:',
             text: this.statusText,
-            duration: 5000,
+            duration: 3000,
           })
         }
       },
@@ -142,6 +142,7 @@ export default {
     ]),
     getFilteredNFTsByContract() {
       let newArr = [].concat(this.getNFTsByContract).sort((a, b) => a.id - b.id)
+      console.log(this.getNFTsByContract, "this.getNFTsByContract")
       return newArr.slice(0, this.contractLimit + 1)
     },
     cardClass() {
@@ -390,13 +391,15 @@ export default {
   object-fit: cover;
 
   .effect-cards-box & {
-    min-height: 350px;
-    object-fit: contain;
+    min-height: 250px;
+    min-width: 230px;
+    object-fit: cover;
   }
 
   .modal-template__body & {
-    height: 250px;
+    height: 320px;
     margin: 30px 0;
+    object-fit: contain;
   }
 
   .form-nft__detail-page & {

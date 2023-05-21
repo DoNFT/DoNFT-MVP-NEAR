@@ -75,7 +75,8 @@ export default {
 }
 
 .effect-cards__item {
-  width: 14%;
+  width: 24%;
+  min-width: 230px;
   margin-bottom: 20px;
   background: linear-gradient(0deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05)), #121212;
   box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.14), 0px 2px 1px rgba(0, 0, 0, 0.12), 0px 1px 3px rgba(0, 0, 0, 0.2);
